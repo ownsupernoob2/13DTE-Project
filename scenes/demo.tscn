@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://db2h3t17k37pe"]
+[gd_scene load_steps=12 format=3 uid="uid://db2h3t17k37pe"]
 
 [ext_resource type="Material" uid="uid://bi1h4xe7msjwi" path="res://assets/materials/Pink.tres" id="1_b0nem"]
 [ext_resource type="Material" uid="uid://b122sws3pt7w7" path="res://assets/materials/Red.tres" id="2_x0xbu"]
 [ext_resource type="Material" uid="uid://p2nkjd3ge3qm" path="res://assets/materials/Blue.tres" id="3_7qr1p"]
 [ext_resource type="Material" uid="uid://b4s0xnt1f6lia" path="res://assets/materials/Green.tres" id="4_e66cg"]
-[ext_resource type="Script" uid="uid://b22uigsk5qpio" path="res://scripts/player.gd" id="5_5fme1"]
+[ext_resource type="PackedScene" uid="uid://bm2ujr6udikc4" path="res://scenes/sub/node_3d.tscn" id="6_x0xbu"]
+[ext_resource type="PackedScene" uid="uid://c8canob25lyi" path="res://scenes/sub/player.tscn" id="7_7qr1p"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_5lq0h"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -18,10 +19,6 @@ background_mode = 2
 sky = SubResource("Sky_f6bkd")
 tonemap_mode = 2
 glow_enabled = true
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_xc2g5"]
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wydro"]
 
 [sub_resource type="Gradient" id="Gradient_b0nem"]
 offsets = PackedFloat32Array(0, 0.818182)
@@ -90,22 +87,6 @@ environment = SubResource("Environment_g2h84")
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
 shadow_enabled = true
 
-[node name="Player" type="CharacterBody3D" parent="."]
-script = ExtResource("5_5fme1")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Player"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("CapsuleMesh_xc2g5")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-shape = SubResource("CapsuleShape3D_wydro")
-
-[node name="Head" type="Node3D" parent="Player"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.67939, 0)
-
-[node name="Camera3D" type="Camera3D" parent="Player/Head"]
-
 [node name="TextureRect" type="TextureRect" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
@@ -120,3 +101,8 @@ size_flags_horizontal = 4
 texture = SubResource("GradientTexture2D_x0xbu")
 expand_mode = 1
 flip_h = true
+
+[node name="Player" parent="." instance=ExtResource("7_7qr1p")]
+
+[node name="Node3D" parent="." instance=ExtResource("6_x0xbu")]
+transform = Transform3D(0.0153234, 0, -0.999883, 0, 1, 0, 0.999883, 0, 0.0153234, 10.1545, 1.4005, 0.00386603)

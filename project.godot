@@ -15,6 +15,10 @@ run/main_scene="uid://db2h3t17k37pe"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+DragSnap="*res://addons/drag_and_snap/nodes/drag_snap.gd"
+
 [display]
 
 window/size/viewport_width=720
@@ -23,6 +27,14 @@ window/size/mode=3
 window/size/resizable=false
 window/stretch/mode="viewport"
 mouse_cursor/size/viewport_height=540
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/drag_and_snap/plugin.cfg")
+
+[global_group]
+
+grabbable=""
 
 [input]
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://db2h3t17k37pe"]
+[gd_scene load_steps=17 format=3 uid="uid://db2h3t17k37pe"]
 
 [ext_resource type="Material" uid="uid://bi1h4xe7msjwi" path="res://assets/materials/Pink.tres" id="1_b0nem"]
 [ext_resource type="Material" uid="uid://b122sws3pt7w7" path="res://assets/materials/Red.tres" id="2_x0xbu"]
@@ -6,6 +6,7 @@
 [ext_resource type="Material" uid="uid://b4s0xnt1f6lia" path="res://assets/materials/Green.tres" id="4_e66cg"]
 [ext_resource type="PackedScene" uid="uid://bm2ujr6udikc4" path="res://scenes/components/computer.tscn" id="6_x0xbu"]
 [ext_resource type="PackedScene" uid="uid://c8canob25lyi" path="res://scenes/components/player.tscn" id="7_7qr1p"]
+[ext_resource type="Material" uid="uid://1bju3ha85is4" path="res://assets/materials/highlight_material.tres" id="7_e66cg"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_5lq0h"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -29,12 +30,15 @@ gradient = SubResource("Gradient_b0nem")
 fill = 1
 fill_from = Vector2(0.490826, 0.477064)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_7qr1p"]
+size = Vector3(3, 2, 3)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_x0xbu"]
 
-[sub_resource type="BoxMesh" id="BoxMesh_7qr1p"]
+[sub_resource type="BoxMesh" id="BoxMesh_x0xbu"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_e66cg"]
-size = Vector3(1.98413, 1, 2.77539)
+[sub_resource type="BoxMesh" id="BoxMesh_7qr1p"]
+material = ExtResource("7_e66cg")
 
 [node name="World" type="Node3D"]
 
@@ -98,10 +102,10 @@ shadow_enabled = true
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 317.0
-offset_top = 240.0
-offset_right = -338.0
-offset_bottom = -235.0
+offset_left = 342.0
+offset_top = 259.0
+offset_right = -348.0
+offset_bottom = -252.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
@@ -114,23 +118,38 @@ flip_h = true
 [node name="Node3D" parent="." instance=ExtResource("6_x0xbu")]
 transform = Transform3D(0.0153234, 0, -0.999883, 0, 1, 0, 0.999883, 0, 0.0153234, 10.1545, 1.4005, 0.00386603)
 
-[node name="GrappableObject" type="RigidBody3D" parent="." groups=["grabbable"]]
-transform = Transform3D(0.988729, 0, 0, 0, 0.988729, 0, 0, 0, 0.988729, 0, 6.82828, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="GrappableObject"]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 6.02205, -5.85193, -2.6283)
-shape = SubResource("BoxShape3D_x0xbu")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="GrappableObject"]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 6.02205, -5.85193, -2.6283)
-mesh = SubResource("BoxMesh_7qr1p")
-
 [node name="GrabArea" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.97475, 0.104591, -0.0852818)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.65015, 0.104591, -2.07672)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="GrabArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8619, -0.114496, -2.14322)
-shape = SubResource("BoxShape3D_e66cg")
+transform = Transform3D(0.974938, 0, 0, 0, 0.974938, 0, 0, 0, 0.974938, 0, 0, 0)
+shape = SubResource("BoxShape3D_7qr1p")
+
+[node name="TestObject" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.65015, 0.104591, -2.07672)
+
+[node name="Object1" type="StaticBody3D" parent="TestObject" groups=["grabbable"]]
+transform = Transform3D(0.988729, 0, 0, 0, 0.988729, 0, 0, 0, 0.988729, 0.88739, 0.0230486, 0.00396633)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TestObject/Object1"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+shape = SubResource("BoxShape3D_x0xbu")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TestObject/Object1"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+mesh = SubResource("BoxMesh_x0xbu")
+
+[node name="Object1Highlighted" type="StaticBody3D" parent="TestObject"]
+transform = Transform3D(0.977585, 0, 0, 0, 0.977585, 0, 0, 0, 0.977585, 0.88739, 0.0230486, 0.00396633)
+visible = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TestObject/Object1Highlighted"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+shape = SubResource("BoxShape3D_x0xbu")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TestObject/Object1Highlighted"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+mesh = SubResource("BoxMesh_7qr1p")
 
 [connection signal="body_entered" from="GrabArea" to="Player" method="_on_grab_area_body_entered"]
 [connection signal="body_exited" from="GrabArea" to="Player" method="_on_grab_area_body_exited"]

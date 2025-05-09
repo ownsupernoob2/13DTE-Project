@@ -76,8 +76,8 @@ func _headbob(time) -> Vector3:
 	return pos
 
 func grab_object():
-	if held_object != null:
-		return  # Prevent grabbing multiple objects
+	if held_object != null or not can_grab:
+		return
 	var space_state = get_world_3d().direct_space_state
 	var mouse_pos = get_viewport().get_mouse_position()
 	var ray_start = camera.project_ray_origin(mouse_pos)
@@ -90,51 +90,75 @@ func grab_object():
 		held_object_name = held_object.name
 		original_position = held_object.global_position
 		original_rotation = held_object.global_rotation
-		if held_object_name in ["Object1", "Object2", "Object3"]:
-			# Store original material and apply highlight material (player is in grab area)
-			var mesh = held_object.get_node_or_null("MeshInstance3D") # Adjust if your mesh node has a different name
-			if mesh and mesh is MeshInstance3D:
-				original_material = mesh.get_surface_override_material(0) if mesh.get_surface_override_material(0) else mesh.mesh.surface_get_material(0)
+		
+		var mesh = held_object.get_node_or_null("MeshInstance3D")
+		if mesh and mesh is MeshInstance3D:
+			original_material = mesh.get_surface_override_material(0) if mesh.get_surface_override_material(0) else mesh.mesh.surface_get_material(0)
+			if can_grab:
 				mesh.set_surface_override_material(0, highlight_material)
-			held_object.visible = false
-			var held_version = camera.get_node_or_null(held_object_name + "_Held")
-			if held_version:
-				held_version.visible = true
+		
+		held_object.visible = can_grab
+		
+		var held_version = camera.get_node_or_null(held_object_name + "_Held")
+		var placeholder = camera.get_node_or_null("Placeholder")
+		
+		if placeholder:
+			placeholder.visible = false
+		
+		if held_version:
+			held_version.visible = true
+		elif placeholder:
+			placeholder.visible = true
 
 func drop_object():
-	if held_object:
-		if held_object_name in ["Object1", "Object2", "Object3"]:
-			# Restore original material and show object
-			var mesh = held_object.get_node_or_null("MeshInstance3D") # Adjust if your mesh node has a different name
-			if mesh and mesh is MeshInstance3D and original_material:
-				mesh.set_surface_override_material(0, original_material)
-			held_object.visible = true
-			var held_version = camera.get_node_or_null(held_object_name + "_Held")
-			if held_version:
-				held_version.visible = false
-		held_object.global_position = original_position
-		held_object.global_rotation = original_rotation
-		held_object = null
-		held_object_name = ""
-		original_material = null
+	if held_object == null or not can_grab:
+		return
+	for node in get_tree().get_nodes_in_group("grabbable"):
+		var mesh = node.get_node_or_null("MeshInstance3D")
+		if mesh and mesh is MeshInstance3D:
+			mesh.set_surface_override_material(0, mesh.mesh.surface_get_material(0))
+
+	
+	held_object.visible = true
+	
+	var held_version = camera.get_node_or_null(held_object_name + "_Held")
+	var placeholder = camera.get_node_or_null("Placeholder")
+	
+	if held_version:
+		held_version.visible = false
+	if placeholder:
+		placeholder.visible = false
+	
+	held_object.global_position = original_position
+	held_object.global_rotation = original_rotation
+	
+	held_object = null
+	held_object_name = ""
+	original_material = null
 
 func _on_grab_area_body_entered(body):
 	if body == self:
 		can_grab = true
-		# Apply highlight material and show object if holding
-		if held_object and held_object_name in ["Object1", "Object2", "Object3"]:
-			var mesh = held_object.get_node_or_null("MeshInstance3D") # Adjust if your mesh node has a different name
-			if mesh and mesh is MeshInstance3D:
-				original_material = mesh.get_surface_override_material(0) if mesh.get_surface_override_material(0) else mesh.mesh.surface_get_material(0)
-				mesh.set_surface_override_material(0, highlight_material)
+		if held_object:
 			held_object.visible = true
+			var mesh = held_object.get_node_or_null("MeshInstance3D")
+			if mesh and mesh is MeshInstance3D:
+				mesh.set_surface_override_material(0, highlight_material)
+		else:
+			for node in get_tree().get_nodes_in_group("grabbable"):
+				node.visible = true
+				var mesh = node.get_node_or_null("MeshInstance3D")
+				if mesh and mesh is MeshInstance3D:
+					mesh.set_surface_override_material(0, mesh.mesh.surface_get_material(0))
 
 func _on_grab_area_body_exited(body):
 	if body == self:
 		can_grab = false
-		# Restore original material and hide object if holding
-		if held_object and held_object_name in ["Object1", "Object2", "Object3"]:
-			var mesh = held_object.get_node_or_null("MeshInstance3D") # Adjust if your mesh node has a different name
-			if mesh and mesh is MeshInstance3D and original_material:
-				mesh.set_surface_override_material(0, original_material)
+		if held_object:
 			held_object.visible = false
+		else:
+			for node in get_tree().get_nodes_in_group("grabbable"):
+				#node.visible = false
+				var mesh = node.get_node_or_null("MeshInstance3D")
+				if mesh and mesh is MeshInstance3D:
+					mesh.set_surface_override_material(0, mesh.mesh.surface_get_material(0))

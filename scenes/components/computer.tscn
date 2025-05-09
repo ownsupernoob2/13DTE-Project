@@ -1,8 +1,7 @@
-[gd_scene load_steps=20 format=4 uid="uid://bm2ujr6udikc4"]
+[gd_scene load_steps=19 format=4 uid="uid://bm2ujr6udikc4"]
 
-[ext_resource type="Script" path="res://Scripts/computer.gd" id="1_okq71"]
+[ext_resource type="Script" uid="uid://d2vkfxd0ifcqn" path="res://Scripts/computer.gd" id="1_okq71"]
 [ext_resource type="Texture2D" uid="uid://bormvtoyuj10o" path="res://assets/icon.svg" id="2_wosnj"]
-[ext_resource type="Script" path="res://Scripts/player_camera.gd" id="3_t3l2h"]
 [ext_resource type="Shader" uid="uid://dcvr6r1j1k4vq" path="res://resources/shaders/crt_shader.gdshader" id="3_wosnj"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_i5arm"]
@@ -216,11 +215,6 @@ skeleton = NodePath("")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Computer/Screen/Area3D"]
 shape = SubResource("ConcavePolygonShape3D_ifh66")
-
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.504846)
-visible = false
-script = ExtResource("3_t3l2h")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_t3l2h")

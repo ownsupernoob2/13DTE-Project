@@ -123,56 +123,68 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.65015, 0.104591, -2.07672)
 transform = Transform3D(0.974938, 0, 0, 0, 0.974938, 0, 0, 0, 0.974938, 0, 0, 0)
 shape = SubResource("BoxShape3D_7qr1p")
 
-[node name="Object1" type="Node3D" parent="."]
+[node name="TestObject" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.65015, 0.104591, -2.07672)
 
-[node name="Object1" type="StaticBody3D" parent="Object1" groups=["grabbable"]]
+[node name="Object1" type="StaticBody3D" parent="TestObject" groups=["grabbable"]]
 transform = Transform3D(0.988729, 0, 0, 0, 0.988729, 0, 0, 0, 0.988729, 0.88739, 0.0230486, 0.00396633)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Object1/Object1"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TestObject/Object1"]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
 shape = SubResource("BoxShape3D_x0xbu")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Object1/Object1"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TestObject/Object1"]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
 mesh = SubResource("BoxMesh_x0xbu")
 
-[node name="Object2" type="Area3D" parent="."]
+[node name="Object1Highlighted" type="StaticBody3D" parent="TestObject"]
+transform = Transform3D(0.977585, 0, 0, 0, 0.977585, 0, 0, 0, 0.977585, 0.88739, 0.0230486, 0.00396633)
+visible = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TestObject/Object1Highlighted"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+shape = SubResource("BoxShape3D_x0xbu")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TestObject/Object1Highlighted"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+mesh = SubResource("BoxMesh_7qr1p")
+
+[node name="GrabArea2" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.80323, 0.209182, 5.92799)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Object2"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GrabArea2"]
 transform = Transform3D(0.974938, 0, 0, 0, 0.974938, 0, 0, 0, 0.974938, 0, 0, 0)
 shape = SubResource("BoxShape3D_7qr1p")
 
 [node name="Player" parent="." instance=ExtResource("7_7qr1p")]
 
-[node name="Object3" type="Node3D" parent="."]
+[node name="TestObject2" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.76818, 0.209182, 5.92241)
 
-[node name="Object1" type="StaticBody3D" parent="Object3" groups=["grabbable"]]
+[node name="Object1" type="StaticBody3D" parent="TestObject2" groups=["grabbable"]]
 transform = Transform3D(0.988729, 0, 0, 0, 0.988729, 0, 0, 0, 0.988729, 0.88739, 0.0230486, 0.00396633)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Object3/Object1"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TestObject2/Object1"]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
 shape = SubResource("BoxShape3D_x0xbu")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Object3/Object1"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TestObject2/Object1"]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
 mesh = SubResource("BoxMesh_x0xbu")
 
-[node name="Object1Highlighted" type="StaticBody3D" parent="Object3"]
+[node name="Object1Highlighted" type="StaticBody3D" parent="TestObject2"]
 transform = Transform3D(0.977585, 0, 0, 0, 0.977585, 0, 0, 0, 0.977585, 0.88739, 0.0230486, 0.00396633)
 visible = false
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Object3/Object1Highlighted"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TestObject2/Object1Highlighted"]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
 shape = SubResource("BoxShape3D_x0xbu")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Object3/Object1Highlighted"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TestObject2/Object1Highlighted"]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
 mesh = SubResource("BoxMesh_7qr1p")
 
 [connection signal="body_entered" from="GrabArea" to="Player" method="_on_grab_area_body_entered"]
 [connection signal="body_exited" from="GrabArea" to="Player" method="_on_grab_area_body_exited"]
-[connection signal="body_entered" from="Object2" to="Player" method="_on_grab_area_body_entered"]
-[connection signal="body_exited" from="Object2" to="Player" method="_on_grab_area_body_exited"]
+[connection signal="body_entered" from="GrabArea2" to="Player" method="_on_grab_area_body_entered"]
+[connection signal="body_exited" from="GrabArea2" to="Player" method="_on_grab_area_body_exited"]

@@ -17,31 +17,50 @@ var gravity = 9.8
 
 @onready var head = $Head
 @onready var camera = $Head/Camera3D
+@onready var player_camera = camera
 
 var can_grab: bool = false
+var current_grab_area: Node = null
 var held_object: StaticBody3D = null
 var original_position: Vector3
 var original_rotation: Vector3
 var held_object_name: String = ""
 var original_material: Material = null
 var highlight_material: Material = preload("res://assets/materials/highlight_material.tres")
+var is_using_computer: bool = false
+var active_computer_camera: Camera3D = null
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
+# SHARED INPUT HANDLING
 func _unhandled_input(event):
-	if event is InputEventMouseMotion:
+	if event is InputEventMouseMotion and not is_using_computer:
 		head.rotate_y(-event.relative.x * SENSITIVITY)
 		camera.rotate_x(-event.relative.y * SENSITIVITY)
 		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-40), deg_to_rad(60))
 	
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if is_using_computer:
+			return
 		if held_object == null and can_grab:
-			grab_object()
+			var clicked_computer = try_click_computer()
+			if clicked_computer:
+				enter_computer_mode(clicked_computer)
+			else:
+				grab_object()
 		elif held_object != null and can_grab:
 			drop_object()
+	
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE and is_using_computer:
+		exit_computer_mode()
 
+# MOVEMENT MECHANICS
 func _physics_process(delta):
+	if is_using_computer:
+		velocity = Vector3.ZERO
+		return
+	
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
@@ -75,13 +94,14 @@ func _headbob(time) -> Vector3:
 	pos.x = cos(time * BOB_FREQ / 2) * BOB_AMP
 	return pos
 
+# GRABBING MECHANICS
 func grab_object():
 	if held_object != null or not can_grab:
 		return
 	var space_state = get_world_3d().direct_space_state
 	var mouse_pos = get_viewport().get_mouse_position()
-	var ray_start = camera.project_ray_origin(mouse_pos)
-	var ray_end = ray_start + camera.project_ray_normal(mouse_pos) * 10.0
+	var ray_start = player_camera.project_ray_origin(mouse_pos)
+	var ray_end = ray_start + player_camera.project_ray_normal(mouse_pos) * 10.0
 	var query = PhysicsRayQueryParameters3D.create(ray_start, ray_end)
 	var result = space_state.intersect_ray(query)
 	
@@ -113,11 +133,27 @@ func grab_object():
 func drop_object():
 	if held_object == null or not can_grab:
 		return
+	
+	var space_state = get_world_3d().direct_space_state
+	var mouse_pos = get_viewport().get_mouse_position()
+	var ray_start = player_camera.project_ray_origin(mouse_pos)
+	var ray_end = ray_start + player_camera.project_ray_normal(mouse_pos) * 10.0
+	var query = PhysicsRayQueryParameters3D.create(ray_start, ray_end)
+	var result = space_state.intersect_ray(query)
+	
+	var can_drop = false
+	if result and result.collider == held_object:
+		can_drop = true
+	elif result and result.position.distance_to(original_position) < 0.5:
+		can_drop = true
+	
+	if not can_drop:
+		return
+	
 	for node in get_tree().get_nodes_in_group("grabbable"):
 		var mesh = node.get_node_or_null("MeshInstance3D")
 		if mesh and mesh is MeshInstance3D:
 			mesh.set_surface_override_material(0, mesh.mesh.surface_get_material(0))
-
 	
 	held_object.visible = true
 	
@@ -139,6 +175,7 @@ func drop_object():
 func _on_grab_area_body_entered(body):
 	if body == self:
 		can_grab = true
+		current_grab_area = body.get_parent() if body.get_parent().has_method("get_groups") else body
 		if held_object:
 			held_object.visible = true
 			var mesh = held_object.get_node_or_null("MeshInstance3D")
@@ -158,7 +195,40 @@ func _on_grab_area_body_exited(body):
 			held_object.visible = false
 		else:
 			for node in get_tree().get_nodes_in_group("grabbable"):
-				#node.visible = false
 				var mesh = node.get_node_or_null("MeshInstance3D")
 				if mesh and mesh is MeshInstance3D:
 					mesh.set_surface_override_material(0, mesh.mesh.surface_get_material(0))
+		current_grab_area = null
+
+# COMPUTER INTERACTION MECHANICS
+func try_click_computer() -> Node:
+	if not can_grab or not current_grab_area:
+		return null
+	var space_state = get_world_3d().direct_space_state
+	var mouse_pos = get_viewport().get_mouse_position()
+	var ray_start = player_camera.project_ray_origin(mouse_pos)
+	var ray_end = ray_start + player_camera.project_ray_normal(mouse_pos) * 10.0
+	var query = PhysicsRayQueryParameters3D.create(ray_start, ray_end)
+	var result = space_state.intersect_ray(query)
+	
+	if result and result.collider and result.collider.is_in_group("computer"):
+		var computer_name = result.collider.name
+		var expected_area_name = computer_name + "_Area"
+		if current_grab_area.name == expected_area_name:
+			return result.collider
+	return null
+
+func enter_computer_mode(computer: Node):
+	var computer_camera = computer.get_node_or_null("ComputerCamera")
+	if computer_camera and computer_camera is Camera3D:
+		is_using_computer = true
+		active_computer_camera = computer_camera
+		player_camera.current = false
+		active_computer_camera.current = true
+
+func exit_computer_mode():
+	is_using_computer = false
+	if active_computer_camera:
+		active_computer_camera.current = false
+	player_camera.current = true
+	active_computer_camera = null

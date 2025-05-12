@@ -1,0 +1,73 @@
+[gd_scene load_steps=7 format=3 uid="uid://divngw0b3efrf"]
+
+[ext_resource type="FontFile" uid="uid://dniffowapljdy" path="res://addons/essence_console/hailtotem_next.ttf" id="1_3mvg0"]
+[ext_resource type="Script" uid="uid://dfmn36gjff4c0" path="res://addons/essence_console/console.gd" id="1_73s1d"]
+
+[sub_resource type="FontVariation" id="FontVariation_c06l4"]
+base_font = ExtResource("1_3mvg0")
+variation_transform = Transform2D(1, 0.25, 0, 1, 0, 0)
+
+[sub_resource type="FontVariation" id="FontVariation_sic2x"]
+base_font = ExtResource("1_3mvg0")
+variation_transform = Transform2D(1.25, 0.25, 0, 1.1, 0, 0)
+
+[sub_resource type="FontVariation" id="FontVariation_mjky1"]
+base_font = ExtResource("1_3mvg0")
+variation_transform = Transform2D(1.25, 0, 0, 1.1, 0, 0)
+
+[sub_resource type="GDScript" id="GDScript_uc3c8"]
+
+[node name="Console" type="RichTextLabel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/text_highlight_v_padding = 0
+theme_override_constants/text_highlight_h_padding = 0
+theme_override_fonts/normal_font = ExtResource("1_3mvg0")
+theme_override_fonts/mono_font = ExtResource("1_3mvg0")
+theme_override_fonts/italics_font = SubResource("FontVariation_c06l4")
+theme_override_fonts/bold_italics_font = SubResource("FontVariation_sic2x")
+theme_override_fonts/bold_font = SubResource("FontVariation_mjky1")
+theme_override_font_sizes/bold_italics_font_size = 25
+theme_override_font_sizes/italics_font_size = 25
+theme_override_font_sizes/mono_font_size = 25
+theme_override_font_sizes/normal_font_size = 25
+theme_override_font_sizes/bold_font_size = 25
+bbcode_enabled = true
+scroll_active = false
+scroll_following = true
+script = ExtResource("1_73s1d")
+fileDirectory = {
+"config": {},
+"home": {
+"FileTypeTest": {
+"Array0": [],
+"Bool0": false,
+"Bool1": true,
+"Dir0": {},
+"Dir1": {
+"ROFile": "test"
+},
+"File0": "",
+"File1": "text",
+"Float0": 0.0,
+"Float1": 2.5,
+"Int0": 0,
+"Int1": 1,
+"NullFile": null,
+"PackInt0": PackedInt32Array(),
+"PackInt1": PackedInt32Array(1),
+"PackStr0": PackedStringArray(),
+"PackStr1": PackedStringArray("aaa"),
+"Path0": NodePath(""),
+"Path1": NodePath("."),
+"ScriptTest": SubResource("GDScript_uc3c8"),
+"StrName0": &"",
+"StrName1": &"test",
+"Vec": Vector2(0, 0)
+}
+}
+}
+SetLocaleToEng = true

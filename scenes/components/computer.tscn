@@ -1,8 +1,8 @@
 [gd_scene load_steps=19 format=4 uid="uid://bm2ujr6udikc4"]
 
-[ext_resource type="Script" uid="uid://d2vkfxd0ifcqn" path="res://Scripts/computer.gd" id="1_okq71"]
-[ext_resource type="Texture2D" uid="uid://bormvtoyuj10o" path="res://assets/icon.svg" id="2_wosnj"]
+[ext_resource type="Script" uid="uid://d2vkfxd0ifcqn" path="res://scripts/computer.gd" id="1_okq71"]
 [ext_resource type="Shader" uid="uid://dcvr6r1j1k4vq" path="res://resources/shaders/crt_shader.gdshader" id="3_wosnj"]
+[ext_resource type="PackedScene" uid="uid://divngw0b3efrf" path="res://addons/essence_console/Console.tscn" id="4_pmsea"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_i5arm"]
 albedo_color = Color(0.334122, 0.334122, 0.334122, 1)
@@ -18,18 +18,18 @@ TabContainer/font_sizes/font_size = 24
 shader = ExtResource("3_wosnj")
 shader_parameter/overlay = false
 shader_parameter/scanlines_opacity = 0.0
-shader_parameter/scanlines_width = 0.108
-shader_parameter/grille_opacity = 0.265
+shader_parameter/scanlines_width = 0.069
+shader_parameter/grille_opacity = 0.0
 shader_parameter/resolution = Vector2(640, 480)
 shader_parameter/pixelate = false
 shader_parameter/roll = true
-shader_parameter/roll_speed = 3.97
+shader_parameter/roll_speed = 8.09
 shader_parameter/roll_size = 9.975
 shader_parameter/roll_variation = 1.48
-shader_parameter/distort_intensity = 0.024
-shader_parameter/noise_opacity = 0.254
+shader_parameter/distort_intensity = 0.0
+shader_parameter/noise_opacity = 0.467
 shader_parameter/noise_speed = 5.0
-shader_parameter/static_noise_intensity = 0.226
+shader_parameter/static_noise_intensity = 0.136
 shader_parameter/aberration = 0.015
 shader_parameter/brightness = 1.45
 shader_parameter/discolor = true
@@ -155,6 +155,7 @@ mesh = SubResource("QuadMesh_4arys")
 skeleton = NodePath("../..")
 
 [node name="SubViewport" type="SubViewport" parent="Computer"]
+mesh_lod_threshold = 0.0
 size = Vector2i(1000, 750)
 
 [node name="Control" type="Control" parent="Computer/SubViewport"]
@@ -167,34 +168,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = SubResource("Theme_wosnj")
 
-[node name="TabContainer" type="TabContainer" parent="Computer/SubViewport/Control"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-current_tab = 0
-
-[node name="TextureRect" type="TextureRect" parent="Computer/SubViewport/Control/TabContainer"]
-layout_mode = 2
-texture = ExtResource("2_wosnj")
-metadata/_tab_index = 0
-
-[node name="TextureRect2" type="TextureRect" parent="Computer/SubViewport/Control/TabContainer"]
-visible = false
-modulate = Color(2.45467e-06, 0.615723, 0.31067, 1)
-layout_mode = 2
-texture = ExtResource("2_wosnj")
-metadata/_tab_index = 1
-
-[node name="TextureRect3" type="TextureRect" parent="Computer/SubViewport/Control/TabContainer"]
-visible = false
-modulate = Color(0.990857, 0.305122, 0.315717, 1)
-layout_mode = 2
-texture = ExtResource("2_wosnj")
-metadata/_tab_index = 2
-
 [node name="ColorRect" type="ColorRect" parent="Computer/SubViewport/Control"]
 z_index = 1
 material = SubResource("ShaderMaterial_t3l2h")
@@ -205,6 +178,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
+[node name="Console" parent="Computer/SubViewport/Control" instance=ExtResource("4_pmsea")]
+layout_mode = 1
 
 [node name="Screen" type="MeshInstance3D" parent="Computer"]
 transform = Transform3D(-0.5, 0, 7.54979e-08, 0, 0.5, 0, -7.54979e-08, 0, -0.5, 0, 0, 0.213525)

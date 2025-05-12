@@ -69,7 +69,7 @@ use_collision = true
 size = Vector3(60, 5.83948, 1)
 
 [node name="CSGBox3D6" type="CSGBox3D" parent="Map"]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 12, -2, 0.382374)
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 12, -1.994, 0.456153)
 material_override = ExtResource("2_x0xbu")
 use_collision = true
 size = Vector3(4, 5.83948, 4)
@@ -112,9 +112,6 @@ size_flags_horizontal = 4
 texture = SubResource("GradientTexture2D_x0xbu")
 expand_mode = 1
 flip_h = true
-
-[node name="Node3D" parent="." instance=ExtResource("6_x0xbu")]
-transform = Transform3D(0.0153234, 0, -0.999883, 0, 1, 0, 0.999883, 0, 0.0153234, 10.1545, 1.4005, 0.00386603)
 
 [node name="GrabArea" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.65015, 0.104591, -2.07672)
@@ -171,6 +168,18 @@ shape = SubResource("BoxShape3D_x0xbu")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Object3/Object1Highlighted"]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
 mesh = SubResource("BoxMesh_7qr1p")
+
+[node name="ComputerArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.39834, 1.39775, 0.473444)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ComputerArea"]
+transform = Transform3D(0.974938, 0, 0, 0, 0.974938, 0, 0, 0, 0.974938, 0, 0, 0)
+shape = SubResource("BoxShape3D_7qr1p")
+
+[node name="Node3D" parent="." groups=["computer"] instance=ExtResource("6_x0xbu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6353, 1.24592, 1.97999)
+
+[node name="ComputerCamera" type="Camera3D" parent="Node3D"]
 
 [connection signal="body_entered" from="GrabArea" to="Player" method="_on_grab_area_body_entered"]
 [connection signal="body_exited" from="GrabArea" to="Player" method="_on_grab_area_body_exited"]

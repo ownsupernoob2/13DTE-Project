@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://db2h3t17k37pe"]
+[gd_scene load_steps=15 format=3 uid="uid://db2h3t17k37pe"]
 
 [ext_resource type="Material" uid="uid://bi1h4xe7msjwi" path="res://assets/materials/Pink.tres" id="1_b0nem"]
 [ext_resource type="Material" uid="uid://b122sws3pt7w7" path="res://assets/materials/Red.tres" id="2_x0xbu"]
@@ -20,15 +20,6 @@ background_mode = 2
 sky = SubResource("Sky_f6bkd")
 tonemap_mode = 2
 glow_enabled = true
-
-[sub_resource type="Gradient" id="Gradient_b0nem"]
-offsets = PackedFloat32Array(0.188312, 0.233766)
-colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 0)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_x0xbu"]
-gradient = SubResource("Gradient_b0nem")
-fill = 1
-fill_from = Vector2(0.490826, 0.477064)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_7qr1p"]
 size = Vector3(3, 2, 3)
@@ -98,21 +89,6 @@ environment = SubResource("Environment_g2h84")
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
 shadow_enabled = true
 
-[node name="TextureRect" type="TextureRect" parent="."]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 342.0
-offset_top = 259.0
-offset_right = -348.0
-offset_bottom = -252.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-texture = SubResource("GradientTexture2D_x0xbu")
-expand_mode = 1
-flip_h = true
-
 [node name="GrabArea" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.65015, 0.104591, -2.07672)
 
@@ -176,7 +152,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.39834, 1.39775, 0.473444)
 transform = Transform3D(0.974938, 0, 0, 0, 0.974938, 0, 0, 0, 0.974938, 0, 0, 0)
 shape = SubResource("BoxShape3D_7qr1p")
 
-[node name="Node3D" parent="." groups=["computer"] instance=ExtResource("6_x0xbu")]
+[node name="Node3D" parent="." instance=ExtResource("6_x0xbu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6353, 1.24592, 1.97999)
 
 [node name="ComputerCamera" type="Camera3D" parent="Node3D"]

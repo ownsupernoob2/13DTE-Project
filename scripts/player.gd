@@ -44,15 +44,19 @@ func _ready() -> void:
 		print("Warning: Cursor1 or Cursor2 TextureRect not found")
 
 func _process(_delta: float) -> void:
-	if not is_using_computer:
-		if cursor1 and cursor2:
-			_update_interaction_raycast()
-			cursor1.visible = !can_interact
-			cursor2.visible = can_interact
-	else:
-		if cursor1 and cursor2:
+	if is_using_computer:
+		# Hide both cursors when in computer mode
+		if cursor1:
 			cursor1.visible = false
-			cursor2.visible = true
+		if cursor2:
+			cursor2.visible = false
+	else:
+		# Update interaction raycast and cursor visibility when not in computer mode
+		_update_interaction_raycast()
+		if cursor1:
+			cursor1.visible = !can_interact
+		if cursor2:
+			cursor2.visible = can_interact
 
 func _update_interaction_raycast() -> void:
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
@@ -103,6 +107,11 @@ func _unhandled_input(event: InputEvent) -> void:
 func enter_computer_mode() -> void:
 	if using_computer and not is_using_computer:
 		print("Entering computer mode for: ", using_computer.name)
+		# Hide cursors
+		if cursor1:
+			cursor1.visible = false
+		if cursor2:
+			cursor2.visible = false
 		active_computer_camera = $"../Node3D/ComputerCamera"
 		if active_computer_camera and active_computer_camera is Camera3D:
 			print("Computer camera found: ", active_computer_camera.name)
@@ -112,6 +121,11 @@ func enter_computer_mode() -> void:
 			velocity = Vector3.ZERO
 		else:
 			print("Error: ComputerCamera not found or invalid for ", using_computer.name)
+			# Restore cursor visibility if entering computer mode fails
+			if cursor1:
+				cursor1.visible = !can_interact
+			if cursor2:
+				cursor2.visible = can_interact
 
 func exit_computer_mode() -> void:
 	if is_using_computer:
@@ -121,6 +135,12 @@ func exit_computer_mode() -> void:
 			active_computer_camera.current = false
 		player_camera.current = true
 		active_computer_camera = null
+		# Restore cursor visibility based on interaction state
+		_update_interaction_raycast()
+		if cursor1:
+			cursor1.visible = !can_interact
+		if cursor2:
+			cursor2.visible = can_interact
 
 # [Rest of the script remains unchanged]
 # MOVEMENT MECHANICS

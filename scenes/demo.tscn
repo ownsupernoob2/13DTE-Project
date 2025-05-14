@@ -145,19 +145,22 @@ shape = SubResource("BoxShape3D_x0xbu")
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
 mesh = SubResource("BoxMesh_7qr1p")
 
-[node name="ComputerArea" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.39834, 1.39775, 0.473444)
+[node name="ComputerArea" type="Area3D" parent="." groups=["computer"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.39834, 1.39775, 4.8115)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ComputerArea"]
 transform = Transform3D(0.974938, 0, 0, 0, 0.974938, 0, 0, 0, 0.974938, 0, 0, 0)
 shape = SubResource("BoxShape3D_7qr1p")
 
 [node name="Node3D" parent="." instance=ExtResource("6_x0xbu")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6353, 1.24592, 1.97999)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6353, 1.24592, 5.1951)
 
 [node name="ComputerCamera" type="Camera3D" parent="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.453819)
 
 [connection signal="body_entered" from="GrabArea" to="Player" method="_on_grab_area_body_entered"]
 [connection signal="body_exited" from="GrabArea" to="Player" method="_on_grab_area_body_exited"]
 [connection signal="body_entered" from="Object2" to="Player" method="_on_grab_area_body_entered"]
 [connection signal="body_exited" from="Object2" to="Player" method="_on_grab_area_body_exited"]
+[connection signal="body_entered" from="ComputerArea" to="Player" method="_on_computer_area_body_entered"]
+[connection signal="body_exited" from="ComputerArea" to="Player" method="_on_computer_area_body_exited"]

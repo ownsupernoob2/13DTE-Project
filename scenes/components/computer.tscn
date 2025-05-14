@@ -1,7 +1,8 @@
-[gd_scene load_steps=19 format=4 uid="uid://bm2ujr6udikc4"]
+[gd_scene load_steps=20 format=4 uid="uid://bm2ujr6udikc4"]
 
 [ext_resource type="Script" uid="uid://d2vkfxd0ifcqn" path="res://scripts/computer.gd" id="1_okq71"]
 [ext_resource type="Shader" uid="uid://dcvr6r1j1k4vq" path="res://resources/shaders/crt_shader.gdshader" id="3_wosnj"]
+[ext_resource type="Material" uid="uid://b4s0xnt1f6lia" path="res://assets/materials/Green.tres" id="4_815cu"]
 [ext_resource type="PackedScene" uid="uid://divngw0b3efrf" path="res://addons/essence_console/Console.tscn" id="4_pmsea"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_i5arm"]
@@ -23,20 +24,20 @@ shader_parameter/grille_opacity = 0.0
 shader_parameter/resolution = Vector2(640, 480)
 shader_parameter/pixelate = false
 shader_parameter/roll = true
-shader_parameter/roll_speed = 8.09
+shader_parameter/roll_speed = 8.0
 shader_parameter/roll_size = 9.975
 shader_parameter/roll_variation = 1.48
 shader_parameter/distort_intensity = 0.0
 shader_parameter/noise_opacity = 0.467
 shader_parameter/noise_speed = 5.0
-shader_parameter/static_noise_intensity = 0.136
+shader_parameter/static_noise_intensity = 0.012
 shader_parameter/aberration = 0.015
 shader_parameter/brightness = 1.45
 shader_parameter/discolor = true
-shader_parameter/warp_amount = 0.0
+shader_parameter/warp_amount = 0.049
 shader_parameter/clip_warp = false
 shader_parameter/vignette_intensity = 0.165
-shader_parameter/vignette_opacity = 0.2
+shader_parameter/vignette_opacity = 0.764
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_wosnj"]
 viewport_path = NodePath("Computer/SubViewport")
@@ -55,12 +56,15 @@ cull_mode = 2
 albedo_color = Color(0.906332, 0.906332, 0.906332, 1)
 roughness = 0.5
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wdkyh"]
+
 [sub_resource type="ArrayMesh" id="ArrayMesh_u3ios"]
 _surfaces = [{
 "aabb": AABB(-0.399709, -0.3, -0.00859782, 0.799418, 0.6, 0.0335679),
 "format": 34896613377,
 "index_count": 30,
 "index_data": PackedByteArray("AAABAAIAAAADAAEABAAAAAIABAACAAUABgAEAAUABgAFAAcACAAGAAcACAAHAAkACgAIAAkACgAJAAsA"),
+"material": SubResource("StandardMaterial3D_wdkyh"),
 "name": "Material",
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
@@ -72,6 +76,7 @@ _surfaces = [{
 "index_count": 102,
 "index_data": PackedByteArray("AAARAAIAEgACABEAEgAEAAIAAAAMABEABAASAA0ADQASABEADQARAAwABAANAAsAAwAMAAAACwANABMAEwANAAwACwATAAoAAwAUAAwAEwAMABQAAQAUAAMACgATABUAFQATABQACgAVAAkAAQAWABQAFQAUABYABgAWAAEACQAVAA8ADwAVABYACQAPAAgABgAOABYADwAWAA4ABQAOAAYACAAPABAAEAAPAA4ACAAQAAcABQAXAA4AEAAOABcABwAXAAUABwAQABcA"),
 "lods": [0.0171389, PackedByteArray("AAAMAAIAAwAMAAAAAQAMAAMADQACAAwADQAEAAIAAQAOAAwADQAMAA4ABgAOAAEABAANAAsACwANAAoABQAOAAYACgANAAkACQANAA8ADwANAA4ACQAPAAgAEAAOAAUAEAAPAA4ACAAPABAABwAQAAUACAAQAAcA"), 0.0335255, PackedByteArray("AAABAAIAAwABAAAABAACAAEABQABAAYABwABAAUABwAIAAEACAAEAAEACQAEAAgACgAEAAkACwAEAAoA")],
+"material": ExtResource("4_815cu"),
 "name": "Material.001",
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
@@ -115,6 +120,9 @@ shadow_mesh = SubResource("ArrayMesh_u3ios")
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_ifh66"]
 data = PackedVector3Array(0.2406, -0.3, 0.0026, 0.3997, 0.3, 0.025, 0.2406, 0.3, 0.0026, 0.2406, -0.3, 0.0026, 0.3997, -0.3, 0.025, 0.3997, 0.3, 0.025, 0.0803, -0.3, -0.0086, 0.2406, -0.3, 0.0026, 0.2406, 0.3, 0.0026, 0.0803, -0.3, -0.0086, 0.2406, 0.3, 0.0026, 0.0803, 0.3, -0.0086, -0.0803, -0.3, -0.0086, 0.0803, -0.3, -0.0086, 0.0803, 0.3, -0.0086, -0.0803, -0.3, -0.0086, 0.0803, 0.3, -0.0086, -0.0803, 0.3, -0.0086, -0.2406, -0.3, 0.0026, -0.0803, -0.3, -0.0086, -0.0803, 0.3, -0.0086, -0.2406, -0.3, 0.0026, -0.0803, 0.3, -0.0086, -0.2406, 0.3, 0.0026, -0.3997, -0.3, 0.025, -0.2406, -0.3, 0.0026, -0.2406, 0.3, 0.0026, -0.3997, -0.3, 0.025, -0.2406, 0.3, 0.0026, -0.3997, 0.3, 0.025, -0.2406, 0.3, 0.0026, -0.3962, 0.3, 0.0447, -0.3997, 0.3, 0.025, -0.3962, -0.3, 0.0447, -0.3997, 0.3, 0.025, -0.3962, 0.3, 0.0447, -0.3962, -0.3, 0.0447, -0.3997, -0.3, 0.025, -0.3997, 0.3, 0.025, -0.2406, 0.3, 0.0026, -0.2385, 0.3, 0.0225, -0.3962, 0.3, 0.0447, -0.3997, -0.3, 0.025, -0.3962, -0.3, 0.0447, -0.2385, -0.3, 0.0225, -0.2385, -0.3, 0.0225, -0.3962, -0.3, 0.0447, -0.3962, 0.3, 0.0447, -0.2385, -0.3, 0.0225, -0.3962, 0.3, 0.0447, -0.2385, 0.3, 0.0225, -0.3997, -0.3, 0.025, -0.2385, -0.3, 0.0225, -0.2406, -0.3, 0.0026, -0.0803, 0.3, -0.0086, -0.2385, 0.3, 0.0225, -0.2406, 0.3, 0.0026, -0.2406, -0.3, 0.0026, -0.2385, -0.3, 0.0225, -0.0796, -0.3, 0.0114, -0.0796, -0.3, 0.0114, -0.2385, -0.3, 0.0225, -0.2385, 0.3, 0.0225, -0.2406, -0.3, 0.0026, -0.0796, -0.3, 0.0114, -0.0803, -0.3, -0.0086, -0.0803, 0.3, -0.0086, -0.0796, 0.3, 0.0114, -0.2385, 0.3, 0.0225, -0.0796, -0.3, 0.0114, -0.2385, 0.3, 0.0225, -0.0796, 0.3, 0.0114, 0.0803, 0.3, -0.0086, -0.0796, 0.3, 0.0114, -0.0803, 0.3, -0.0086, -0.0803, -0.3, -0.0086, -0.0796, -0.3, 0.0114, 0.0796, -0.3, 0.0114, 0.0796, -0.3, 0.0114, -0.0796, -0.3, 0.0114, -0.0796, 0.3, 0.0114, -0.0803, -0.3, -0.0086, 0.0796, -0.3, 0.0114, 0.0803, -0.3, -0.0086, 0.0803, 0.3, -0.0086, 0.0796, 0.3, 0.0114, -0.0796, 0.3, 0.0114, 0.0796, -0.3, 0.0114, -0.0796, 0.3, 0.0114, 0.0796, 0.3, 0.0114, 0.2406, 0.3, 0.0026, 0.0796, 0.3, 0.0114, 0.0803, 0.3, -0.0086, 0.0803, -0.3, -0.0086, 0.0796, -0.3, 0.0114, 0.2385, -0.3, 0.0225, 0.2385, -0.3, 0.0225, 0.0796, -0.3, 0.0114, 0.0796, 0.3, 0.0114, 0.0803, -0.3, -0.0086, 0.2385, -0.3, 0.0225, 0.2406, -0.3, 0.0026, 0.2406, 0.3, 0.0026, 0.2385, 0.3, 0.0225, 0.0796, 0.3, 0.0114, 0.2385, -0.3, 0.0225, 0.0796, 0.3, 0.0114, 0.2385, 0.3, 0.0225, 0.3997, 0.3, 0.025, 0.2385, 0.3, 0.0225, 0.2406, 0.3, 0.0026, 0.2406, -0.3, 0.0026, 0.2385, -0.3, 0.0225, 0.3962, -0.3, 0.0447, 0.3962, -0.3, 0.0447, 0.2385, -0.3, 0.0225, 0.2385, 0.3, 0.0225, 0.2406, -0.3, 0.0026, 0.3962, -0.3, 0.0447, 0.3997, -0.3, 0.025, 0.3997, 0.3, 0.025, 0.3962, 0.3, 0.0447, 0.2385, 0.3, 0.0225, 0.3962, -0.3, 0.0447, 0.2385, 0.3, 0.0225, 0.3962, 0.3, 0.0447, 0.3997, -0.3, 0.025, 0.3962, 0.3, 0.0447, 0.3997, 0.3, 0.025, 0.3997, -0.3, 0.025, 0.3962, -0.3, 0.0447, 0.3962, 0.3, 0.0447)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_fpwu0"]
+size = Vector3(0.447693, 0.369019, 0.440979)
+
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_okq71"]
 
 [sub_resource type="Sky" id="Sky_wosnj"]
@@ -126,11 +134,6 @@ background_energy_multiplier = 1.02
 sky = SubResource("Sky_wosnj")
 ambient_light_source = 3
 glow_enabled = true
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wosnj"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a8auw"]
-albedo_color = Color(0.113665, 0.113665, 0.113665, 1)
 
 [node name="Node3D" type="Node3D" groups=["computer"]]
 
@@ -144,7 +147,7 @@ size = Vector3(0.45, 0.35, 0.4)
 material = SubResource("StandardMaterial3D_i5arm")
 
 [node name="CSGBox3D2" type="CSGBox3D" parent="Computer/CSGCombiner3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.0611729)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.103111)
 operation = 2
 size = Vector3(0.4, 0.3, 0.3)
 
@@ -181,6 +184,11 @@ mouse_filter = 2
 
 [node name="Console" parent="Computer/SubViewport/Control" instance=ExtResource("4_pmsea")]
 layout_mode = 1
+console_size = null
+USER_Name = null
+ShowTextArt = null
+CanInput = null
+commands = null
 
 [node name="Screen" type="MeshInstance3D" parent="Computer" groups=["computer"]]
 transform = Transform3D(-0.5, 0, 7.54979e-08, 0, 0.5, 0, -7.54979e-08, 0, -0.5, 0, 0, 0.213525)
@@ -192,17 +200,11 @@ skeleton = NodePath("")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Computer/Screen/Area3D"]
 shape = SubResource("ConcavePolygonShape3D_ifh66")
 
+[node name="StaticBody3D" type="StaticBody3D" parent="Computer" groups=["computer"]]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Computer/StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.154133, -0.00424194, 0.00140381, 0.214954)
+shape = SubResource("BoxShape3D_fpwu0")
+
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_t3l2h")
-
-[node name="CSGCombiner3D" type="CSGCombiner3D" parent="."]
-visible = false
-
-[node name="CSGBox3D" type="CSGBox3D" parent="CSGCombiner3D"]
-size = Vector3(4, 4, 4)
-material = SubResource("StandardMaterial3D_wosnj")
-
-[node name="CSGBox3D2" type="CSGBox3D" parent="CSGCombiner3D"]
-operation = 2
-size = Vector3(3, 3, 3)
-material = SubResource("StandardMaterial3D_a8auw")

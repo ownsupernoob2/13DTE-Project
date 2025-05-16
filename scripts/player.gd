@@ -45,13 +45,11 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if is_using_computer:
-		# Hide both cursors when in computer mode
 		if cursor1:
 			cursor1.visible = false
 		if cursor2:
 			cursor2.visible = false
 	else:
-		# Update interaction raycast and cursor visibility when not in computer mode
 		_update_interaction_raycast()
 		if cursor1:
 			cursor1.visible = !can_interact
@@ -69,11 +67,9 @@ func _update_interaction_raycast() -> void:
 	can_interact = false
 	using_computer = null
 	if result and result.collider:
-		print("Raycast hit: ", result.collider.name, " Groups: ", result.collider.get_groups())
 		if result.collider.is_in_group("computer"):
 			can_interact = true
 			using_computer = result.collider
-			print("Computer detected: ", result.collider.name, " can_interact: ", can_interact)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and not is_using_computer:
@@ -82,46 +78,37 @@ func _unhandled_input(event: InputEvent) -> void:
 		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-40), deg_to_rad(60))
 	
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		print("Left click detected. is_using_computer: ", is_using_computer, " can_interact: ", can_interact, " using_computer: ", using_computer, " held_object: ", held_object)
 		if is_using_computer:
-			print("Attempting to exit computer mode")
 			exit_computer_mode()
 		elif can_interact and using_computer and not held_object:
-			print("Attempting to enter computer mode")
 			enter_computer_mode()
 		elif held_object == null:
 			if can_grab:
-				print("Attempting to grab object")
 				grab_object()
 		elif held_object != null and can_grab:
-			print("Attempting to drop object")
 			drop_object()
 	
-	# Debug: Press 'E' to force computer mode
 	if event is InputEventKey and event.pressed and event.keycode == KEY_E:
-		print("Debug: Forcing computer mode")
 		using_computer = get_tree().get_first_node_in_group("computer")
 		if using_computer:
 			enter_computer_mode()
 
 func enter_computer_mode() -> void:
 	if using_computer and not is_using_computer:
-		print("Entering computer mode for: ", using_computer.name)
-		# Hide cursors
-		if cursor1:
-			cursor1.visible = false
-		if cursor2:
-			cursor2.visible = false
 		active_computer_camera = $"../Node3D/ComputerCamera"
 		if active_computer_camera and active_computer_camera is Camera3D:
-			print("Computer camera found: ", active_computer_camera.name)
 			is_using_computer = true
 			player_camera.current = false
 			active_computer_camera.current = true
 			velocity = Vector3.ZERO
+			var terminal = $"../Node3D/Computer/SubViewport/Control/Console"
+			if terminal and terminal.has_method("power_on"):
+				terminal.power_on()
+			if cursor1:
+				cursor1.visible = false
+			if cursor2:
+				cursor2.visible = false
 		else:
-			print("Error: ComputerCamera not found or invalid for ", using_computer.name)
-			# Restore cursor visibility if entering computer mode fails
 			if cursor1:
 				cursor1.visible = !can_interact
 			if cursor2:
@@ -129,21 +116,17 @@ func enter_computer_mode() -> void:
 
 func exit_computer_mode() -> void:
 	if is_using_computer:
-		print("Exiting computer mode")
 		is_using_computer = false
 		if active_computer_camera:
 			active_computer_camera.current = false
 		player_camera.current = true
 		active_computer_camera = null
-		# Restore cursor visibility based on interaction state
 		_update_interaction_raycast()
 		if cursor1:
 			cursor1.visible = !can_interact
 		if cursor2:
 			cursor2.visible = can_interact
 
-# [Rest of the script remains unchanged]
-# MOVEMENT MECHANICS
 func _physics_process(delta: float) -> void:
 	if is_using_computer:
 		velocity = Vector3.ZERO
@@ -182,7 +165,6 @@ func _headbob(time: float) -> Vector3:
 	pos.x = cos(time * BOB_FREQ / 2) * BOB_AMP
 	return pos
 
-# GRABBING MECHANICS
 func grab_object() -> void:
 	if held_object != null or not can_grab or is_using_computer:
 		return
@@ -264,7 +246,6 @@ func _on_grab_area_body_entered(body: Node) -> void:
 	if body == self:
 		can_grab = true
 		current_grab_area = body.get_parent() if body.get_parent().has_method("get_groups") else body
-		print("Entered grab area, can_grab: ", can_grab)
 		if held_object:
 			held_object.visible = true
 			var mesh: MeshInstance3D = held_object.get_node_or_null("MeshInstance3D")
@@ -280,7 +261,6 @@ func _on_grab_area_body_entered(body: Node) -> void:
 func _on_grab_area_body_exited(body: Node) -> void:
 	if body == self:
 		can_grab = false
-		print("Exited grab area, can_grab: ", can_grab)
 		if held_object:
 			held_object.visible = false
 		else:

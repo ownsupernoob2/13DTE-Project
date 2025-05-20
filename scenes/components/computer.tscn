@@ -153,9 +153,6 @@ color = Color(0.996078, 1, 1, 1)
 
 [node name="Console" parent="Computer/SubViewport/Control" instance=ExtResource("4_pmsea")]
 layout_mode = 1
-console_size = Vector2(100, 30)
-user_name = "@user"
-can_input = false
 
 [node name="Screen" type="MeshInstance3D" parent="Computer" groups=["computer"]]
 transform = Transform3D(-0.5, 0, 7.54979e-08, 0, 0.5, 0, -7.54979e-08, 0, -0.5, 0, 0, 0.213525)

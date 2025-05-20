@@ -30,7 +30,7 @@ var original_rotation: Vector3
 var held_object_name: String = ""
 var original_material: Material = null
 var highlight_material: Material = preload("res://assets/materials/highlight_material.tres")
-var is_using_computer: bool = false
+#var is_using_computer: bool = false
 var active_computer_camera: Camera3D = null
 var can_interact: bool = false
 var using_computer = null
@@ -44,7 +44,7 @@ func _ready() -> void:
 		print("Warning: Cursor1 or Cursor2 TextureRect not found")
 
 func _process(_delta: float) -> void:
-	if is_using_computer:
+	if Global.is_using_computer:
 		if cursor1:
 			cursor1.visible = false
 		if cursor2:
@@ -72,13 +72,13 @@ func _update_interaction_raycast() -> void:
 			using_computer = result.collider
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion and not is_using_computer:
+	if event is InputEventMouseMotion and not Global.is_using_computer:
 		head.rotate_y(-event.relative.x * SENSITIVITY)
 		camera.rotate_x(-event.relative.y * SENSITIVITY)
 		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-40), deg_to_rad(60))
 	
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		if is_using_computer:
+		if Global.is_using_computer:
 			exit_computer_mode()
 		elif can_interact and using_computer and not held_object:
 			enter_computer_mode()
@@ -94,10 +94,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			enter_computer_mode()
 
 func enter_computer_mode() -> void:
-	if using_computer and not is_using_computer:
+	if using_computer and not Global.is_using_computer:
 		active_computer_camera = $"../Node3D/ComputerCamera"
 		if active_computer_camera and active_computer_camera is Camera3D:
-			is_using_computer = true
+			Global.is_using_computer = true
 			player_camera.current = false
 			active_computer_camera.current = true
 			velocity = Vector3.ZERO
@@ -115,8 +115,8 @@ func enter_computer_mode() -> void:
 				cursor2.visible = can_interact
 
 func exit_computer_mode() -> void:
-	if is_using_computer:
-		is_using_computer = false
+	if Global.is_using_computer:
+		Global.is_using_computer = false
 		if active_computer_camera:
 			active_computer_camera.current = false
 		player_camera.current = true
@@ -128,7 +128,7 @@ func exit_computer_mode() -> void:
 			cursor2.visible = can_interact
 
 func _physics_process(delta: float) -> void:
-	if is_using_computer:
+	if Global.is_using_computer:
 		velocity = Vector3.ZERO
 		return
 	
@@ -166,7 +166,7 @@ func _headbob(time: float) -> Vector3:
 	return pos
 
 func grab_object() -> void:
-	if held_object != null or not can_grab or is_using_computer:
+	if held_object != null or not can_grab or Global.is_using_computer:
 		return
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
@@ -201,7 +201,7 @@ func grab_object() -> void:
 			placeholder.visible = true
 
 func drop_object() -> void:
-	if held_object == null or not can_grab or is_using_computer:
+	if held_object == null or not can_grab or Global.is_using_computer:
 		return
 	
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state

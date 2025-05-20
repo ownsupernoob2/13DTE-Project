@@ -1,32 +1,16 @@
 extends RichTextLabel
-
-# Configuration
-@export var console_size: Vector2 = Vector2(100, 30)
-@export var user_name: String = "@user"
-@export var can_input: bool = false
-var current_mode: String = "Default"
-var current_path: String = "/home"
-var file_system: Dictionary = {
-	"/home": {
-		"readme.txt": "Welcome to the terminal emulator!\nType 'help' for a list of commands.",
-		"docs": {
-			"guide.txt": "This is a user guide.\nUse 'ls' to list files, 'cd' to navigate, 'cat' to read files.",
-			"tutorial": {
-				"step1.txt": "Step 1: Use 'pwd' to see your current directory."
-			}
-		}
-	},
-	"/config": {
-		"settings.conf": "theme=dark\nversion=1.0",
-		"logs": {
-			"system.log": "System started successfully."
-		}
-	}
-}
-var commands: Dictionary = {}
-
-# ASCII art for startup
-var TextArt: Array[String] = [
+# Base
+@export var console_size: Vector2 = Vector2(100,30)
+@export var USER_Name:String = "@USER"
+@export var ShowTextArt:bool = true
+@export var CanInput:bool = false
+var CurrentMode:String = ""
+# Data
+@export var commands:Dictionary = {}
+@export var fileDirectory:Dictionary = {"home":{},"config":{}}
+var current_path:String = "/home"
+# Setup text art
+var TextArt:Array[String] = [
 	"┎┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┒",
 	"┇                 ████████        ███◤                        ┇",
 	"┇          ▓▓▓▓▓▓▓▓      ██       █                           ┇",
@@ -42,290 +26,624 @@ var TextArt: Array[String] = [
 	"┇         ▒▒▒▒▒▒▒▒                ███◤ ██◤ █ █ ██◤ ██◤  █◤ ███┇",
 	"┖┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┚"
 ]
-var startup_done: bool = false
-var is_powered_on: bool = false
-var art_timer: Timer = Timer.new()
+var TextArtThin:Array[String] = [
+	"┎┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┒",
+	"┇                 ████████       ┇",
+	"┇          ▓▓▓▓▓▓▓▓      ██      ┇",
+	"┇   ▒▒▒▒▒▒▒▒        ████████     ┇",
+	"┇    ▒▒      ▓▓▓▓▓▓▓▓          ██┇",
+	"┇     ▒▒▒▒▒▒▒▒               ███ ┇",
+	"┇   ░░░▒▒                  ███   ┇",
+	"┇ ░░░  ▒▒ ◥██▶   ▬▬▬▬▬ ██████    ┇",
+	"┇░░     ▒▒ ◢◤      ▓▓▓▓▓    ██   ┇",
+	"┇ ░░       ▒▒▒▒▒▓▓▓          ██  ┇",
+	"┇  ░░░░░░▒▒             ████████ ┇",
+	"┇        ▒▒      ▓▓▓▓▓▓▓▓        ┇",
+	"┇         ▒▒▒▒▒▒▒▒               ┇",
+	"┖┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┚"
+]
+# Input content
+var CurrentInputString: String = ""
+var CurrentInputString_escaped: String = ""
+var _current_cursor_pos: int = 0
+# Page scroll
+var _current_line: int = 0
+# Input visual
+var _flash: bool = false
+var _flash_timer = Timer.new()
+var _start_up:int = 0
+var _just_enter: bool = false
+var _PrefixText: String = ""
+# History
+var _send_history: Array[String] = []
+var _current_history : int = -1
+var _last_input: String = ""
+# Edit mode
+var current_file: String = ""
+var current_file_type: String = "Text"
+var _just_save: String = ""
 
-# Input handling
-var input_string: String = ""
-var cursor_pos: int = 0
-var history: Array[String] = []
-var history_index: int = -1
-var last_input: String = ""
-var flash: bool = false
-var flash_timer: Timer = Timer.new()
-var display_text: String = ""
-
-# Printable ASCII characters
-const PRINTABLE_ASCII: String = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+@export var SetLocaleToEng: bool = false
 
 func _ready() -> void:
+	if SetLocaleToEng:
+		TranslationServer.set_locale("en_US")
 	size = Vector2(console_size.x * 12.5, console_size.y * 23)
-	add_child(flash_timer)
-	add_child(art_timer)
-	flash_timer.set_one_shot(true)
-	art_timer.set_one_shot(true)
-	flash_timer.start(1)
-	_setup_commands()
-	visible = false
-	can_input = false
-	# Debug: Log initial file system
-	print("Initial file system: ", file_system)
+	_built_in_command_init()
+	add_child(_flash_timer)
+	text = ""
+	_flash_timer.set_one_shot(true)
+	_flash_timer.start(1)
 
-func power_on() -> void:
-	if not is_powered_on:
-		is_powered_on = true
-		visible = true
-		startup_done = false
-		_display_ascii_art()
-		can_input = true
-		flash_timer.start(0.5)
-		art_timer.start(2.0)
-		# Debug: Log power on
-		print("Terminal powered on")
-
-func _process(_delta: float) -> void:
-	if art_timer.time_left == 0 and not startup_done and is_powered_on:
-		startup_done = true
-		display_text = ""
-		_update_display()
-	if flash_timer.time_left == 0 and is_powered_on:
-		flash = !flash
-		_update_display()
-		flash_timer.start(0.5)
-
-func _display_ascii_art() -> void:
-	display_text = ""
-	if console_size.x >= 63:
-		for line in TextArt:
-			display_text += _center_text(line) + "\n"
-	else:
-		display_text = "[color=RED]Console too small for ASCII art[/color]\n"
-	text = display_text
-	# Debug: Log ASCII art display
-	print("Displaying ASCII art: ", display_text)
-
-func _center_text(line: String) -> String:
-	var console_width = int(console_size.x)
-	var line_length = line.length()
-	var padding = max(0, (console_width - line_length) / 2)
-	return " ".repeat(padding) + line
+func _process(delta: float) -> void:
+	set_prefix()
+	if _flash_timer.time_left == 0:
+		if _start_up == 0 and ShowTextArt:
+			for i in(console_size.y / 2 + 7):
+				if i < console_size.y / 2 - 7:
+					newline()
+				else:
+					if console_size.x >= 63:
+						append_text(TextArt[i-console_size.y / 2 + 7])
+					elif console_size.x >= 34:
+						append_text(TextArtThin[i-console_size.y / 2 + 7])
+					pop()
+					newline()
+			_start_up += 1
+			_flash_timer.start()
+		else:
+			_flash = !_flash
+			if !CanInput:
+				clear()
+				CanInput = true
+			append_current_input_string()
+			_flash_timer.start()
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if event.is_pressed() and can_input:
-		var key = event.as_text()
-		# Debug: Log key press
-		print("Key pressed: ", key)
-		match key:
-			_ when key.length() == 1 and PRINTABLE_ASCII.contains(key):
-				_insert_char(key)
-			"Space":
-				_insert_char(" ")
-			"Slash":
-				_insert_char("/")
-			"Minus":
-				_insert_char("-")
-			"Period":
-				_insert_char(".")
-			"Backspace":
-				if cursor_pos < input_string.length():
-					input_string = input_string.erase(input_string.length() - cursor_pos - 1, 1)
-			"Enter":
-				if current_mode == "Default":
-					_execute_command()
+	if !Global.is_using_computer:
+		return
+	if event.is_pressed() and CanInput:
+		match event.as_text():
+			"A","B","C","D","E","F","G",\
+			"H","I","J","K","L","M","N",\
+			"O","P","Q","R","S","T","U",\
+			"V","W","X","Y","Z":
+				insert_character(event.as_text().to_lower())
+			"Shift+A","Shift+B","Shift+C","Shift+D","Shift+E","Shift+F","Shift+G",\
+			"Shift+H","Shift+I","Shift+J","Shift+K","Shift+L","Shift+M","Shift+N",\
+			"Shift+O","Shift+P","Shift+Q","Shift+R","Shift+S","Shift+T","Shift+U",\
+			"Shift+V","Shift+W","Shift+X","Shift+Y","Shift+Z",\
+			"Kp 1","Kp 2","Kp 3","Kp 4","Kp 5","Kp 6","Kp 7","Kp 8","Kp 9","Kp 0":
+				insert_character(event.as_text()[-1])
+			"0","1","2","3","4","5","6","7","8","9":
+				insert_character(event.as_text())
+			"Space","Shift_Space": insert_character(" ")
+			"BracketLeft": insert_character("[")
+			"BracketRight": insert_character("]")
+			"Slash","Kp Divide": insert_character("/")
+			"QuoteLeft": insert_character("`")
+			"Shift+QuoteLeft": insert_character("~")
+			"Shift+1": insert_character("!")
+			"Shift+2": insert_character("@")
+			"Shift+3": insert_character("#")
+			"Shift+4": insert_character("$")
+			"Shift+5": insert_character("%")
+			"Shift+6": insert_character("^")
+			"Shift+7": insert_character("&")
+			"Shift+8","Kp Multiply": insert_character("*")
+			"Shift+9": insert_character("(")
+			"Shift+0": insert_character(")")
+			"Minus","Kp Subtract": insert_character("-")
+			"Shift+Minus": insert_character("_")
+			"Equal": insert_character("=")
+			"Shift+Equal","Kp Add": insert_character("+")
+			"Shift+BracketLeft": insert_character("{")
+			"Shift+BracketRight": insert_character("}")
+			"BackSlash": insert_character("\\")
+			"Shift+BackSlash": insert_character("|")
+			"Semicolon": insert_character(";")
+			"Shift+Semicolon": insert_character(":")
+			"Apostrophe": insert_character("'")
+			"Shift+Apostrophe": insert_character("\"")
+			"Comma": insert_character(",")
+			"Shift+Comma": insert_character("<")
+			"Period","Kp Period": insert_character(".")
+			"Shift+Period": insert_character(">")
+			"Shift+Slash": insert_character("?")
+			"Shift":
+				pass
+			"Backspace","Shift+Backspace":
+				scroll_to_line(get_line_count())
+				_current_line = 0
+				if _current_cursor_pos == 0:
+					if CurrentInputString.right(1) == "\n":
+						remove_paragraph(get_paragraph_count()-1)
+					CurrentInputString = CurrentInputString.left(CurrentInputString.length()-1)
+				elif _current_cursor_pos > 0 && _current_cursor_pos < CurrentInputString.length():
+					if CurrentInputString[CurrentInputString.length() -_current_cursor_pos - 1] == "\n":
+						remove_paragraph(get_paragraph_count()-1)
+					CurrentInputString = CurrentInputString.erase(CurrentInputString.length() -_current_cursor_pos - 1)
+			"Enter","Kp Enter":
+				match CurrentMode:
+					"","Default":
+						append_current_input_string(true)
+					"Edit":
+						append_text("[p][/p]")
+						insert_character("\n")
 			"Left":
-				if cursor_pos < input_string.length():
-					cursor_pos += 1
+				scroll_to_line(get_line_count())
+				_current_line = 0
+				_flash = true
+				if _current_cursor_pos < CurrentInputString.length():
+					_current_cursor_pos += 1
 			"Right":
-				if cursor_pos > 0:
-					cursor_pos -= 1
+				scroll_to_line(get_line_count())
+				_current_line = 0
+				_flash = true
+				if _current_cursor_pos > 0:
+					_current_cursor_pos -= 1
 			"Up":
-				if current_mode == "Default":
-					_cycle_history(true)
+				if CurrentMode == "" or CurrentMode == "Default":
+					append_history()
 			"Down":
-				if current_mode == "Default":
-					_cycle_history(false)
-		_update_display()
+				if CurrentMode == "" or CurrentMode == "Default":
+					append_history(false)
+			"PageUp":
+				scroll_page(false)
+			"PageDown":
+				scroll_page()
+			"Ctrl+S":
+				if CurrentMode == "Edit":
+					_flash = true
+					if match_file_type(current_file_type,CurrentInputString):
+						match_file_type(current_file_type,CurrentInputString,false,true)
+						_just_save = "Success"
+					else:
+						_just_save = "Fail"
+			"Ctrl+X":
+				if CurrentMode == "Edit":
+					_flash = false
+					_current_cursor_pos = 0
+					append_current_input_string()
+					newline()
+					CurrentMode = ""
+					CurrentInputString = ""
+					set_prefix()
+			_: print(event.as_text())
+		CurrentInputString_escaped = CurrentInputString.replace("[", "[lb]").replace("\n", "\u2B92\n")
+		append_current_input_string()
+		_just_enter = false
 
-func _insert_char(char: String) -> void:
-	if cursor_pos == 0:
-		input_string += char
-	else:
-		input_string = input_string.insert(input_string.length() - cursor_pos, char)
-
-func _cycle_history(up: bool) -> void:
-	if history.is_empty():
-		return
-	if up:
-		if history_index == -1:
-			last_input = input_string
-			history_index = history.size() - 1
-		elif history_index > 0:
-			history_index -= 1
-	else:
-		if history_index < history.size() - 1:
-			history_index += 1
+func append_current_input_string(enter:bool=false) -> void:
+	if !_just_enter:
+		remove_paragraph(get_paragraph_count()-1)
+		match CurrentMode:
+			"Edit":
+				for i in CurrentInputString.count("\n"):
+					remove_paragraph(get_paragraph_count()-1)
+	if !enter:
+		if _flash:
+			push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
+			if _current_cursor_pos == 0:
+				match _just_save:
+					"Success":
+						append_text(_PrefixText + CurrentInputString_escaped + "[color=LIME_GREEN]\u2581[/color]")
+					"Fail":
+						append_text(_PrefixText + CurrentInputString_escaped + "[color=CRIMSON]\u2581[/color]")
+					_:
+						append_text(_PrefixText + CurrentInputString_escaped + "\u2581")
+			elif _current_cursor_pos > 0:
+				var minus_num = (3 * CurrentInputString.right(_current_cursor_pos - 1).count("["))\
+						+ (CurrentInputString.right(_current_cursor_pos - 1).count("\n"))
+				var cis_left: String = _PrefixText + CurrentInputString_escaped.left(-_current_cursor_pos - minus_num)
+				match CurrentInputString[-_current_cursor_pos]:
+					"[":
+						append_text(cis_left.trim_suffix("[lb"))
+					"\n":
+						append_text(cis_left.trim_suffix("\u2B92"))
+					_:
+						append_text(cis_left)
+				match _just_save:
+					"Success":
+						push_bgcolor(Color("LIME_GREEN"))
+					"Fail":
+						push_bgcolor(Color("CRIMSON"))
+					_:
+						push_bgcolor(Color("WHITE"))
+				push_color(Color("BLACK"))
+				match CurrentInputString[-_current_cursor_pos]:
+					"[":
+						append_text("[")
+					"\n":
+						append_text("\u2B92\n")
+					_:
+						append_text(CurrentInputString_escaped[-_current_cursor_pos - minus_num])
+				pop()
+				pop()
+				append_text(CurrentInputString_escaped.right(_current_cursor_pos - 1 + minus_num))
+				if CurrentMode == "Edit":
+					append_text(" ")
+			pop()
 		else:
-			history_index = -1
-			input_string = last_input
-			_update_display()
-			return
-	if history_index >= 0:
-		input_string = history[history_index]
-	cursor_pos = 0
-	_update_display()
-
-func _update_display() -> void:
-	var current_display = display_text
-	if current_mode == "Default":
-		current_display += _get_prompt()
-		var display_input = input_string
-		if flash:
-			if cursor_pos == 0:
-				display_input += "_"
-			else:
-				display_input = display_input.insert(input_string.length() - cursor_pos, "[color=WHITE]_[/color]")
-		current_display += display_input
-	text = current_display
-	# Debug: Log display update
-	print("Display updated: ", current_display)
-
-func _get_prompt() -> String:
-	var path = "~" if current_path == "/home" else current_path
-	return "[color=BLUE]" + user_name + "[/color]:" + path + "$ "
-
-func _execute_command() -> void:
-	if input_string.strip_edges() == "":
-		display_text += "\n"
-		_update_display()
-		return
-	history.append(input_string)
-	history_index = -1
-	display_text += _get_prompt() + input_string + "\n"
-	var parts = input_string.split(" ", false)
-	var cmd = parts[0].to_lower()
-	parts.remove_at(0)
-	# Debug: Log command execution
-	print("Executing command: ", cmd, " with args: ", parts)
-	if commands.has(cmd):
-		var output = commands[cmd].callv(parts)
-		# Debug: Log command output
-		print("Command output: ", output)
-		# Append output if it's a string, even if empty
-		if output is String:
-			display_text += output
-			if output != "" and not output.ends_with("\n"):
-				display_text += "\n"
-		else:
-			display_text += "[color=RED]Error: Invalid command output[/color]\n"
+			push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
+			append_text(_PrefixText + CurrentInputString_escaped + " ")
+			pop()
 	else:
-		display_text += "[color=RED]Command not found: " + cmd + "[/color]\n"
-	input_string = ""
-	cursor_pos = 0
-	_update_display()
+		_current_cursor_pos = 0
+		push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
+		append_text(_PrefixText + CurrentInputString_escaped)
+		pop()
+		newline()
+		if CurrentInputString != "":
+			_send_history.append(CurrentInputString)
+		_current_history = -1
+		_last_input = ""
+		process(CurrentInputString)
+		if current_path == "":
+			current_path = "/"
+		set_prefix()
+		if CurrentMode == "" or CurrentMode == "Default":
+			CurrentInputString = ""
+			CurrentInputString_escaped = ""
+		_just_enter = true
+		scroll_to_line(get_line_count())
+		_current_line = 0
 
-func _setup_commands() -> void:
-	commands = {
-		"help": func(_args: Array[String]) -> String:
-			var output = "Available commands:\n"
-			for cmd in commands.keys():
-				output += cmd + "\n"
-			# Debug: Log help output
-			print("Help command output: ", output)
-			return output,
-		"clear": func(_args: Array[String]) -> String:
-			display_text = ""
-			# Debug: Log clear
-			print("Clear command executed")
-			return "",
-		"echo": func(args: Array[String]) -> String:
-			var output = _array_to_string(args, " ")
-			# Debug: Log echo output
-			print("Echo command output: ", output)
-			return output,
-		"pwd": func(_args: Array[String]) -> String:
-			# Debug: Log pwd output
-			print("PWD command output: ", current_path)
-			return current_path,
-		"ls": func(_args: Array[String]) -> String:
-			var dir = _get_dir(current_path)
-			var output = ""
-			if dir is Dictionary:
-				for item in dir.keys():
-					var icon = "📁" if dir[item] is Dictionary else "📄"
-					output += icon + " " + item + "\n"
+func insert_character(character:String) -> void:
+	scroll_to_line(get_line_count())
+	_just_save = ""
+	_current_line = 0
+	if _current_cursor_pos == 0:
+		CurrentInputString += character
+	elif _current_cursor_pos > 0:
+		CurrentInputString = CurrentInputString.insert(CurrentInputString.length() -_current_cursor_pos,character)
+
+func scroll_page(down:bool = true) -> void:
+	if down:
+		if _current_line > 0:
+			_current_line -= 1
+	elif _current_line < get_line_count() - console_size.y:
+		_current_line += 1
+	scroll_to_line(get_line_count() - console_size.y - _current_line)
+
+func append_history(up:bool = true) -> void:
+	scroll_to_line(get_line_count())
+	_current_cursor_pos = 0
+	if _current_history == -1:
+		_last_input = CurrentInputString
+	if _send_history.size() != 0:
+		if up:
+			if _current_history == -1:
+				_current_history = _send_history.size() -1
+			elif _current_history != 0:
+				_current_history -= 1
+		else:
+			if _current_history == -1:
+				pass
+			elif _current_history == _send_history.size() -1:
+				_current_history = -1
+			elif _current_history < _send_history.size() -1:
+				_current_history += 1
+	if _send_history.size() != 0 and _current_history != -1 and _current_history <= _send_history.size() -1:
+		CurrentInputString = _send_history[_current_history]
+	else:
+		_current_history = -1
+		CurrentInputString = _last_input
+
+func set_prefix() -> void:
+	match CurrentMode:
+		"","Default":
+			_PrefixText = "[bgcolor=DODGER_BLUE]" + USER_Name + "[/bgcolor][bgcolor=WEB_GRAY][color=DODGER_BLUE]\u25E3[/color]"\
+				+ return_path_string(current_path) +"[/bgcolor][color=WEB_GRAY]\u25B6[/color]"
+		"Edit":
+			_PrefixText = "[bgcolor=DODGER_BLUE]" + USER_Name + "[/bgcolor][bgcolor=WEB_GRAY][color=DODGER_BLUE]\u25E3[/color]"\
+				+ return_path_string(current_path) +"[/bgcolor][bgcolor=BURLYWOOD][color=WEB_GRAY]\u25B6[/color]"\
+				+ "\U01F4DD" + current_file + "[/bgcolor][color=BURLYWOOD]\u25B6[/color]"
+		_:
+			append_text(tr("error.mode_undefined"))
+			CurrentMode = ""
+func process(command: String) -> void:
+	var parts: PackedStringArray = command.strip_edges().split(" ", false)
+	var cmd: String = parts[0] if parts.size() > 0 else command.strip_edges()
+	var args: Array[String] = []
+	if parts.size() > 1:
+		args.append_array(parts.slice(1))
+	
+	if !commands.keys().has(cmd):
+		push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
+		append_text("[color=RED]" + tr("error.command_not_found") + "[/color] " + cmd)
+		pop()
+		newline()
+		return
+	
+	var commandData = commands[cmd]
+	var expected_arg_count: int = commandData.function.get_argument_count()
+	
+	if expected_arg_count != args.size():
+		push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
+		append_text("[color=RED]" + tr("error.parameter_count_mismatch") + "[/color] " + tr("error.parameter_count_mismatch.expect_got") \
+						% [str(expected_arg_count), args])
+		pop()
+		newline()
+		return
+	
+	commandData.function.callv(args)
+
+func add_command(id: String, function: Callable, functionInstance: Object, helpText: String = "", helpDetail: String = ""):
+	commands[id] = EC_CommandClass.new(id, function, functionInstance, helpText, helpDetail)
+
+func _built_in_command_init():
+	add_command(
+		"man",
+		func(id: String = ""):
+			if id == "":
+				for i in commands:
+					append_text(i + ": " + commands[i].helpText)
+					newline()
+			elif commands.keys().has(id):
+				append_text(commands[id].helpDetail)
 			else:
-				output = "[color=RED]Error: Invalid directory[/color]\n"
-			# Debug: Log ls output
-			print("LS command output: ", output)
-			return output,
-		"cd": func(args: Array[String]) -> String:
-			if args.is_empty():
+				append_text("[color=RED]" + tr("error.command_not_found") + "[/color] " + id)
+			newline(),
+		self,
+		tr("help.man"),
+		tr("help.man.detail")
+	)
+	add_command(
+		"clear",
+		func():
+			clear(),
+		self,
+		tr("help.clear"),
+		tr("help.clear.detail")
+	)
+	add_command(
+		"echo",
+		func(input: String):
+			append_text(input)
+			newline(),
+		self,
+		tr("help.echo"),
+		tr("help.echo.detail")
+	)
+	add_command(
+		"pwd",
+		func():
+			var path_instance = get_path_instance(current_path)
+			if !path_instance.has(null):
+				append_text(current_path)
+			else:
+				append_text(path_instance.get(null))
 				current_path = "/home"
-				# Debug: Log cd
-				print("CD to /home")
-				return ""
-			var new_path = _resolve_path(args[0])
-			var dir = _get_dir(new_path)
-			if dir is Dictionary:
-				current_path = new_path
-				# Debug: Log cd
-				print("CD to ", new_path)
-				return ""
-			# Debug: Log cd error
-			print("CD failed: No such directory: ", args[0])
-			return "[color=RED]No such directory: " + args[0] + "[/color]",
-		"cat": func(args: Array[String]) -> String:
-			if args.is_empty():
-				# Debug: Log cat error
-				print("Cat failed: missing operand")
-				return "[color=RED]cat: missing operand[/color]"
-			var dir = _get_dir(current_path)
-			if dir is Dictionary and dir.has(args[0]) and dir[args[0]] is String:
-				# Debug: Log cat output
-				print("Cat command output: ", dir[args[0]])
-				return dir[args[0]]
-			# Debug: Log cat error
-			print("Cat failed: No such file or not readable: ", args[0])
-			return "[color=RED]No such file or not readable: " + args[0] + "[/color]",
-		"whoami": func(_args: Array[String]) -> String:
-			# Debug: Log whoami output
-			print("Whoami command output: ", user_name)
-			return user_name
-	}
+			newline(),
+		self,
+		tr("help.pwd"),
+		tr("help.pwd.detail")
+	)
+	add_command(
+		"ls",
+		func():
+			var path_instance = get_path_instance(current_path)
+			if !path_instance.has(null):
+				for i in path_instance:
+					var icon = "\uFFFD"
+					if path_instance[i] is String:
+						icon = "\U01F5CE"
+					elif path_instance[i] is Dictionary:
+						icon = "\U01F5C1"
+					append_text(icon + i)
+					newline()
+			else:
+				append_text(path_instance.get(null))
+				current_path = "/home"
+			newline(),
+		self,
+		tr("help.ls"),
+		tr("help.ls.detail")
+	)
+	add_command(
+		"cd",
+		func(path: String):
+			if !get_path_instance(path, true).has(null):
+				pass
+			else:
+				append_text(get_path_instance(path).get(null))
+			newline(),
+		self,
+		tr("help.cd"),
+		tr("help.cd.detail")
+	)
+	add_command(
+		"mkdir",
+		func(folder_name: String):
+			if folder_name.is_valid_filename():
+				var path_instance = get_path_instance(current_path)
+				if !path_instance.has(null):
+					if !path_instance.has(folder_name):
+						path_instance[folder_name] = {}
+					else:
+						append_text("[i]" + folder_name + "[/i] " + tr("error.already_exist"))
+				else:
+					append_text(path_instance.get(null))
+			else:
+				append_text("[color=RED]" + tr("error.invalid_file_name") + "[/color] [i]" + folder_name + "[/i]")
+			newline(),
+		self,
+		tr("help.mkdir"),
+		tr("help.mkdir.detail")
+	)
+	add_command(
+		"touch",
+		func(file_name: String):
+			if file_name.is_valid_filename():
+				var path_instance = get_path_instance(current_path)
+				if !path_instance.has(null):
+					if !path_instance.has(file_name):
+						path_instance[file_name] = ""
+					else:
+						append_text("[i]" + file_name + "[/i] " + tr("error.already_exist"))
+				else:
+					append_text(path_instance.get(null))
+			else:
+				append_text("[color=RED]" + tr("error.invalid_file_name") + "[/color] [i]" + file_name + "[/i]")
+			newline(),
+		self,
+		tr("help.touch"),
+		tr("help.touch.detail")
+	)
+	add_command(
+		"rm",
+		func(file_name: String):
+			var path_instance = get_path_instance(current_path)
+			if !path_instance.has(null):
+				if path_instance.has(file_name):
+					path_instance.erase(file_name)
+				else:
+					append_text("[i]" + file_name + "[/i] " + tr("error.not_exist"))
+			else:
+				append_text(path_instance.get(null))
+			newline(),
+		self,
+		tr("help.rm"),
+		tr("help.rm.detail")
+	)
+	add_command(
+		"mv",
+		func(file_name: String, to_name: String):
+			var path_instance = get_path_instance(current_path)
+			if !path_instance.has(null):
+				if path_instance.has(file_name):
+					if to_name.is_valid_filename():
+						if !path_instance.has(to_name):
+							path_instance[to_name] = path_instance[file_name]
+							path_instance.erase(file_name)
+						else:
+							append_text("[i]" + to_name + "[/i] " + tr("error.already_exist"))
+					else:
+						append_text("[color=RED]" + tr("error.invalid_file_name") + "[/color] [i]" + to_name + "[/i]")
+				else:
+					append_text("[i]" + file_name + "[/i] " + tr("error.not_exist"))
+			else:
+				append_text(path_instance.get(null))
+			newline(),
+		self,
+		tr("help.mv"),
+		tr("help.mv.detail")
+	)
+	add_command(
+		"cp",
+		func(file_name: String, to_name: String):
+			var path_instance = get_path_instance(current_path)
+			if !path_instance.has(null):
+				if path_instance.has(file_name):
+					if to_name.is_valid_filename():
+						if !path_instance.has(to_name):
+							path_instance[to_name] = path_instance[file_name].duplicate(true)
+						else:
+							append_text("[i]" + to_name + "[/i] " + tr("error.already_exist"))
+					else:
+						append_text("[color=RED]" + tr("error.invalid_file_name") + "[/color] [i]" + to_name + "[/i]")
+				else:
+					append_text("[i]" + file_name + "[/i] " + tr("error.not_exist"))
+			else:
+				append_text(path_instance.get(null))
+			newline(),
+		self,
+		tr("help.cp"),
+		tr("help.cp.detail")
+	)
+	add_command(
+		"cat",
+		func(file_name: String):
+			var path_instance = get_path_instance(current_path)
+			if !path_instance.has(null):
+				if path_instance.has(file_name):
+					append_text(str(path_instance[file_name]))
+				else:
+					append_text("[i]" + file_name + "[/i] " + tr("error.not_exist"))
+			else:
+				append_text(path_instance.get(null))
+			newline(),
+		self,
+		tr("help.cat"),
+		tr("help.cat.detail")
+	)
+	add_command(
+		"nano",
+		func(file_name: String):
+			var path_instance = get_path_instance(current_path)
+			if !path_instance.has(null):
+				if path_instance.has(file_name):
+					if path_instance[file_name] is String:
+						current_file_type = "Text"
+						CurrentMode = "Edit"
+						current_file = file_name
+						CurrentInputString = str(path_instance[file_name])
+					else:
+						append_text(tr("error.cant_edit"))
+				else:
+					append_text("[i]" + file_name + "[/i] " + tr("error.not_exist"))
+			else:
+				append_text(path_instance.get(null))
+			newline(),
+		self,
+		tr("help.nano"),
+		tr("help.nano.detail")
+	)
+	add_command(
+		"expr",
+		func(command: String):
+			var expression = Expression.new()
+			var error = expression.parse(command)
+			if error != OK:
+				append_text("[color=RED]" + tr("error.parse") + "[/color] " + expression.get_error_text())
+			else:
+				var result = expression.execute()
+				if not expression.has_execute_failed() and result:
+					append_text(str(result))
+			newline(),
+		self,
+		tr("help.expr"),
+		tr("help.expr.detail")
+	)
 
-func _array_to_string(arr: Array[String], separator: String) -> String:
-	var result = ""
-	for i in range(arr.size()):
-		result += arr[i]
-		if i < arr.size() - 1:
-			result += separator
-	return result
+func return_path_string(path: String) -> String:
+	if current_path == "/home":
+		return "\u2302"
+	else:
+		return current_path
 
-func _resolve_path(path: String) -> String:
-	if path.begins_with("/"):
-		return path
-	var resolved = current_path + "/" + path
-	var parts = resolved.split("/", false)
-	var result: Array[String] = []
-	for part in parts:
-		if part == "..":
-			if not result.is_empty():
-				result.pop_back()
-		elif part != ".":
-			result.append(part)
-	return "/" + _array_to_string(result, "/")
+func get_path_instance(path: String, goto: bool = false) -> Dictionary:
+	if !path.begins_with("/"):
+		path = current_path + "/" + path
+	var current_path_instance = fileDirectory
+	var path_array: PackedStringArray = path.split("/")
+	if path_array.has(".."):
+		while path_array.find("..") != -1:
+			path_array.remove_at(path_array.find("..") - 1)
+			path_array.remove_at(path_array.find(".."))
+	for i in path_array:
+		if i != "":
+			if !current_path_instance.has(i):
+				return {null:"[i]" + path + "[/i] " + tr("error.not_exist")}
+			elif current_path_instance.get(i) is Dictionary:
+				current_path_instance = current_path_instance[i]
+			else:
+				return {null:"[i]" + path + "[/i] " + tr("error.not_valid_directory")}
+	if goto:
+		current_path = ""
+		for i in path_array:
+			if i != "" and i != ".":
+				current_path += "/" + i
+	return current_path_instance
 
-func _get_dir(path: String) -> Variant:
-	var current = file_system
-	var parts = path.split("/", false)
-	for part in parts:
-		if current.has(part) and current[part] is Dictionary:
-			current = current[part]
-		else:
-			# Debug: Log directory failure
-			print("Failed to find directory: ", path, " at part: ", part)
-			return null
-	# Debug: Log directory found
-	print("Directory found: ", path, " contents: ", current)
-	return current
+func match_file_type(type: String = "Text", content: String = "", append_error: bool = false, apply: bool = false, path: Dictionary = get_path_instance(current_path), file: String = current_file) -> bool:
+	match type:
+		"","Text":
+			if apply:
+				path[file] = content
+			return content != ""
+		_:
+			if append_error:
+				append_text(tr("error.unknown_file_type") % [type])
+			return false

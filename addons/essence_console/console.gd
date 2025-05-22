@@ -454,6 +454,41 @@ func _built_in_command_init():
 		tr("help.cd.detail")
 	)
 	add_command(
+	"help",
+	func():
+		append_text("IBM 1974 Terminal")
+		newline()
+		append_text("help: Display a list of all available commands with their descriptions")
+		newline()
+		append_text("clear: Clear the terminal screen")
+		newline()
+		append_text("echo: Print a specified text string to the terminal")
+		newline()
+		append_text("ls: List the contents of the current directory")
+		newline()
+		append_text("cd: Change the current directory to a specified path")
+		newline()
+		append_text("mkdir: Create a new directory with the specified name")
+		newline()
+		append_text("touch: Create a new empty file with the specified name")
+		newline()
+		append_text("rm: Remove a specified file or directory")
+		newline()
+		append_text("mv: Move or rename a file or directory to a new location or name")
+		newline()
+		append_text("cp: Copy a file or directory to a new location")
+		newline()
+		append_text("cat: Display the contents of a specified file")
+		newline()
+		append_text("nano: Edit the contents of a specified text file")
+		newline()
+		append_text("expr: Evaluate a mathematical expression and display the result")
+		newline(),
+	self,
+	"Show list of commands",
+	"Displays all available commands with their descriptions"
+)
+	add_command(
 		"mkdir",
 		func(folder_name: String):
 			if folder_name.is_valid_filename():
@@ -568,6 +603,7 @@ func _built_in_command_init():
 		tr("help.cat"),
 		tr("help.cat.detail")
 	)
+	#
 	add_command(
 		"nano",
 		func(file_name: String):

@@ -71,6 +71,42 @@ func _update_interaction_raycast() -> void:
 			can_interact = true
 			using_computer = result.collider
 
+func insert_disk() -> void:
+	if held_object == null or not can_grab or Global.is_using_computer:
+		return
+	if held_object.is_in_group("disk") and using_computer:
+		var terminal = using_computer.get_node_or_null("SubViewport/Control/Console")
+		if terminal and terminal.has_method("insert_disk"):
+			terminal.insert_disk(held_object_name, held_object)
+			held_object.visible = false
+			var held_version: Node = camera.get_node_or_null(held_object_name + "_Held")
+			var placeholder: Node = camera.get_node_or_null("Placeholder")
+			if held_version:
+				held_version.visible = false
+			if placeholder:
+				placeholder.visible = false
+			held_object = null
+			held_object_name = ""
+			original_material = null
+			original_position = Vector3.ZERO
+			original_rotation = Vector3.ZERO
+
+func return_disk_to_hand(disk_name: String, disk_node: Node) -> void:
+	if disk_node and disk_node.is_in_group("disk"):
+		held_object = disk_node
+		held_object_name = disk_name
+		var mesh: MeshInstance3D = held_object.get_node_or_null("MeshInstance3D")
+		if mesh and mesh is MeshInstance3D:
+			original_material = mesh.get_surface_override_material(0) if mesh.get_surface_override_material(0) else mesh.mesh.surface_get_material(0)
+			mesh.set_surface_override_material(0, highlight_material)
+		held_object.visible = false
+		var held_version: Node = camera.get_node_or_null(held_object_name + "_Held")
+		var placeholder: Node = camera.get_node_or_null("Placeholder")
+		if held_version:
+			held_version.visible = true
+		elif placeholder:
+			placeholder.visible = true
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and not Global.is_using_computer:
 		head.rotate_y(-event.relative.x * SENSITIVITY)
@@ -82,6 +118,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			exit_computer_mode()
 		elif can_interact and using_computer and not held_object:
 			enter_computer_mode()
+		elif held_object != null and held_object.is_in_group("disk") and can_interact and using_computer:
+			insert_disk()
 		elif held_object == null:
 			if can_grab:
 				grab_object()

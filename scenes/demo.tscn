@@ -90,23 +90,23 @@ transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -
 shadow_enabled = true
 
 [node name="GrabArea" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.65015, 0.104591, -2.07672)
+transform = Transform3D(0.999732, 0.023141, 0, -0.023141, 0.999732, 0, 0, 0, 1, 11.4137, 0.104591, 2.53028)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="GrabArea"]
 transform = Transform3D(0.974938, 0, 0, 0, 0.974938, 0, 0, 0, 0.974938, 0, 0, 0)
 shape = SubResource("BoxShape3D_7qr1p")
 
 [node name="Object1" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.65015, 0.104591, -2.07672)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.65618, 1.12055, 2.34001)
 
-[node name="Object1" type="StaticBody3D" parent="Object1" groups=["grabbable"]]
+[node name="Disk1" type="StaticBody3D" parent="Object1" groups=["disk", "grabbable"]]
 transform = Transform3D(0.988729, 0, 0, 0, 0.988729, 0, 0, 0, 0.988729, 0.88739, 0.0230486, 0.00396633)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Object1/Object1"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Object1/Disk1"]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
 shape = SubResource("BoxShape3D_x0xbu")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Object1/Object1"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Object1/Disk1"]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
 mesh = SubResource("BoxMesh_x0xbu")
 
@@ -146,14 +146,14 @@ transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
 mesh = SubResource("BoxMesh_7qr1p")
 
 [node name="ComputerArea" type="Area3D" parent="." groups=["computer"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.13727, 1.39775, -2.46412)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6081, 1.39775, 1.7615)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ComputerArea"]
 transform = Transform3D(0.974938, 0, 0, 0, 0.974938, 0, 0, 0, 0.974938, 0, 0, 0)
 shape = SubResource("BoxShape3D_7qr1p")
 
 [node name="Node3D" parent="." instance=ExtResource("6_x0xbu")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0996895, 1.24592, -2.08052)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.8451, 1.24592, 2.1451)
 
 [node name="ComputerCamera" type="Camera3D" parent="Node3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.453819)

@@ -1,3 +1,5 @@
+
+
 extends RichTextLabel
 # Base
 @export var console_size: Vector2 = Vector2(100,30)
@@ -342,6 +344,22 @@ func set_prefix() -> void:
 		_:
 			append_text(tr("error.mode_undefined"))
 			CurrentMode = ""
+var has_permission: bool = false
+var inserted_disk: String = ""
+
+func insert_disk(disk_name: String) -> void:
+	inserted_disk = disk_name
+	var path_instance = get_path_instance(current_path)
+	if !path_instance.has(null):
+		path_instance[disk_name] = {"data.txt": "Disk content"}
+		append_text("Disk '" + disk_name + "' inserted. Added to current directory.")
+	else:
+		append_text("Error: Cannot access current directory.")
+	newline()
+
+func check_permission() -> bool:
+	return has_permission
+
 func process(command: String) -> void:
 	var parts: PackedStringArray = command.strip_edges().split(" ", false)
 	var cmd: String = parts[0] if parts.size() > 0 else command.strip_edges()
@@ -367,7 +385,15 @@ func process(command: String) -> void:
 		newline()
 		return
 	
+	if cmd in ["mkdir", "touch", "rm", "mv", "cp", "nano"] and not check_permission():
+		push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
+		append_text("[color=RED]Insufficient permissions. Use 'auth' to gain access.[/color]")
+		pop()
+		newline()
+		return
+	
 	commandData.function.callv(args)
+
 
 func add_command(id: String, function: Callable, functionInstance: Object, helpText: String = "", helpDetail: String = ""):
 	commands[id] = EC_CommandClass.new(id, function, functionInstance, helpText, helpDetail)
@@ -454,40 +480,56 @@ func _built_in_command_init():
 		tr("help.cd.detail")
 	)
 	add_command(
-	"help",
-	func():
-		append_text("IBM 1974 Terminal")
-		newline()
-		append_text("help: Display a list of all available commands with their descriptions")
-		newline()
-		append_text("clear: Clear the terminal screen")
-		newline()
-		append_text("echo: Print a specified text string to the terminal")
-		newline()
-		append_text("ls: List the contents of the current directory")
-		newline()
-		append_text("cd: Change the current directory to a specified path")
-		newline()
-		append_text("mkdir: Create a new directory with the specified name")
-		newline()
-		append_text("touch: Create a new empty file with the specified name")
-		newline()
-		append_text("rm: Remove a specified file or directory")
-		newline()
-		append_text("mv: Move or rename a file or directory to a new location or name")
-		newline()
-		append_text("cp: Copy a file or directory to a new location")
-		newline()
-		append_text("cat: Display the contents of a specified file")
-		newline()
-		append_text("nano: Edit the contents of a specified text file")
-		newline()
-		append_text("expr: Evaluate a mathematical expression and display the result")
-		newline(),
-	self,
-	"Show list of commands",
-	"Displays all available commands with their descriptions"
-)
+		"auth",
+		func(password: String):
+			if password == "123":
+				has_permission = true
+				append_text("Permission granted.")
+			else:
+				has_permission = false
+				append_text("[color=RED]Incorrect password.[/color]")
+			newline(),
+		self,
+		"Authenticate to gain write permissions",
+		"Grants write permissions for file system commands with correct password"
+	)
+	add_command(
+		"help",
+		func():
+			append_text("IBM 1974 Terminal")
+			newline()
+			append_text("help: Display a list of all available commands with their descriptions")
+			newline()
+			append_text("clear: Clear the terminal screen")
+			newline()
+			append_text("echo: Print a specified text string to the terminal")
+			newline()
+			append_text("ls: List the contents of the current directory")
+			newline()
+			append_text("cd: Change the current directory to a specified path")
+			newline()
+			append_text("auth: Authenticate to gain write permissions")
+			newline()
+			append_text("mkdir: Create a new directory with the specified name (requires permission)")
+			newline()
+			append_text("touch: Create a new empty file with the specified name (requires permission)")
+			newline()
+			append_text("rm: Remove a specified file or directory (requires permission)")
+			newline()
+			append_text("mv: Move or rename a file or directory to a new location or name (requires permission)")
+			newline()
+			append_text("cp: Copy a file or directory to a new location (requires permission)")
+			newline()
+			append_text("cat: Display the contents of a specified file")
+			newline()
+			append_text("nano: Edit the contents of a specified text file (requires permission)")
+			newline()
+			append_text("expr: Evaluate a mathematical expression and display the result")
+			newline(),
+		self,
+		"Show list of commands",
+		"Displays all available commands with their descriptions"
+	)
 	add_command(
 		"mkdir",
 		func(folder_name: String):
@@ -603,7 +645,6 @@ func _built_in_command_init():
 		tr("help.cat"),
 		tr("help.cat.detail")
 	)
-	#
 	add_command(
 		"nano",
 		func(file_name: String):
@@ -642,7 +683,6 @@ func _built_in_command_init():
 		tr("help.expr"),
 		tr("help.expr.detail")
 	)
-
 func return_path_string(path: String) -> String:
 	if current_path == "/home":
 		return "\u2302"

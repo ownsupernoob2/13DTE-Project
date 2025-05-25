@@ -41,16 +41,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.67939, 0)
 [node name="HoldPosition" type="Marker3D" parent="Head/Camera3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
 
-[node name="Object1_Held" type="StaticBody3D" parent="Head/Camera3D"]
+[node name="Disk1_Held" type="StaticBody3D" parent="Head/Camera3D"]
 visible = false
 collision_layer = 2
 collision_mask = 2
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Head/Camera3D/Object1_Held"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Head/Camera3D/Disk1_Held"]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.398642, -0.274516, -0.885329)
 shape = SubResource("BoxShape3D_6mmc7")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Head/Camera3D/Object1_Held"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Head/Camera3D/Disk1_Held"]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.398642, -0.274516, -0.885329)
 mesh = SubResource("BoxMesh_h3cwf")
 

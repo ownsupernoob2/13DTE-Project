@@ -1,5 +1,3 @@
-
-
 extends RichTextLabel
 # Base
 @export var console_size: Vector2 = Vector2(100,30)
@@ -66,6 +64,10 @@ var current_file_type: String = "Text"
 var _just_save: String = ""
 
 @export var SetLocaleToEng: bool = false
+
+var has_permission: bool = false
+var inserted_disk: String = ""
+var inserted_disk_node: Node = null
 
 func _ready() -> void:
 	if SetLocaleToEng:
@@ -344,18 +346,18 @@ func set_prefix() -> void:
 		_:
 			append_text(tr("error.mode_undefined"))
 			CurrentMode = ""
-var has_permission: bool = false
-var inserted_disk: String = ""
 
-func insert_disk(disk_name: String) -> void:
-	inserted_disk = disk_name
-	var path_instance = get_path_instance(current_path)
-	if !path_instance.has(null):
-		path_instance[disk_name] = {"data.txt": "Disk content"}
-		append_text("Disk '" + disk_name + "' inserted. Added to current directory.")
-	else:
-		append_text("Error: Cannot access current directory.")
-	newline()
+func insert_disk(disk_name: String, disk_node: Node) -> void:
+	if disk_name == "Disk1":
+		inserted_disk = disk_name
+		inserted_disk_node = disk_node
+		var path_instance = get_path_instance(current_path)
+		if !path_instance.has(null):
+			path_instance[disk_name] = {"data.txt": "Contents of Disk1"}
+			append_text("Disk 'Disk1' inserted. Added to current directory.")
+		else:
+			append_text("Error: Cannot access current directory.")
+		newline()
 
 func check_permission() -> bool:
 	return has_permission
@@ -393,7 +395,6 @@ func process(command: String) -> void:
 		return
 	
 	commandData.function.callv(args)
-
 
 func add_command(id: String, function: Callable, functionInstance: Object, helpText: String = "", helpDetail: String = ""):
 	commands[id] = EC_CommandClass.new(id, function, functionInstance, helpText, helpDetail)
@@ -525,6 +526,8 @@ func _built_in_command_init():
 			append_text("nano: Edit the contents of a specified text file (requires permission)")
 			newline()
 			append_text("expr: Evaluate a mathematical expression and display the result")
+			newline()
+			append_text("eject: Eject the inserted disk from the computer")
 			newline(),
 		self,
 		"Show list of commands",
@@ -683,6 +686,36 @@ func _built_in_command_init():
 		tr("help.expr"),
 		tr("help.expr.detail")
 	)
+	add_command(
+		"eject",
+		func():
+			if inserted_disk == "Disk1" and inserted_disk_node:
+				var path_instance = get_path_instance(current_path)
+				if !path_instance.has(null):
+					if path_instance.has(inserted_disk):
+						path_instance.erase(inserted_disk)
+						var player: CharacterBody3D = $Player
+
+						print(player)
+						if player and player.has_method("return_disk_to_hand"):
+							player.return_disk_to_hand(inserted_disk, inserted_disk_node)
+							append_text("Disk 'Disk1' ejected.")
+						else:
+							append_text("[color=RED]Error: Player not found.[/color]")
+						inserted_disk = ""
+						inserted_disk_node = null
+					else:
+						append_text("[color=RED]Error: Disk not found in current directory.[/color]")
+				else:
+					append_text("[color=RED]Error: Cannot access current directory.[/color]")
+			else:
+				append_text("[color=RED]Error: No disk inserted or invalid disk.[/color]")
+			newline(),
+		self,
+		"Eject the inserted disk",
+		"Ejects the inserted disk from the computer, returning it to the player's hand"
+	)
+
 func return_path_string(path: String) -> String:
 	if current_path == "/home":
 		return "\u2302"

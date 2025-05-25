@@ -30,7 +30,6 @@ var original_rotation: Vector3
 var held_object_name: String = ""
 var original_material: Material = null
 var highlight_material: Material = preload("res://assets/materials/highlight_material.tres")
-#var is_using_computer: bool = false
 var active_computer_camera: Camera3D = null
 var can_interact: bool = false
 var using_computer = null
@@ -70,13 +69,14 @@ func _update_interaction_raycast() -> void:
 		if result.collider.is_in_group("computer"):
 			can_interact = true
 			using_computer = result.collider
-
 func insert_disk() -> void:
-	if held_object == null or not can_grab or Global.is_using_computer:
-		return
-	if held_object.is_in_group("disk") and using_computer:
-		var terminal = using_computer.get_node_or_null("SubViewport/Control/Console")
+	#if held_object == null or not can_grab or Global.is_using_computer:
+		#print("no?")
+		#return
+	#
+		var terminal = $"../Node3D/Computer/SubViewport/Control/Console"
 		if terminal and terminal.has_method("insert_disk"):
+			print("yes?")
 			terminal.insert_disk(held_object_name, held_object)
 			held_object.visible = false
 			var held_version: Node = camera.get_node_or_null(held_object_name + "_Held")
@@ -90,9 +90,10 @@ func insert_disk() -> void:
 			original_material = null
 			original_position = Vector3.ZERO
 			original_rotation = Vector3.ZERO
+			#enter_computer_mode()
 
 func return_disk_to_hand(disk_name: String, disk_node: Node) -> void:
-	if disk_node and disk_node.is_in_group("disk"):
+	if disk_name == "Disk1" and disk_node and disk_node.is_in_group("disk"):
 		held_object = disk_node
 		held_object_name = disk_name
 		var mesh: MeshInstance3D = held_object.get_node_or_null("MeshInstance3D")
@@ -106,6 +107,7 @@ func return_disk_to_hand(disk_name: String, disk_node: Node) -> void:
 			held_version.visible = true
 		elif placeholder:
 			placeholder.visible = true
+		exit_computer_mode()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and not Global.is_using_computer:
@@ -116,10 +118,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		if Global.is_using_computer:
 			exit_computer_mode()
-		elif can_interact and using_computer and not held_object:
-			enter_computer_mode()
 		elif held_object != null and held_object.is_in_group("disk") and can_interact and using_computer:
 			insert_disk()
+		elif can_interact and using_computer and not held_object:
+			enter_computer_mode()
 		elif held_object == null:
 			if can_grab:
 				grab_object()

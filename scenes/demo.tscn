@@ -164,3 +164,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.453819)
 [connection signal="body_exited" from="Object2" to="Player" method="_on_grab_area_body_exited"]
 [connection signal="body_entered" from="ComputerArea" to="Player" method="_on_computer_area_body_entered"]
 [connection signal="body_exited" from="ComputerArea" to="Player" method="_on_computer_area_body_exited"]
+
+[editable path="Player"]

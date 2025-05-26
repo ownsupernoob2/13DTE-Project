@@ -44,7 +44,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.67939, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
 
 [node name="Disk1_Held" type="StaticBody3D" parent="Head/Camera3D"]
-transform = Transform3D(1, 0, 0, 0, 1.05803, 0, 0, 0, 1, -0.0925556, 0.128592, 0.428235)
+transform = Transform3D(1, 0, 0, 0, 0.865191, -0.575591, 0, 0.608992, 0.817738, -0.0799404, -0.41923, 0.512101)
 visible = false
 collision_layer = 2
 collision_mask = 2

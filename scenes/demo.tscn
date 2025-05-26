@@ -1,12 +1,22 @@
-[gd_scene load_steps=15 format=3 uid="uid://db2h3t17k37pe"]
+[gd_scene load_steps=25 format=3 uid="uid://db2h3t17k37pe"]
 
 [ext_resource type="Material" uid="uid://bi1h4xe7msjwi" path="res://assets/materials/Pink.tres" id="1_b0nem"]
 [ext_resource type="Material" uid="uid://b122sws3pt7w7" path="res://assets/materials/Red.tres" id="2_x0xbu"]
 [ext_resource type="Material" uid="uid://p2nkjd3ge3qm" path="res://assets/materials/Blue.tres" id="3_7qr1p"]
 [ext_resource type="Material" uid="uid://b4s0xnt1f6lia" path="res://assets/materials/Green.tres" id="4_e66cg"]
+[ext_resource type="PackedScene" uid="uid://di3q5pchjnbdt" path="res://assets/bunker/GLB/floppy_disc_2.glb" id="5_e66cg"]
+[ext_resource type="PackedScene" uid="uid://kafn0q2ks2qa" path="res://assets/bunker/GLB/machinery_1.glb" id="5_h5dly"]
+[ext_resource type="PackedScene" uid="uid://bkgx2a6p8r42u" path="res://assets/bunker/GLB/metal_shelf_2.glb" id="6_nwon6"]
 [ext_resource type="PackedScene" uid="uid://bm2ujr6udikc4" path="res://scenes/components/computer.tscn" id="6_x0xbu"]
 [ext_resource type="PackedScene" uid="uid://c8canob25lyi" path="res://scenes/components/player.tscn" id="7_7qr1p"]
 [ext_resource type="Material" uid="uid://1bju3ha85is4" path="res://assets/materials/highlight_material.tres" id="7_e66cg"]
+[ext_resource type="PackedScene" uid="uid://d2yevku4q473g" path="res://assets/bunker/GLB/military_radio_1.glb" id="11_s3vvr"]
+[ext_resource type="PackedScene" uid="uid://bvquisjd8ci7m" path="res://assets/bunker/GLB/pcb_1.glb" id="12_6cg1f"]
+[ext_resource type="PackedScene" uid="uid://b3dfoy0y6l5av" path="res://assets/bunker/GLB/pipe_2.glb" id="13_7hm0d"]
+[ext_resource type="PackedScene" uid="uid://cd6dxaaw5lie6" path="res://assets/bunker/GLB/sign_1.glb" id="14_l53ft"]
+[ext_resource type="PackedScene" uid="uid://c823eqxmq8rdq" path="res://assets/bunker/GLB/trash_1.glb" id="15_xe7ic"]
+[ext_resource type="PackedScene" uid="uid://fkbwohsof13y" path="res://assets/bunker/GLB/trash_2.glb" id="16_c0h4v"]
+[ext_resource type="PackedScene" uid="uid://dcl2qgr07bjau" path="res://Pod11.glb" id="17_xe7ic"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_5lq0h"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -25,6 +35,7 @@ glow_enabled = true
 size = Vector3(3, 2, 3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_x0xbu"]
+size = Vector3(1, 0.101746, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_x0xbu"]
 
@@ -86,29 +97,35 @@ size = Vector3(52.2363, 0.002, 59.575)
 environment = SubResource("Environment_g2h84")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Map"]
-transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+transform = Transform3D(-0.866024, -0.433016, 0.250001, 0, 0.499998, 0.866026, -0.500003, 0.749999, -0.43301, -0.351453, 12.9855, -0.480213)
 shadow_enabled = true
+sky_mode = 1
+
+[node name="machinery_12" parent="Map" instance=ExtResource("5_h5dly")]
+transform = Transform3D(1, 0, 2.98023e-08, 0, 1, 0, -2.98023e-08, 0, 1, 11.5481, 0.36258, 4.45839)
+
+[node name="metal_shelf_22" parent="Map" instance=ExtResource("6_nwon6")]
+transform = Transform3D(1, 0, 2.98023e-08, 0, 1, 0, -2.98023e-08, 0, 1, 7.90495, -0.341933, 1.55154)
 
 [node name="GrabArea" type="Area3D" parent="."]
-transform = Transform3D(0.999732, 0.023141, 0, -0.023141, 0.999732, 0, 0, 0, 1, 11.4137, 0.104591, 2.53028)
+transform = Transform3D(0.999732, 0.023141, 0, -0.023141, 0.999732, 0, 0, 0, 1, 7.5936, 0.3919, 2.53028)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="GrabArea"]
 transform = Transform3D(0.974938, 0, 0, 0, 0.974938, 0, 0, 0, 0.974938, 0, 0, 0)
 shape = SubResource("BoxShape3D_7qr1p")
 
 [node name="Object1" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.65618, 1.12055, 2.34001)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.83827, 1.16363, 1.78732)
 
 [node name="Disk1" type="StaticBody3D" parent="Object1" groups=["disk", "grabbable"]]
-transform = Transform3D(0.988729, 0, 0, 0, 0.988729, 0, 0, 0, 0.988729, 0.88739, 0.0230486, 0.00396633)
+transform = Transform3D(0.932695, 0, -0.328124, 0, 0.988729, 0, 0.328124, 0, 0.932695, 1.1179, -0.19086, 0.00396633)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Object1/Disk1"]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+transform = Transform3D(0.188665, 0, 0.066373, 0, 0.2, 0, -0.066373, 0, 0.188665, 0, 0.00664663, 0)
 shape = SubResource("BoxShape3D_x0xbu")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Object1/Disk1"]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
-mesh = SubResource("BoxMesh_x0xbu")
+[node name="Disk1" parent="Object1/Disk1" instance=ExtResource("5_e66cg")]
+transform = Transform3D(1, 0, 2.98023e-08, 0, 1, 0, -2.98023e-08, 0, 1, 0, 0, 0)
 
 [node name="Object2" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.80323, 0.209182, 5.92799)
@@ -146,17 +163,38 @@ transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
 mesh = SubResource("BoxMesh_7qr1p")
 
 [node name="ComputerArea" type="Area3D" parent="." groups=["computer"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6081, 1.39775, 1.7615)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.79019, 1.77808, 1.20881)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ComputerArea"]
 transform = Transform3D(0.974938, 0, 0, 0, 0.974938, 0, 0, 0, 0.974938, 0, 0, 0)
 shape = SubResource("BoxShape3D_7qr1p")
 
 [node name="Node3D" parent="." instance=ExtResource("6_x0xbu")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.8451, 1.24592, 2.1451)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.02719, 0.946274, 1.12702)
 
 [node name="ComputerCamera" type="Camera3D" parent="Node3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.453819)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.540068, 0.720221)
+
+[node name="military_radio_12" parent="." instance=ExtResource("11_s3vvr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.08945, 0.989402, 1.79329)
+
+[node name="pcb_12" parent="." instance=ExtResource("12_6cg1f")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.3547, 0.92574, 1.66476)
+
+[node name="pipe_22" parent="." instance=ExtResource("13_7hm0d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.23467, 0.000999855, 2.07016)
+
+[node name="sign_12" parent="." instance=ExtResource("14_l53ft")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.21857, 1.51311, 2.21526)
+
+[node name="trash_12" parent="." instance=ExtResource("15_xe7ic")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.27728, 0.000999928, 1.53427)
+
+[node name="trash_22" parent="." instance=ExtResource("16_c0h4v")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.70394, 0.00100005, 0.765094)
+
+[node name="Pod11" parent="." instance=ExtResource("17_xe7ic")]
+transform = Transform3D(0.499914, 0, 0, 0, 0.499914, 0, 0, 0, 0.499914, -1.10606, 0.000999928, -0.225623)
 
 [connection signal="body_entered" from="GrabArea" to="Player" method="_on_grab_area_body_entered"]
 [connection signal="body_exited" from="GrabArea" to="Player" method="_on_grab_area_body_exited"]
@@ -165,4 +203,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.453819)
 [connection signal="body_entered" from="ComputerArea" to="Player" method="_on_computer_area_body_entered"]
 [connection signal="body_exited" from="ComputerArea" to="Player" method="_on_computer_area_body_exited"]
 
+[editable path="Object1/Disk1/Disk1"]
 [editable path="Player"]

@@ -1,11 +1,9 @@
 [gd_scene load_steps=17 format=4 uid="uid://bm2ujr6udikc4"]
 
-[ext_resource type="Script" path="res://scripts/computer.gd" id="1_okq71"]
+[ext_resource type="Script" uid="uid://d2vkfxd0ifcqn" path="res://scripts/computer.gd" id="1_okq71"]
 [ext_resource type="Shader" uid="uid://dcvr6r1j1k4vq" path="res://resources/shaders/crt_shader.gdshader" id="3_wosnj"]
+[ext_resource type="PackedScene" uid="uid://blo2e5ll5uait" path="res://assets/bunker/GLB/computer_1.glb" id="4_815cu"]
 [ext_resource type="PackedScene" uid="uid://divngw0b3efrf" path="res://addons/essence_console/Console.tscn" id="4_pmsea"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_i5arm"]
-albedo_color = Color(0.334122, 0.334122, 0.334122, 1)
 
 [sub_resource type="QuadMesh" id="QuadMesh_4arys"]
 resource_local_to_scene = true
@@ -104,23 +102,13 @@ ambient_light_source = 3
 glow_enabled = true
 
 [node name="Node3D" type="Node3D" groups=["computer"]]
+transform = Transform3D(0.713579, 0, 0, 0, 0.708985, 0, 0, 0, 0.765617, 0, 0, 0)
 
 [node name="Computer" type="Node3D" parent="." groups=["computer"]]
 script = ExtResource("1_okq71")
 
-[node name="CSGCombiner3D" type="CSGCombiner3D" parent="Computer"]
-
-[node name="CSGBox3D" type="CSGBox3D" parent="Computer/CSGCombiner3D"]
-size = Vector3(0.45, 0.35, 0.4)
-material = SubResource("StandardMaterial3D_i5arm")
-
-[node name="CSGBox3D2" type="CSGBox3D" parent="Computer/CSGCombiner3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.103111)
-operation = 2
-size = Vector3(0.4, 0.3, 0.3)
-
 [node name="Quad" type="MeshInstance3D" parent="Computer"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.213765)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8239e-05, 0.541285, 0.4303)
 visible = false
 mesh = SubResource("QuadMesh_4arys")
 skeleton = NodePath("../..")
@@ -155,7 +143,7 @@ color = Color(0.996078, 1, 1, 1)
 layout_mode = 1
 
 [node name="Screen" type="MeshInstance3D" parent="Computer" groups=["computer"]]
-transform = Transform3D(-0.5, 0, 7.54979e-08, 0, 0.5, 0, -7.54979e-08, 0, -0.5, 0, 0, 0.213525)
+transform = Transform3D(-0.5, 0, 7.54979e-08, 0, 0.5, 0, -7.54979e-08, 0, -0.5, 1.8239e-05, 0.541285, 0.43006)
 mesh = SubResource("ArrayMesh_a8auw")
 skeleton = NodePath("")
 
@@ -164,7 +152,15 @@ skeleton = NodePath("")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Computer/Screen/Area3D"]
 shape = SubResource("ConcavePolygonShape3D_ifh66")
 
+[node name="StaticBody3D2" type="StaticBody3D" parent="Computer" groups=["computer"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6478e-05, 1.08257, 0.433069)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Computer/StaticBody3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.154133, -0.00130313, -0.878636, 0.0707442)
+shape = SubResource("BoxShape3D_fpwu0")
+
 [node name="StaticBody3D" type="StaticBody3D" parent="Computer" groups=["computer"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8239e-05, 0.541285, 0.216535)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Computer/StaticBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.154133, -0.00424194, 0.00140381, 0.214954)
@@ -172,3 +168,7 @@ shape = SubResource("BoxShape3D_fpwu0")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_t3l2h")
+
+[node name="computer_12" parent="." instance=ExtResource("4_815cu")]
+
+[editable path="computer_12"]

@@ -1,10 +1,12 @@
-[gd_scene load_steps=9 format=3 uid="uid://c8canob25lyi"]
+[gd_scene load_steps=10 format=3 uid="uid://c8canob25lyi"]
 
 [ext_resource type="Script" uid="uid://b22uigsk5qpio" path="res://scripts/player.gd" id="1_bukt6"]
+[ext_resource type="PackedScene" uid="uid://di3q5pchjnbdt" path="res://assets/bunker/GLB/floppy_disc_2.glb" id="2_h3cwf"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wydro"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6mmc7"]
+size = Vector3(1, 0.179199, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_h3cwf"]
 
@@ -42,17 +44,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.67939, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
 
 [node name="Disk1_Held" type="StaticBody3D" parent="Head/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1.05803, 0, 0, 0, 1, -0.0925556, 0.128592, 0.428235)
 visible = false
 collision_layer = 2
 collision_mask = 2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Head/Camera3D/Disk1_Held"]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.398642, -0.274516, -0.885329)
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.398642, -0.356596, -0.885329)
 shape = SubResource("BoxShape3D_6mmc7")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Head/Camera3D/Disk1_Held"]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.398642, -0.274516, -0.885329)
-mesh = SubResource("BoxMesh_h3cwf")
+[node name="floppy_disc_22" parent="Head/Camera3D/Disk1_Held" instance=ExtResource("2_h3cwf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.38589, -0.360364, -0.891893)
 
 [node name="Placeholder" type="StaticBody3D" parent="Head/Camera3D"]
 visible = false

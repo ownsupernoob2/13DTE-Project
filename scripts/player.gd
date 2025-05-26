@@ -113,7 +113,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and not Global.is_using_computer:
 		head.rotate_y(-event.relative.x * SENSITIVITY)
 		camera.rotate_x(-event.relative.y * SENSITIVITY)
-		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-40), deg_to_rad(60))
+		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-70), deg_to_rad(60))
 	
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		if Global.is_using_computer:
@@ -221,7 +221,7 @@ func grab_object() -> void:
 		original_position = held_object.global_position
 		original_rotation = held_object.global_rotation
 		
-		var mesh: MeshInstance3D = held_object.get_node_or_null("MeshInstance3D")
+		var mesh: MeshInstance3D = $"../Object1/Disk1/Disk1/floppy_disc_2"
 		if mesh and mesh is MeshInstance3D:
 			original_material = mesh.get_surface_override_material(0) if mesh.get_surface_override_material(0) else mesh.mesh.surface_get_material(0)
 			if can_grab:
@@ -261,7 +261,7 @@ func drop_object() -> void:
 		return
 	
 	for node in get_tree().get_nodes_in_group("grabbable"):
-		var mesh: MeshInstance3D = node.get_node_or_null("MeshInstance3D")
+		var mesh: MeshInstance3D = $"../Object1/Disk1/Disk1/floppy_disc_2"
 		if mesh and mesh is MeshInstance3D:
 			mesh.set_surface_override_material(0, mesh.mesh.surface_get_material(0))
 	

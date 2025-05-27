@@ -1,0 +1,30 @@
+[gd_scene load_steps=6 format=3 uid="uid://bpigsocwrxqni"]
+
+[ext_resource type="PackedScene" uid="uid://dcl2qgr07bjau" path="res://pod/Pod11.glb" id="1_bqs3a"]
+[ext_resource type="Shader" uid="uid://d0imqq8kwdp2l" path="res://pod_11.gdshader" id="2_ewli3"]
+[ext_resource type="ArrayMesh" uid="uid://dw7pqqqln26we" path="res://new_array_mesh2.tres" id="3_75itj"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_75itj"]
+render_priority = 0
+shader = ExtResource("2_ewli3")
+shader_parameter/speed = 1.0
+shader_parameter/noise_scale = 7.0
+shader_parameter/displacement_strength = 0.1
+shader_parameter/color = Vector3(0.2, 0.5, 0.8)
+shader_parameter/metallic = 0.3
+shader_parameter/roughness = 0.5
+
+[sub_resource type="SphereMesh" id="SphereMesh_pjfdm"]
+material = SubResource("ShaderMaterial_75itj")
+radial_segments = 256
+rings = 128
+
+[node name="Pod11" instance=ExtResource("1_bqs3a")]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="0"]
+transform = Transform3D(8.5, 0, 0, 0, 8.5, 0, 0, 0, 8.5, -0.241674, 2.63746, 0.0354023)
+mesh = SubResource("SphereMesh_pjfdm")
+skeleton = NodePath("")
+
+[node name="Glass" parent="." index="1"]
+mesh = ExtResource("3_75itj")

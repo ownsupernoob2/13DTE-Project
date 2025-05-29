@@ -262,7 +262,7 @@ light_energy = 1.646
 light_indirect_energy = 1.646
 light_volumetric_fog_energy = 1.808
 shadow_enabled = true
-omni_attenuation = -1.72
+omni_attenuation = 0.1
 
 [node name="lamp_02" parent="cool" instance=ExtResource("23_f1hw0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.70563, 3.8503, -13.2508)

@@ -4,7 +4,6 @@
 resource_name = "Material"
 transparency = 1
 blend_mode = 3
-albedo_color = Color(0.962083, 0.887776, 0.875647, 1)
 metallic = 1.0
 roughness = 0.5
 

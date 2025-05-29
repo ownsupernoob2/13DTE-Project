@@ -694,7 +694,7 @@ func _built_in_command_init():
 				if !path_instance.has(null):
 					if path_instance.has(inserted_disk):
 						path_instance.erase(inserted_disk)
-						var player: CharacterBody3D = $"../../Player"
+						var player: CharacterBody3D = $"Player"
 
 						print(player)
 						if player and player.has_method("return_disk_to_hand"):

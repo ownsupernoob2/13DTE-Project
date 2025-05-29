@@ -1,7 +1,7 @@
 [gd_resource type="FastNoiseLite" format=3 uid="uid://cnve4sjd8v7w3"]
 
 [resource]
-frequency = 0.0867
+frequency = 0.0059
 offset = Vector3(297.87, 0, 0)
 fractal_octaves = 1
 domain_warp_enabled = true

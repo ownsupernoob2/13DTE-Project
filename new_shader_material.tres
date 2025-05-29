@@ -8,16 +8,17 @@ invert = true
 in_3d_space = true
 generate_mipmaps = false
 seamless = true
+seamless_blend_skirt = 1.0
 noise = ExtResource("2_cabul")
 
 [resource]
 render_priority = 0
 shader = ExtResource("1_50bgh")
-shader_parameter/noise_scale = 29.649
-shader_parameter/animation_speed = 0.056
-shader_parameter/transparency_strength = 0.53
+shader_parameter/noise_scale = 19.504
+shader_parameter/animation_speed = 0.013
+shader_parameter/transparency_strength = 0.897
 shader_parameter/color = Color(2.76752e-07, 0.24841, 0.205981, 1)
-shader_parameter/wobble_strength = 0.0
-shader_parameter/wobble_speed = 0.254
-shader_parameter/wobble_scale = 1.758
+shader_parameter/wobble_strength = 0.028
+shader_parameter/wobble_speed = 0.016
+shader_parameter/wobble_scale = 0.1
 shader_parameter/noise_texture = SubResource("NoiseTexture2D_75itj")

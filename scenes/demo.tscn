@@ -271,7 +271,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.70563, 3.8503, -13.2508)
 transform = Transform3D(0.769, 0, 0, 0, 1.3, 0, 0, 0, 0.769, -5.1304, 0.00229933, -17.1382)
 
 [node name="wall_1_plain7" parent="cool" instance=ExtResource("20_b63qt")]
-transform = Transform3D(0.391279, 0, 0, 0, 1.16391, 0, 0, 0, 0.769, -2.88754, 0.0990864, -17.1382)
+transform = Transform3D(0.391279, 0, 0, 0, 1.16391, 0, 0, 0, 0.769, -2.88754, 2.34306, -17.1382)
 
 [node name="wall_1_plain8" parent="cool" instance=ExtResource("20_b63qt")]
 transform = Transform3D(0.769, 0, 0, 0, 1.3, 0, 0, 0, 0.769, -0.689076, 0.0030246, -17.1401)

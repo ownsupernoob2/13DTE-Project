@@ -348,17 +348,53 @@ func set_prefix() -> void:
 			CurrentMode = ""
 
 func insert_disk(disk_name: String, disk_node: Node) -> void:
-	if disk_name == "Disk1":
-		inserted_disk = disk_name
-		inserted_disk_node = disk_node
-		var path_instance = get_path_instance(current_path)
-		if !path_instance.has(null):
-			path_instance[disk_name] = {"data.txt": "Contents of Disk1"}
-			append_text("Disk 'Disk1' inserted. Added to current directory.")
-		else:
-			append_text("Error: Cannot access current directory.")
+	if disk_name != "Disk1":
+		append_text("[color=RED]Error: Invalid disk name.[/color]")
+		newline()
+		return
+
+	# Reference the FakeDisk node in the scene (adjust path as needed)
+	var fake_disk = $"../../../../AnimationPlayer/FakeDisk"
+	if not fake_disk:
+		append_text("[color=RED]Error: FakeDisk node not found.[/color]")
+		newline()
+		return
+
+	# Check for AnimationPlayer on FakeDisk or its parent
+	var animation_player = $"../../../../AnimationPlayer"
+	if not animation_player:
+		animation_player = fake_disk.get_parent().get_node_or_null("AnimationPlayer")
+	
+	if animation_player and animation_player.has_animation("insert"):
+		# Make FakeDisk visible if hidden
+		if fake_disk:
+			fake_disk.visible = true
+		# Play the disk insertion animation
+		animation_player.play("insert")
+		# Wait for the animation to finish
+		await animation_player.animation_finished
+	else:
+		append_text("[color=YELLOW]Warning: No insertion animation found, proceeding with insertion.[/color]")
 		newline()
 
+	# Update the file system
+	inserted_disk = disk_name
+	inserted_disk_node = disk_node # Store original disk_node for eject
+	var path_instance = get_path_instance(current_path)
+	if !path_instance.has(null):
+		if !path_instance.has(disk_name):
+			path_instance[disk_name] = {"data.txt": "Contents of Disk1"}
+			append_text("Disk 'Disk1' inserted successfully.")
+		else:
+			append_text("[color=YELLOW]Warning: Disk already exists in directory.[/color]")
+	else:
+		append_text("[color=RED]Error: Cannot access current directory.[/color]")
+	newline()
+
+	# Hide the disk node after insertion (optional, depending on your animation)
+	if disk_node is Node3D:
+		disk_node.visible = false
+		
 func check_permission() -> bool:
 	return has_permission
 
@@ -687,34 +723,50 @@ func _built_in_command_init():
 		tr("help.expr.detail")
 	)
 	add_command(
-		"eject",
-		func():
-			if inserted_disk == "Disk1" and inserted_disk_node:
-				var path_instance = get_path_instance(current_path)
-				if !path_instance.has(null):
-					if path_instance.has(inserted_disk):
-						path_instance.erase(inserted_disk)
-						var player: CharacterBody3D = $"Player"
+	"eject",
+	func():
+		if inserted_disk == "Disk1" and inserted_disk_node:
+			var path_instance = get_path_instance(current_path)
+			if !path_instance.has(null):
+				if path_instance.has(inserted_disk):
+					# Reference the FakeDisk node (adjust path as needed)
+					var fake_disk =  $"../../../../AnimationPlayer/FakeDisk"
+					if not fake_disk:
+						append_text("[color=RED]Error: FakeDisk node not found.[/color]")
+						newline()
+						return
 
-						print(player)
-						if player and player.has_method("return_disk_to_hand"):
-							player.return_disk_to_hand(inserted_disk, inserted_disk_node)
-							append_text("Disk 'Disk1' ejected.")
-						else:
-							append_text("[color=RED]Error: Player not found.[/color]")
-						inserted_disk = ""
-						inserted_disk_node = null
+					# Check for AnimationPlayer
+					var animation_player = $"../../../../AnimationPlayer"
+					if not animation_player:
+						animation_player = fake_disk.get_parent().get_node_or_null("AnimationPlayer")
+
+					if animation_player and animation_player.has_animation("disk_eject"):
+						animation_player.play("disk_eject")
+						await animation_player.animation_finished
+						# Hide FakeDisk after ejection
+						if fake_disk:
+							fake_disk.visible = false
 					else:
-						append_text("[color=RED]Error: Disk not found in current directory.[/color]")
+						append_text("[color=YELLOW]Warning: No ejection animation found, proceeding with ejection.[/color]")
+						newline()
+
+					# Remove disk from file system
+					path_instance.erase(inserted_disk)
+					append_text("Disk 'Disk1' ejected successfully.")
+					inserted_disk = ""
+					inserted_disk_node = null
 				else:
-					append_text("[color=RED]Error: Cannot access current directory.[/color]")
+					append_text("[color=RED]Error: Disk not found in current directory.[/color]")
 			else:
-				append_text("[color=RED]Error: No disk inserted or invalid disk.[/color]")
-			newline(),
-		self,
-		"Eject the inserted disk",
-		"Ejects the inserted disk from the computer, returning it to the player's hand"
-	)
+				append_text("[color=RED]Error: Cannot access current directory.[/color]")
+		else:
+			append_text("[color=RED]Error: No disk inserted or invalid disk.[/color]")
+		newline(),
+	self,
+	"Eject the inserted disk",
+	"Ejects the inserted disk from the computer, hiding the simulated disk"
+)
 
 func return_path_string(path: String) -> String:
 	if current_path == "/home":

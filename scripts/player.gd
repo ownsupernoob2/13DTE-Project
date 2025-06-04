@@ -69,33 +69,33 @@ func _update_interaction_raycast() -> void:
 		if result.collider.is_in_group("computer"):
 			can_interact = true
 			using_computer = result.collider
+
 func insert_disk() -> void:
-	#if held_object == null or not can_grab or Global.is_using_computer:
-		#print("no?")
-		#return
-	#
-		var terminal = $"../Node3D/Computer/SubViewport/Control/Console"
-		if terminal and terminal.has_method("insert_disk"):
-			print("yes?")
-			terminal.insert_disk(held_object_name, held_object)
-			held_object.visible = false
-			var held_version: Node = camera.get_node_or_null(held_object_name + "_Held")
-			var placeholder: Node = camera.get_node_or_null("Placeholder")
-			if held_version:
-				held_version.visible = false
-			if placeholder:
-				placeholder.visible = false
-			held_object = null
-			held_object_name = ""
-			original_material = null
-			original_position = Vector3.ZERO
-			original_rotation = Vector3.ZERO
-			#enter_computer_mode()
+	if held_object == null or not can_grab or Global.is_using_computer:
+		return
+	var terminal = $"../Computer/Computer/SubViewport/Control/Console"
+	if terminal and terminal.has_method("insert_disk"):
+		print("Inserting disk: ", held_object_name)
+		terminal.insert_disk(held_object_name, held_object)
+		held_object.visible = false
+		held_object.remove_from_group("grabbable") # Prevent grabbing while inserted
+		var held_version: Node = camera.get_node_or_null(held_object_name + "_Held")
+		var placeholder: Node = camera.get_node_or_null("Placeholder")
+		if held_version:
+			held_version.visible = false
+		if placeholder:
+			placeholder.visible = false
+		held_object = null
+		held_object_name = ""
+		original_material = null
+		original_position = Vector3.ZERO
+		original_rotation = Vector3.ZERO
 
 func return_disk_to_hand(disk_name: String, disk_node: Node) -> void:
 	if disk_name == "Disk1" and disk_node and disk_node.is_in_group("disk"):
 		held_object = disk_node
 		held_object_name = disk_name
+		held_object.add_to_group("grabbable") # Restore grabbable state
 		var mesh: MeshInstance3D = held_object.get_node_or_null("MeshInstance3D")
 		if mesh and mesh is MeshInstance3D:
 			original_material = mesh.get_surface_override_material(0) if mesh.get_surface_override_material(0) else mesh.mesh.surface_get_material(0)
@@ -135,13 +135,13 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func enter_computer_mode() -> void:
 	if using_computer and not Global.is_using_computer:
-		active_computer_camera = $"../Node3D/ComputerCamera"
+		active_computer_camera = $"../Computer/ComputerCamera"
 		if active_computer_camera and active_computer_camera is Camera3D:
 			Global.is_using_computer = true
 			player_camera.current = false
 			active_computer_camera.current = true
 			velocity = Vector3.ZERO
-			var terminal = $"../Node3D/Computer/SubViewport/Control/Console"
+			var terminal = $"../Computer/Computer/SubViewport/Control/Console"
 			if terminal and terminal.has_method("power_on"):
 				terminal.power_on()
 			if cursor1:

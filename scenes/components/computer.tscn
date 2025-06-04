@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=4 uid="uid://bm2ujr6udikc4"]
+[gd_scene load_steps=25 format=4 uid="uid://bm2ujr6udikc4"]
 
 [ext_resource type="Script" uid="uid://d2vkfxd0ifcqn" path="res://scripts/computer.gd" id="1_okq71"]
 [ext_resource type="Shader" uid="uid://dcvr6r1j1k4vq" path="res://resources/shaders/crt_shader.gdshader" id="3_wosnj"]
@@ -90,44 +90,6 @@ data = PackedVector3Array(0.2406, -0.3, 0.0026, 0.3997, 0.3, 0.025, 0.2406, 0.3,
 [sub_resource type="BoxShape3D" id="BoxShape3D_fpwu0"]
 size = Vector3(0.447693, 0.369019, 0.440979)
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_okq71"]
-
-[sub_resource type="Sky" id="Sky_wosnj"]
-sky_material = SubResource("ProceduralSkyMaterial_okq71")
-
-[sub_resource type="Environment" id="Environment_t3l2h"]
-background_mode = 2
-background_energy_multiplier = 1.02
-sky = SubResource("Sky_wosnj")
-ambient_light_source = 3
-glow_enabled = true
-
-[sub_resource type="Animation" id="Animation_wdkyh"]
-resource_name = "insert"
-tracks/0/type = "position_3d"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("AnimationPlayer/FakeDisk")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0.266667, 1, 0.109248, 0.17073, 0.466787, 1, 1, 0.109248, 0.17073, 0.32822)
-
-[sub_resource type="Animation" id="Animation_6ukor"]
-length = 0.001
-tracks/0/type = "position_3d"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("AnimationPlayer/FakeDisk")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, 0.109248, 0.17073, 0.335843)
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_uu6qv"]
-_data = {
-&"RESET": SubResource("Animation_6ukor"),
-&"insert": SubResource("Animation_wdkyh")
-}
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_efktp"]
 resource_name = "floppy_disc_2"
 cull_mode = 2
@@ -159,7 +121,7 @@ _surfaces = [{
 }]
 blend_shape_mode = 0
 
-[sub_resource type="ArrayMesh" id="ArrayMesh_4g1w0"]
+[sub_resource type="ArrayMesh" id="ArrayMesh_815cu"]
 resource_name = "floppy_disc_2_floppy_disc_2"
 _surfaces = [{
 "aabb": AABB(-0.0792, -0.081, -0.0108, 0.1584, 0.1602, 0.0108),
@@ -189,6 +151,70 @@ _surfaces = [{
 }]
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_mlkvs")
+
+[sub_resource type="Animation" id="Animation_6ukor"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Computer/FakeDisk:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0.153099, 0.240809, 0.403252)]
+}
+
+[sub_resource type="Animation" id="Animation_wdkyh"]
+resource_name = "insert"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Computer/FakeDisk:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.566667, 0.733333),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0.153099, 0.240809, 0.821494), Vector3(0.153099, 0.240809, 0.552539), Vector3(0.153099, 0.240809, 0.460022)]
+}
+
+[sub_resource type="Animation" id="Animation_815cu"]
+resource_name = "eject"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Computer/FakeDisk:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0.153099, 0.240809, 0.450336), Vector3(0.153099, 0.240809, 0.602152)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_uu6qv"]
+_data = {
+&"RESET": SubResource("Animation_6ukor"),
+&"eject": SubResource("Animation_815cu"),
+&"insert": SubResource("Animation_wdkyh")
+}
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_okq71"]
+
+[sub_resource type="Sky" id="Sky_wosnj"]
+sky_material = SubResource("ProceduralSkyMaterial_okq71")
+
+[sub_resource type="Environment" id="Environment_t3l2h"]
+background_mode = 2
+background_energy_multiplier = 1.02
+sky = SubResource("Sky_wosnj")
+ambient_light_source = 3
+glow_enabled = true
 
 [node name="Node3D" type="Node3D" groups=["computer"]]
 transform = Transform3D(0.713579, 0, 0, 0, 0.708985, 0, 0, 0, 0.765617, 0, 0, 0)
@@ -255,23 +281,21 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8239e-05, 0.541285, 0.21653
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.154133, -0.00424194, 0.00140381, 0.214954)
 shape = SubResource("BoxShape3D_fpwu0")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_t3l2h")
+[node name="FakeDisk" type="MeshInstance3D" parent="Computer"]
+transform = Transform3D(1.00002, -0.0143136, 6.25721e-10, 0, -4.37077e-08, -1, 0.0143166, 0.999813, -4.37069e-08, 0.153099, 0.240809, 0.403252)
+mesh = SubResource("ArrayMesh_815cu")
+skeleton = NodePath("")
 
-[node name="computer_12" parent="." instance=ExtResource("4_815cu")]
-
-[node name="computer_1" parent="computer_12" index="0"]
-visible = false
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Computer"]
+root_node = NodePath("../..")
 libraries = {
 &"": SubResource("AnimationLibrary_uu6qv")
 }
 autoplay = "insert"
 
-[node name="FakeDisk" type="MeshInstance3D" parent="AnimationPlayer"]
-transform = Transform3D(0.713592, -0.0163412, 0, 0, 0, -0.708985, 0.010961, 0.765352, 0, 0.109248, 0.17073, 0.335843)
-mesh = SubResource("ArrayMesh_4g1w0")
-skeleton = NodePath("")
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_t3l2h")
+
+[node name="computer_12" parent="." instance=ExtResource("4_815cu")]
 
 [editable path="computer_12"]

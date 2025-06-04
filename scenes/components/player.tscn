@@ -28,7 +28,7 @@ gradient = SubResource("Gradient_6mmc7")
 fill = 1
 fill_from = Vector2(0.490826, 0.477064)
 
-[node name="Player" type="CharacterBody3D"]
+[node name="Player" type="CharacterBody3D" groups=["player"]]
 script = ExtResource("1_bukt6")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

@@ -78,6 +78,9 @@ func _ready() -> void:
 	text = ""
 	_flash_timer.set_one_shot(true)
 	_flash_timer.start(1)
+	var fake_disk = $"../../../FakeDisk"
+	if fake_disk:
+		fake_disk.visible = false
 
 func _process(delta: float) -> void:
 	set_prefix()
@@ -348,8 +351,8 @@ func set_prefix() -> void:
 			CurrentMode = ""
 
 func insert_disk(disk_name: String, disk_node: Node) -> void:
-	if disk_name != "Disk1":
-		append_text("[color=RED]Error: Invalid disk name.[/color]")
+	if not disk_node.is_in_group("disks"):
+		append_text("[color=RED]Error: Invalid disk.[/color]")
 		newline()
 		return
 
@@ -383,8 +386,8 @@ func insert_disk(disk_name: String, disk_node: Node) -> void:
 	var path_instance = get_path_instance(current_path)
 	if !path_instance.has(null):
 		if !path_instance.has(disk_name):
-			path_instance[disk_name] = {"data.txt": "Contents of Disk1"}
-			append_text("Disk 'Disk1' inserted successfully.")
+			path_instance[disk_name] = {"data.txt": "Contents of " + disk_name}
+			append_text("Disk '" + disk_name + "' inserted successfully.")
 		else:
 			append_text("[color=YELLOW]Warning: Disk already exists in directory.[/color]")
 	else:
@@ -394,7 +397,7 @@ func insert_disk(disk_name: String, disk_node: Node) -> void:
 	# Hide the disk node after insertion (optional, depending on your animation)
 	if disk_node is Node3D:
 		disk_node.visible = false
-		
+
 func check_permission() -> bool:
 	return has_permission
 
@@ -519,7 +522,7 @@ func _built_in_command_init():
 	add_command(
 		"auth",
 		func(password: String):
-			if password == "123":
+			if password == "goodboy":
 				has_permission = true
 				append_text("Permission granted.")
 			else:
@@ -545,23 +548,7 @@ func _built_in_command_init():
 			newline()
 			append_text("cd: Change the current directory to a specified path")
 			newline()
-			append_text("auth: Authenticate to gain write permissions")
-			newline()
-			append_text("mkdir: Create a new directory with the specified name (requires permission)")
-			newline()
-			append_text("touch: Create a new empty file with the specified name (requires permission)")
-			newline()
-			append_text("rm: Remove a specified file or directory (requires permission)")
-			newline()
-			append_text("mv: Move or rename a file or directory to a new location or name (requires permission)")
-			newline()
-			append_text("cp: Copy a file or directory to a new location (requires permission)")
-			newline()
 			append_text("cat: Display the contents of a specified file")
-			newline()
-			append_text("nano: Edit the contents of a specified text file (requires permission)")
-			newline()
-			append_text("expr: Evaluate a mathematical expression and display the result")
 			newline()
 			append_text("eject: Eject the inserted disk from the computer")
 			newline(),
@@ -725,8 +712,8 @@ func _built_in_command_init():
 	add_command(
 		"eject",
 		func():
-			if inserted_disk != "Disk1" or not inserted_disk_node:
-				append_text("[color=RED]Error: No disk inserted or invalid disk.[/color]")
+			if inserted_disk == "" or not inserted_disk_node:
+				append_text("[color=RED]Error: No disk inserted.[/color]")
 				newline() 
 				return
 
@@ -752,6 +739,8 @@ func _built_in_command_init():
 
 			var fake_disk = $"../../../FakeDisk"
 			if not fake_disk:
+				append_text("[color=RED]Error: FakeDisk node not found.[/color]")
+				newline()
 				return
 			print("FakeDisk found, initial visible: ", fake_disk.visible) 
 
@@ -759,6 +748,8 @@ func _built_in_command_init():
 			if not animation_player:
 				animation_player = fake_disk.get_parent().get_node_or_null("AnimationPlayer")
 			if not animation_player:
+				append_text("[color=RED]Error: AnimationPlayer not found.[/color]")
+				newline()
 				return
 			print("AnimationPlayer found: ", animation_player)
 
@@ -769,9 +760,12 @@ func _built_in_command_init():
 				await animation_player.animation_finished
 				fake_disk.visible = false
 				print("Eject animation finished, FakeDisk hidden")
+			else:
+				append_text("[color=YELLOW]Warning: No ejection animation found, proceeding with ejection.[/color]")
+				newline()
 
 			path_instance.erase(inserted_disk)
-			append_text("Disk 'Disk1' ejected successfully.")
+			append_text("Disk '" + inserted_disk + "' ejected successfully.")
 			newline()
 
 			if player and player.has_method("return_disk_to_hand"):

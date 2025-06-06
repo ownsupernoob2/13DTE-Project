@@ -19,8 +19,8 @@ var gravity: float = 9.8
 @onready var camera: Camera3D = $Head/Camera3D
 @onready var player_camera: Camera3D = camera
 
-@onready var cursor1: TextureRect = $Cursor1 
-@onready var cursor2: TextureRect = $Cursor2 
+@onready var cursor1: TextureRect = $CanvasLayer/Cursor1
+@onready var cursor2: TextureRect = $CanvasLayer/Cursor2
 
 var can_grab: bool = false
 var current_grab_area: Node = null
@@ -92,11 +92,11 @@ func insert_disk() -> void:
 		original_rotation = Vector3.ZERO
 
 func return_disk_to_hand(disk_name: String, disk_node: Node) -> void:
-	if disk_name == "Disk1" and disk_node and disk_node.is_in_group("disk"):
+	if disk_node.is_in_group("disks"):
 		held_object = disk_node
 		held_object_name = disk_name
 		held_object.add_to_group("grabbable") # Restore grabbable state
-		var mesh: MeshInstance3D = held_object.get_node_or_null("MeshInstance3D")
+		var mesh: MeshInstance3D = held_object.get_node_or_null("floppy_disc_2")
 		if mesh and mesh is MeshInstance3D:
 			original_material = mesh.get_surface_override_material(0) if mesh.get_surface_override_material(0) else mesh.mesh.surface_get_material(0)
 			mesh.set_surface_override_material(0, highlight_material)
@@ -118,7 +118,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		if Global.is_using_computer:
 			exit_computer_mode()
-		elif held_object != null and held_object.is_in_group("disk") and can_interact and using_computer:
+		elif held_object != null and held_object.is_in_group("disks") and can_interact and using_computer:
 			insert_disk()
 		elif can_interact and using_computer and not held_object:
 			enter_computer_mode()
@@ -221,13 +221,12 @@ func grab_object() -> void:
 		original_position = held_object.global_position
 		original_rotation = held_object.global_rotation
 		
-		var mesh: MeshInstance3D = $"../Object1/Disk1/Disk1/floppy_disc_2"
+		var mesh: MeshInstance3D = held_object.get_node_or_null("floppy_disc_2")
 		if mesh and mesh is MeshInstance3D:
 			original_material = mesh.get_surface_override_material(0) if mesh.get_surface_override_material(0) else mesh.mesh.surface_get_material(0)
-			if can_grab:
-				mesh.set_surface_override_material(0, highlight_material)
+			mesh.set_surface_override_material(0, highlight_material)
 		
-		held_object.visible = can_grab
+		held_object.visible = false # Hide the original object
 		
 		var held_version: Node = camera.get_node_or_null(held_object_name + "_Held")
 		var placeholder: Node = camera.get_node_or_null("Placeholder")
@@ -260,12 +259,13 @@ func drop_object() -> void:
 	if not can_drop:
 		return
 	
-	for node in get_tree().get_nodes_in_group("grabbable"):
-		var mesh: MeshInstance3D = $"../Object1/Disk1/Disk1/floppy_disc_2"
-		if mesh and mesh is MeshInstance3D:
-			mesh.set_surface_override_material(0, mesh.mesh.surface_get_material(0))
+	var mesh: MeshInstance3D = held_object.get_node_or_null("floppy_disc_2")
+	if mesh and mesh is MeshInstance3D:
+		mesh.set_surface_override_material(0, original_material if original_material else mesh.mesh.surface_get_material(0))
 	
 	held_object.visible = true
+	held_object.global_position = original_position
+	held_object.global_rotation = original_rotation
 	
 	var held_version: Node = camera.get_node_or_null(held_object_name + "_Held")
 	var placeholder: Node = camera.get_node_or_null("Placeholder")
@@ -275,12 +275,11 @@ func drop_object() -> void:
 	if placeholder:
 		placeholder.visible = false
 	
-	held_object.global_position = original_position
-	held_object.global_rotation = original_rotation
-	
 	held_object = null
 	held_object_name = ""
 	original_material = null
+	original_position = Vector3.ZERO
+	original_rotation = Vector3.ZERO
 
 func _on_grab_area_body_entered(body: Node) -> void:
 	if body == self:

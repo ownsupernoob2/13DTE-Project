@@ -167,21 +167,6 @@ tracks/0/keys = {
 "values": [Vector3(0.153099, 0.240809, 0.403252)]
 }
 
-[sub_resource type="Animation" id="Animation_wdkyh"]
-resource_name = "insert"
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Computer/FakeDisk:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.566667, 0.733333),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector3(0.153099, 0.240809, 0.821494), Vector3(0.153099, 0.240809, 0.552539), Vector3(0.153099, 0.240809, 0.460022)]
-}
-
 [sub_resource type="Animation" id="Animation_815cu"]
 resource_name = "eject"
 tracks/0/type = "value"
@@ -195,6 +180,21 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
 "values": [Vector3(0.153099, 0.240809, 0.450336), Vector3(0.153099, 0.240809, 0.602152)]
+}
+
+[sub_resource type="Animation" id="Animation_wdkyh"]
+resource_name = "insert"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Computer/FakeDisk:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.566667, 0.733333),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0.153099, 0.240809, 0.821494), Vector3(0.153099, 0.240809, 0.552539), Vector3(0.153099, 0.240809, 0.460022)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_uu6qv"]

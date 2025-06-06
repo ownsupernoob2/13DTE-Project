@@ -3,12 +3,15 @@
 [ext_resource type="Script" uid="uid://b22uigsk5qpio" path="res://scripts/player.gd" id="1_bukt6"]
 [ext_resource type="PackedScene" uid="uid://di3q5pchjnbdt" path="res://assets/bunker/GLB/floppy_disc_2.glb" id="2_h3cwf"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wydro"]
+[sub_resource type="Gradient" id="Gradient_6mmc7"]
+offsets = PackedFloat32Array(0.012987, 0.168831, 0.233766)
+colors = PackedColorArray(0.801294, 0.79536, 0.788543, 1, 0.930475, 0.64475, 0.71653, 1, 0, 0, 0, 0)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_6mmc7"]
-size = Vector3(1, 0.179199, 1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_h3cwf"]
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_h3cwf"]
+gradient = SubResource("Gradient_6mmc7")
+fill = 1
+fill_from = Vector2(0.490826, 0.477064)
+fill_to = Vector2(0.662393, 0.311966)
 
 [sub_resource type="Gradient" id="Gradient_b0nem"]
 offsets = PackedFloat32Array(0.012987, 0.188312, 0.233766)
@@ -18,18 +21,50 @@ colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0)
 gradient = SubResource("Gradient_b0nem")
 fill = 1
 fill_from = Vector2(0.490826, 0.477064)
+fill_to = Vector2(0.675214, 0.350427)
 
-[sub_resource type="Gradient" id="Gradient_6mmc7"]
-offsets = PackedFloat32Array(0.012987, 0.168831, 0.233766)
-colors = PackedColorArray(0.801294, 0.79536, 0.788543, 1, 0.752889, 0.734938, 0.708882, 1, 0, 0, 0, 0)
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wydro"]
 
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_h3cwf"]
-gradient = SubResource("Gradient_6mmc7")
-fill = 1
-fill_from = Vector2(0.490826, 0.477064)
+[sub_resource type="BoxShape3D" id="BoxShape3D_6mmc7"]
+size = Vector3(1, 0.179199, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_h3cwf"]
 
 [node name="Player" type="CharacterBody3D" groups=["player"]]
 script = ExtResource("1_bukt6")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Cursor2" type="TextureRect" parent="CanvasLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = 32.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = SubResource("GradientTexture2D_h3cwf")
+flip_h = true
+
+[node name="Cursor1" type="TextureRect" parent="CanvasLayer"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = SubResource("GradientTexture2D_6mmc7")
+flip_h = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -68,35 +103,3 @@ shape = SubResource("BoxShape3D_6mmc7")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Head/Camera3D/Placeholder"]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.398642, -0.274516, -0.885329)
 mesh = SubResource("BoxMesh_h3cwf")
-
-[node name="Cursor1" type="TextureRect" parent="."]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 340.0
-offset_top = 250.0
-offset_right = -351.0
-offset_bottom = -261.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-texture = SubResource("GradientTexture2D_6mmc7")
-expand_mode = 1
-flip_h = true
-
-[node name="Cursor2" type="TextureRect" parent="."]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 340.0
-offset_top = 250.0
-offset_right = -350.0
-offset_bottom = -261.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-texture = SubResource("GradientTexture2D_h3cwf")
-expand_mode = 1
-flip_h = true

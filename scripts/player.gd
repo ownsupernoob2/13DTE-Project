@@ -39,8 +39,7 @@ func _ready() -> void:
 	if cursor1 and cursor2:
 		cursor1.visible = true
 		cursor2.visible = false
-	else:
-		print("Warning: Cursor1 or Cursor2 TextureRect not found")
+
 
 func _process(_delta: float) -> void:
 	if Global.is_using_computer:
@@ -69,6 +68,8 @@ func _update_interaction_raycast() -> void:
 		if result.collider.is_in_group("computer"):
 			can_interact = true
 			using_computer = result.collider
+		if result.collider.is_in_group("grabbable"):
+			can_interact = true
 
 func insert_disk() -> void:
 	if held_object == null or not can_grab or Global.is_using_computer:

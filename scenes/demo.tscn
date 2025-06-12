@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://db2h3t17k37pe"]
+[gd_scene load_steps=43 format=3 uid="uid://db2h3t17k37pe"]
 
 [ext_resource type="Material" uid="uid://bi1h4xe7msjwi" path="res://assets/materials/Pink.tres" id="1_b0nem"]
 [ext_resource type="Material" uid="uid://b4s0xnt1f6lia" path="res://assets/materials/Green.tres" id="4_e66cg"]
@@ -34,6 +34,7 @@
 [ext_resource type="PackedScene" uid="uid://bpigsocwrxqni" path="res://pod_11.tscn" id="33_hj0bg"]
 [ext_resource type="PackedScene" uid="uid://cy1lydgt0g4g5" path="res://assets/bunker/GLB/bunker_entrance_1.glb" id="33_ssbcb"]
 [ext_resource type="PackedScene" uid="uid://culqv6vf0jevi" path="res://Untitled.glb" id="34_ijaeb"]
+[ext_resource type="PackedScene" uid="uid://u7lnosmcdssa" path="res://scenes/components/monitor.tscn" id="35_ssbcb"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_5lq0h"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -330,6 +331,12 @@ transform = Transform3D(0.999137, -0.0415443, 0, 0.0415443, 0.999137, 0, 0, 0, 1
 [node name="Untitled" parent="." instance=ExtResource("34_ijaeb")]
 transform = Transform3D(-0.000150132, 0, -0.00199436, 0, 0.002, 0, 0.00199436, 0, -0.000150132, -0.483937, 1.0874, -13.4834)
 visible = false
+
+[node name="Node3D" parent="." instance=ExtResource("35_ssbcb")]
+transform = Transform3D(0.113682, 0, 0.755839, 0, 0.708985, 0, -0.704465, 0, 0.121972, -3.9603, 1.12745, -12.4616)
+
+[node name="MonitorCamera" type="Camera3D" parent="Node3D"]
+transform = Transform3D(1.40139, 0, -1.49012e-07, 0, 1.41047, 0, 0, 0, 1.30614, -0.0175114, 0.532729, 0.627103)
 
 [connection signal="body_entered" from="Object2" to="Player" method="_on_grab_area_body_entered"]
 [connection signal="body_exited" from="Object2" to="Player" method="_on_grab_area_body_exited"]

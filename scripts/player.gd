@@ -65,6 +65,9 @@ func _update_interaction_raycast() -> void:
 	can_interact = false
 	using_computer = null
 	if result and result.collider:
+		if result.collider.is_in_group("monitor"):
+			can_interact = true
+			using_computer = result.collider
 		if result.collider.is_in_group("computer"):
 			can_interact = true
 			using_computer = result.collider
@@ -109,6 +112,25 @@ func return_disk_to_hand(disk_name: String, disk_node: Node) -> void:
 		elif placeholder:
 			placeholder.visible = true
 		exit_computer_mode()
+		
+func enter_monitor_mode() -> void:
+	if using_computer and not Global.is_using_computer:
+		active_computer_camera = get_node_or_null("../Node3D/MonitorCamera")
+		if active_computer_camera and active_computer_camera is Camera3D:
+			Global.is_using_computer = true
+			player_camera.current = false
+			active_computer_camera.current = true
+			velocity = Vector3.ZERO
+			if cursor1:
+				cursor1.visible = false
+			if cursor2:
+				cursor2.visible = false
+		else:
+			push_error("Failed to switch to MonitorCamera: Node not found or invalid.")
+			if cursor1:
+				cursor1.visible = !can_interact
+			if cursor2:
+				cursor2.visible = can_interact
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and not Global.is_using_computer:
@@ -119,20 +141,18 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		if Global.is_using_computer:
 			exit_computer_mode()
-		elif held_object != null and held_object.is_in_group("disk") and can_interact and using_computer:
-			insert_disk()
-		elif can_interact and using_computer and not held_object:
-			enter_computer_mode()
-		elif held_object == null:
-			if can_grab:
-				grab_object()
-		elif held_object != null and can_grab:
+		elif can_interact and using_computer:
+			if using_computer.is_in_group("monitor") and not held_object:
+				enter_monitor_mode()
+			elif using_computer.is_in_group("computer") and not held_object:
+				enter_computer_mode()
+			elif held_object and held_object.is_in_group("disk"):
+				insert_disk()
+		elif held_object == null and can_grab:
+			grab_object()
+		elif held_object and can_grab:
 			drop_object()
-	
-	if event is InputEventKey and event.pressed and event.keycode == KEY_E:
-		using_computer = get_tree().get_first_node_in_group("computer")
-		if using_computer:
-			enter_computer_mode()
+
 
 func enter_computer_mode() -> void:
 	if using_computer and not Global.is_using_computer:

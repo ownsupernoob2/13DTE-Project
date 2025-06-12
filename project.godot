@@ -42,6 +42,7 @@ grabbable=""
 computer=""
 disk=""
 player=""
+monitor=""
 
 [input]
 

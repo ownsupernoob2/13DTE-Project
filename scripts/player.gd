@@ -40,9 +40,8 @@ func _ready() -> void:
 		cursor1.visible = true
 		cursor2.visible = false
 
-
 func _process(_delta: float) -> void:
-	if Global.is_using_computer:
+	if Global.is_using_computer or Global.is_using_monitor:
 		if cursor1:
 			cursor1.visible = false
 		if cursor2:
@@ -75,7 +74,7 @@ func _update_interaction_raycast() -> void:
 			can_interact = true
 
 func insert_disk() -> void:
-	if held_object == null or not can_grab or Global.is_using_computer:
+	if held_object == null or not can_grab or Global.is_using_computer or Global.is_using_monitor:
 		return
 	var terminal = $"../Computer/Computer/SubViewport/Control/Console"
 	if terminal and terminal.has_method("insert_disk"):
@@ -114,10 +113,11 @@ func return_disk_to_hand(disk_name: String, disk_node: Node) -> void:
 		exit_computer_mode()
 		
 func enter_monitor_mode() -> void:
-	if using_computer and not Global.is_using_computer:
+	if using_computer and not Global.is_using_computer and not Global.is_using_monitor:
 		active_computer_camera = get_node_or_null("../Node3D/MonitorCamera")
 		if active_computer_camera and active_computer_camera is Camera3D:
-			Global.is_using_computer = true
+			Global.is_using_monitor = true
+			Global.is_using_computer = false
 			player_camera.current = false
 			active_computer_camera.current = true
 			velocity = Vector3.ZERO
@@ -133,13 +133,13 @@ func enter_monitor_mode() -> void:
 				cursor2.visible = can_interact
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion and not Global.is_using_computer:
+	if event is InputEventMouseMotion and not (Global.is_using_computer or Global.is_using_monitor):
 		head.rotate_y(-event.relative.x * SENSITIVITY)
 		camera.rotate_x(-event.relative.y * SENSITIVITY)
 		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-70), deg_to_rad(60))
 	
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		if Global.is_using_computer:
+		if Global.is_using_computer or Global.is_using_monitor:
 			exit_computer_mode()
 		elif can_interact and using_computer:
 			if using_computer.is_in_group("monitor") and not held_object:
@@ -153,12 +153,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif held_object and can_grab:
 			drop_object()
 
-
 func enter_computer_mode() -> void:
-	if using_computer and not Global.is_using_computer:
+	if using_computer and not Global.is_using_computer and not Global.is_using_monitor:
 		active_computer_camera = $"../Computer/ComputerCamera"
 		if active_computer_camera and active_computer_camera is Camera3D:
 			Global.is_using_computer = true
+			Global.is_using_monitor = false
 			player_camera.current = false
 			active_computer_camera.current = true
 			velocity = Vector3.ZERO
@@ -176,8 +176,9 @@ func enter_computer_mode() -> void:
 				cursor2.visible = can_interact
 
 func exit_computer_mode() -> void:
-	if Global.is_using_computer:
+	if Global.is_using_computer or Global.is_using_monitor:
 		Global.is_using_computer = false
+		Global.is_using_monitor = false
 		if active_computer_camera:
 			active_computer_camera.current = false
 		player_camera.current = true
@@ -189,7 +190,7 @@ func exit_computer_mode() -> void:
 			cursor2.visible = can_interact
 
 func _physics_process(delta: float) -> void:
-	if Global.is_using_computer:
+	if Global.is_using_computer or Global.is_using_monitor:
 		velocity = Vector3.ZERO
 		return
 	
@@ -227,7 +228,7 @@ func _headbob(time: float) -> Vector3:
 	return pos
 
 func grab_object() -> void:
-	if held_object != null or not can_grab or Global.is_using_computer:
+	if held_object != null or not can_grab or Global.is_using_computer or Global.is_using_monitor:
 		return
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
@@ -262,7 +263,7 @@ func grab_object() -> void:
 			placeholder.visible = true
 
 func drop_object() -> void:
-	if held_object == null or not can_grab or Global.is_using_computer:
+	if held_object == null or not can_grab or Global.is_using_computer or Global.is_using_monitor:
 		return
 	
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state

@@ -146,7 +146,6 @@ anchor_bottom = 0.0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("3_kly2o")
-console_size = Vector2(80, 30)
 
 [node name="Screen" type="MeshInstance3D" parent="Monitor" groups=["monitor"]]
 transform = Transform3D(-0.5, 0, 7.54979e-08, 0, 0.5, 0, -7.54979e-08, 0, -0.5, 1.8239e-05, 0.541285, 0.43006)

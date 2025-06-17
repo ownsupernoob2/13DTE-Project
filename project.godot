@@ -43,6 +43,7 @@ computer=""
 disk=""
 player=""
 monitor=""
+interactable=""
 
 [input]
 

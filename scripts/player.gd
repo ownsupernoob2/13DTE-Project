@@ -53,6 +53,8 @@ func _process(_delta: float) -> void:
 		if cursor2:
 			cursor2.visible = can_interact
 
+# ... (rest of the script unchanged, keeping all variables and other functions as provided)
+
 func _update_interaction_raycast() -> void:
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
@@ -72,6 +74,12 @@ func _update_interaction_raycast() -> void:
 			using_computer = result.collider
 		if result.collider.is_in_group("grabbable"):
 			can_interact = true
+		if result.collider.is_in_group("interactable"): # Added to detect machine buttons
+			can_interact = true
+			using_computer = result.collider # Store collider for interaction
+
+
+
 
 func insert_disk() -> void:
 	if held_object == null or not can_grab or Global.is_using_computer or Global.is_using_monitor:

@@ -1,94 +1,76 @@
-[gd_scene load_steps=6 format=3 uid="uid://c4k3j2l5m7n8p"]
+extends Node3D
 
-[ext_resource type="Script" path="res://Machine.gd" id="1_k2q3r"]
+@onready var rich_text_label = $Monitor/SubViewport/Control/RichTextLabel
+@onready var up_button = $UpButton
+@onready var down_button = $DownButton
 
-[sub_resource type="BoxMesh" id="BoxMesh_abc12"]
-size = Vector3(1, 1, 1)
+var current_number: int = 0
+var direction: int = 0 # 0: stopped, 1: up, -1: down
+var timer: float = 0.0
+const UPDATE_INTERVAL: float = 0.5
+var is_active: bool = false
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j5k2l"]
-bg_color = Color(0.2, 0.2, 0.2, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.8, 0.8, 0.8, 1)
+func _ready() -> void:
+	# Validate nodes
+	if rich_text_label == null:
+		_debug_print_node_tree()
+		return
+	if up_button == null:
+		push_error("UpButton not found at 'UpButton'. Ensure Area3D node exists.")
+		return
+	if down_button == null:
+		push_error("DownButton not found at 'DownButton'. Ensure Area3D node exists.")
+		return
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vptex"]
-albedo_texture = SubResource("ViewportTexture_vp123")
+	# Connect Area3D input event signals for raycast interaction
+	up_button.input_event.connect(_on_up_button_input_event)
+	down_button.input_event.connect(_on_down_button_input_event)
+	# Start with random direction
+	direction = [-1, 1][randi() % 2]
+	is_active = true
+	_update_display()
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_vp123"]
-viewport_path = NodePath("SubViewport")
+func _process(delta: float) -> void:
+	if is_active and rich_text_label != null:
+		timer += delta
+		if timer >= UPDATE_INTERVAL:
+			timer -= UPDATE_INTERVAL
+			current_number += direction
+			_update_display()
 
-[node name="Machine" type="Node3D"]
-script = ExtResource("1_k2q3r")
-metadata/_edit_group_ = true
+func _update_display() -> void:
+	if rich_text_label == null:
+		return
+	# Update text
+	rich_text_label.text = "[center][font_size=48]%d[/font_size][/center]" % current_number
+	# Calculate color based on absolute value
+	var redness = min(abs(current_number) / 100.0, 1.0)
+	var color = Color(1.0, 1.0 - redness, 1.0 - redness, 1.0)
+	rich_text_label.modulate = color
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-mesh = SubResource("BoxMesh_abc12")
-surface_material_override/0 = SubResource("StandardMaterial3D_vptex")
+func _on_up_button_input_event(_camera: Node, event: InputEvent, _position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if direction == 1 and is_active and not (Global.is_using_computer or Global.is_using_monitor):
+			is_active = false
+			current_number = 0
+			direction = [-1, 1][randi() % 2] # New random direction
+			is_active = true
+			_update_display()
 
-[node name="SubViewport" type="SubViewport" parent="."]
-transparent_bg = true
-size = Vector2i(256, 128)
+func _on_down_button_input_event(_camera: Node, event: InputEvent, _position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if direction == -1 and is_active and not (Global.is_using_computer or Global.is_using_monitor):
+			is_active = false
+			current_number = 0
+			direction = [-1, 1][randi() % 2] # New random direction
+			is_active = true
+			_update_display()
 
-[node name="Control" type="Control" parent="SubViewport"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+func _debug_print_node_tree() -> void:
+	print("Debug: Node tree for ", get_path())
+	_print_node_children(self, "")
 
-[node name="RichTextLabel" type="RichTextLabel" parent="SubViewport/Control"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -100.0
-offset_top = -50.0
-offset_right = 100.0
-offset_bottom = 50.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_j5k2l")
-bbcode_enabled = true
-text = "[center][font_size=48]0[/font_size][/center]"
-
-[node name="UpButton" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.7, -0.51)
-collision_layer = 1
-collision_mask = 1
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="UpButton"]
-mesh = SubResource("BoxMesh_btn")
-material_override = SubResource("StandardMaterial3D_btn_up")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="UpButton"]
-shape = SubResource("BoxShape3D_btn")
-
-[node name="DownButton" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 0.7, -0.51)
-collision_layer = 1
-collision_mask = 1
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="DownButton"]
-mesh = SubResource("BoxMesh_btn")
-material_override = SubResource("StandardMaterial3D_btn_down")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="DownButton"]
-shape = SubResource("BoxShape3D_btn")
-
-[sub_resource type="BoxMesh" id="BoxMesh_btn"]
-size = Vector3(0.2, 0.2, 0.05)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_btn_up"]
-albedo_color = Color(0, 1, 0, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_btn_down"]
-albedo_color = Color(1, 0, 0, 1)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_btn"]
-size = Vector3(0.2, 0.2, 0.05)
+func _print_node_children(node: Node, indent: String) -> void:
+	print(indent, node.name, " (", node.get_class(), ")")
+	for child in node.get_children():
+		_print_node_children(child, indent + "  ")

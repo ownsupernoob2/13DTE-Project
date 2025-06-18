@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=4 uid="uid://bm2ujr6udikc4"]
+[gd_scene load_steps=27 format=4 uid="uid://bm2ujr6udikc4"]
 
 [ext_resource type="Script" uid="uid://d2vkfxd0ifcqn" path="res://scripts/computer.gd" id="1_okq71"]
 [ext_resource type="Shader" uid="uid://dcvr6r1j1k4vq" path="res://resources/shaders/crt_shader.gdshader" id="3_wosnj"]
@@ -6,8 +6,16 @@
 [ext_resource type="PackedScene" uid="uid://divngw0b3efrf" path="res://addons/essence_console/Console.tscn" id="4_pmsea"]
 [ext_resource type="Texture2D" uid="uid://olibi1cfvctl" path="res://assets/bunker/GLB/floppy_disc_2_floppy_disc_2.png" id="5_815cu"]
 
+[sub_resource type="ViewportTexture" id="ViewportTexture_815cu"]
+viewport_path = NodePath("Computer/SubViewport")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wdkyh"]
+resource_local_to_scene = true
+albedo_texture = SubResource("ViewportTexture_815cu")
+
 [sub_resource type="QuadMesh" id="QuadMesh_4arys"]
 resource_local_to_scene = true
+material = SubResource("StandardMaterial3D_wdkyh")
 size = Vector2(0.4, 0.3)
 
 [sub_resource type="Theme" id="Theme_wosnj"]
@@ -40,11 +48,11 @@ shader_parameter/vignette_opacity = 0.764
 [sub_resource type="ViewportTexture" id="ViewportTexture_wosnj"]
 viewport_path = NodePath("Computer/SubViewport")
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t3l2h"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_815cu"]
 resource_local_to_scene = true
 resource_name = "Material"
 cull_mode = 2
-albedo_color = Color(0.297746, 0.831777, 0, 1)
+albedo_color = Color(0, 0.591645, 0.0190627, 1)
 albedo_texture = SubResource("ViewportTexture_wosnj")
 roughness = 0.5
 
@@ -63,7 +71,7 @@ _surfaces = [{
 "format": 34896613399,
 "index_count": 30,
 "index_data": PackedByteArray("AAABAAIAAAADAAEABAAAAAIABAACAAUABgAEAAUABgAFAAcACAAGAAcACAAHAAkACgAIAAkACgAJAAsA"),
-"material": SubResource("StandardMaterial3D_t3l2h"),
+"material": SubResource("StandardMaterial3D_815cu"),
 "name": "Material",
 "primitive": 3,
 "uv_scale": Vector4(2.00055, 2.00019, 0, 0),

@@ -1,0 +1,11 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://cae2d5om2ybil"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_wosnj"]
+viewport_path = NodePath("Monitor/SubViewport")
+
+[resource]
+resource_local_to_scene = true
+resource_name = "Material"
+cull_mode = 2
+albedo_texture = SubResource("ViewportTexture_wosnj")
+roughness = 0.5

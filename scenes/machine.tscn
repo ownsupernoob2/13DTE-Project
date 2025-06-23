@@ -1,7 +1,6 @@
-[gd_scene load_steps=13 format=4 uid="uid://cnprupmmgiyon"]
+[gd_scene load_steps=8 format=3 uid="uid://cnprupmmgiyon"]
 
 [ext_resource type="Script" uid="uid://cgg25tjkn7rq4" path="res://scripts/machine.gd" id="1_k2q3r"]
-[ext_resource type="Material" uid="uid://cae2d5om2ybil" path="res://cool.tres" id="2_73k52"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_beb27"]
 
@@ -12,11 +11,10 @@ size = Vector3(0.2, 0.05, 0.2)
 size = Vector3(0.2, 0.05, 0.2)
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_a5lir"]
-viewport_path = NodePath("Monitor/SubViewport4")
+viewport_path = NodePath("Monitor/SubViewport")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a5lir"]
 resource_local_to_scene = true
-albedo_color = Color(0, 0, 0, 1)
 albedo_texture = SubResource("ViewportTexture_a5lir")
 proximity_fade_distance = 19.99
 
@@ -24,48 +22,6 @@ proximity_fade_distance = 19.99
 resource_local_to_scene = true
 material = SubResource("StandardMaterial3D_a5lir")
 size = Vector2(0.4, 0.3)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sfpdp"]
-resource_name = "Material.001"
-cull_mode = 2
-albedo_color = Color(0.906332, 0.906332, 0.906332, 1)
-roughness = 0.5
-
-[sub_resource type="ArrayMesh" id="ArrayMesh_73k52"]
-resource_local_to_scene = true
-resource_name = "computer_screen_Cube"
-_surfaces = [{
-"aabb": AABB(-0.399709, -0.3, -0.00859782, 0.799418, 0.6, 0.0335679),
-"attribute_data": PackedByteArray("gJn//wiA/H+Amfx/CID//yez//8ns/x/38z//9/M/H+H5v7/h+b8f////v/+//x/"),
-"format": 34896613399,
-"index_count": 30,
-"index_data": PackedByteArray("AAABAAIAAAADAAEABAAAAAIABAACAAUABgAEAAUABgAFAAcACAAGAAcACAAHAAkACgAIAAkACgAJAAsA"),
-"material": ExtResource("2_73k52"),
-"name": "Material",
-"primitive": 3,
-"uv_scale": Vector4(2.00055, 2.00019, 0, 0),
-"vertex_count": 12,
-"vertex_data": PackedByteArray("DM0AAHhVC/z///////834wzN//94VQv8//8AAP//N+O5mQAAAACu/rmZ//8AAK7+RWYAAAAArv5FZv//AACu/vIyAAB4VQv88jL//3hVC/wAAAAA//834wAA/////zfjFX5vJsFSCQlvpukBCYk+LVp/jiWNpaQAcVpa/6SAcNqPWRX+6YGP2T2t9fb1dsDS")
-}, {
-"aabb": AABB(-0.399709, -0.3, -0.00859782, 0.799418, 0.6, 0.053264),
-"attribute_data": PackedByteArray("AAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/"),
-"format": 34359742487,
-"index_count": 102,
-"index_data": PackedByteArray("AAARAAIAEgACABEAEgAEAAIAAAAMABEABAASAA0ADQASABEADQARAAwABAANAAsAAwAMAAAACwANABMAEwANAAwACwATAAoAAwAUAAwAEwAMABQAAQAUAAMACgATABUAFQATABQACgAVAAkAAQAWABQAFQAUABYABgAWAAEACQAVAA8ADwAVABYACQAPAAgABgAOABYADwAWAA4ABQAOAAYACAAPABAAEAAPAA4ACAAQAAcABQAXAA4AEAAOABcABwAXAAUABwAQABcA"),
-"lods": [0.0171389, PackedByteArray("AAAMAAIAAwAMAAAAAQAMAAMADQACAAwADQAEAAIAAQAOAAwADQAMAA4ABgAOAAEABAANAAsACwANAAoABQAOAAYACgANAAkACQANAA8ADwANAA4ACQAPAAgAEAAOAAUAEAAPAA4ACAAPABAABwAQAAUACAAQAAcA"), 0.0335255, PackedByteArray("AAABAAIAAwABAAAABAACAAEABQABAAYABwABAAUABwAIAAEACAAEAAEACQAEAAgACgAEAAkACwAEAAoA")],
-"material": SubResource("StandardMaterial3D_sfpdp"),
-"name": "Material.001",
-"primitive": 3,
-"uv_scale": Vector4(0, 0, 0, 0),
-"vertex_count": 24,
-"vertex_data": PackedByteArray("pmF2vpqZmT5ABis7f4WkPZqZmT7c3Qy8oqbMvpqZmT76jcw8f4WkvZqZmT7c3Qy8oqbMvpqZmb76jcw8oqbMPpqZmT76jcw8pmF2PpqZmT5ABis7oqbMPpqZmb76jcw8pmF2PpqZmb5ABis7f4WkPZqZmb7c3Qy8f4WkvZqZmb7c3Qy8pmF2vpqZmb5ABis7nj10vpqZmT4OUrg8nj10vpqZmb4OUrg8nj10PpqZmT4OUrg8nj10PpqZmb4OUrg8bd/KPpqZmb7n8zY9bd/KvpqZmT7n8zY9bd/KvpqZmb7n8zY9jRejvZqZmb4enTo8jRejvZqZmT4enTo8jRejPZqZmb4enTo8jRejPZqZmT4enTo8bd/KPpqZmT7n8zY9RzyO+f///z/Gwcf9////P+Eqss7///8/OD7H/f///z/hKkwx////Px3Vss7///8/t8OO+f///z8d1Uwx////P7fDcAb///8/xsE3Av///z84PjcC////P0c8cAb///8/Toaxvf///z9Ohk1C////P7B5sb3///8/sHlNQv///z+zo9dU////P0tcJ6v///8/S1zXVP///z8rglxA////PyuCor////8/031cQP///z/TfaK/////P7OjJ6v///8/")
-}]
-
-[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_448ux"]
-data = PackedVector3Array(0.2406, -0.3, 0.0026, 0.3997, 0.3, 0.025, 0.2406, 0.3, 0.0026, 0.2406, -0.3, 0.0026, 0.3997, -0.3, 0.025, 0.3997, 0.3, 0.025, 0.0803, -0.3, -0.0086, 0.2406, -0.3, 0.0026, 0.2406, 0.3, 0.0026, 0.0803, -0.3, -0.0086, 0.2406, 0.3, 0.0026, 0.0803, 0.3, -0.0086, -0.0803, -0.3, -0.0086, 0.0803, -0.3, -0.0086, 0.0803, 0.3, -0.0086, -0.0803, -0.3, -0.0086, 0.0803, 0.3, -0.0086, -0.0803, 0.3, -0.0086, -0.2406, -0.3, 0.0026, -0.0803, -0.3, -0.0086, -0.0803, 0.3, -0.0086, -0.2406, -0.3, 0.0026, -0.0803, 0.3, -0.0086, -0.2406, 0.3, 0.0026, -0.3997, -0.3, 0.025, -0.2406, -0.3, 0.0026, -0.2406, 0.3, 0.0026, -0.3997, -0.3, 0.025, -0.2406, 0.3, 0.0026, -0.3997, 0.3, 0.025, -0.2406, 0.3, 0.0026, -0.3962, 0.3, 0.0447, -0.3997, 0.3, 0.025, -0.3962, -0.3, 0.0447, -0.3997, 0.3, 0.025, -0.3962, 0.3, 0.0447, -0.3962, -0.3, 0.0447, -0.3997, -0.3, 0.025, -0.3997, 0.3, 0.025, -0.2406, 0.3, 0.0026, -0.2385, 0.3, 0.0225, -0.3962, 0.3, 0.0447, -0.3997, -0.3, 0.025, -0.3962, -0.3, 0.0447, -0.2385, -0.3, 0.0225, -0.2385, -0.3, 0.0225, -0.3962, -0.3, 0.0447, -0.3962, 0.3, 0.0447, -0.2385, -0.3, 0.0225, -0.3962, 0.3, 0.0447, -0.2385, 0.3, 0.0225, -0.3997, -0.3, 0.025, -0.2385, -0.3, 0.0225, -0.2406, -0.3, 0.0026, -0.0803, 0.3, -0.0086, -0.2385, 0.3, 0.0225, -0.2406, 0.3, 0.0026, -0.2406, -0.3, 0.0026, -0.2385, -0.3, 0.0225, -0.0796, -0.3, 0.0114, -0.0796, -0.3, 0.0114, -0.2385, -0.3, 0.0225, -0.2385, 0.3, 0.0225, -0.2406, -0.3, 0.0026, -0.0796, -0.3, 0.0114, -0.0803, -0.3, -0.0086, -0.0803, 0.3, -0.0086, -0.0796, 0.3, 0.0114, -0.2385, 0.3, 0.0225, -0.0796, -0.3, 0.0114, -0.2385, 0.3, 0.0225, -0.0796, 0.3, 0.0114, 0.0803, 0.3, -0.0086, -0.0796, 0.3, 0.0114, -0.0803, 0.3, -0.0086, -0.0803, -0.3, -0.0086, -0.0796, -0.3, 0.0114, 0.0796, -0.3, 0.0114, 0.0796, -0.3, 0.0114, -0.0796, -0.3, 0.0114, -0.0796, 0.3, 0.0114, -0.0803, -0.3, -0.0086, 0.0796, -0.3, 0.0114, 0.0803, -0.3, -0.0086, 0.0803, 0.3, -0.0086, 0.0796, 0.3, 0.0114, -0.0796, 0.3, 0.0114, 0.0796, -0.3, 0.0114, -0.0796, 0.3, 0.0114, 0.0796, 0.3, 0.0114, 0.2406, 0.3, 0.0026, 0.0796, 0.3, 0.0114, 0.0803, 0.3, -0.0086, 0.0803, -0.3, -0.0086, 0.0796, -0.3, 0.0114, 0.2385, -0.3, 0.0225, 0.2385, -0.3, 0.0225, 0.0796, -0.3, 0.0114, 0.0796, 0.3, 0.0114, 0.0803, -0.3, -0.0086, 0.2385, -0.3, 0.0225, 0.2406, -0.3, 0.0026, 0.2406, 0.3, 0.0026, 0.2385, 0.3, 0.0225, 0.0796, 0.3, 0.0114, 0.2385, -0.3, 0.0225, 0.0796, 0.3, 0.0114, 0.2385, 0.3, 0.0225, 0.3997, 0.3, 0.025, 0.2385, 0.3, 0.0225, 0.2406, 0.3, 0.0026, 0.2406, -0.3, 0.0026, 0.2385, -0.3, 0.0225, 0.3962, -0.3, 0.0447, 0.3962, -0.3, 0.0447, 0.2385, -0.3, 0.0225, 0.2385, 0.3, 0.0225, 0.2406, -0.3, 0.0026, 0.3962, -0.3, 0.0447, 0.3997, -0.3, 0.025, 0.3997, 0.3, 0.025, 0.3962, 0.3, 0.0447, 0.2385, 0.3, 0.0225, 0.3962, -0.3, 0.0447, 0.2385, 0.3, 0.0225, 0.3962, 0.3, 0.0447, 0.3997, -0.3, 0.025, 0.3962, 0.3, 0.0447, 0.3997, 0.3, 0.025, 0.3997, -0.3, 0.025, 0.3962, -0.3, 0.0447, 0.3962, 0.3, 0.0447)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_pt243"]
-size = Vector3(0.447693, 0.369019, 0.440979)
 
 [node name="Machine" type="Node3D" groups=["interactable"]]
 script = ExtResource("1_k2q3r")
@@ -75,29 +31,41 @@ mesh = SubResource("BoxMesh_beb27")
 
 [node name="UpButton" type="Area3D" parent="." groups=["interactable"]]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="UpButton"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="UpButton" groups=["interactable"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0299992, 0.559142, -0.141297)
 mesh = SubResource("BoxMesh_a5lir")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="UpButton"]
+[node name="StaticBody3D" type="StaticBody3D" parent="UpButton" groups=["interactable"]]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="UpButton/StaticBody3D" groups=["interactable"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0271178, 0.560838, -0.143372)
+shape = SubResource("BoxShape3D_73k52")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="UpButton" groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0542356, 1.12168, -0.286744)
 shape = SubResource("BoxShape3D_73k52")
 
 [node name="DownButton" type="Area3D" parent="." groups=["interactable"]]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="DownButton"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="DownButton" groups=["interactable"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0299992, 0.559142, 0.260561)
 mesh = SubResource("BoxMesh_a5lir")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="DownButton"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DownButton" groups=["interactable"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0271178, 0.560838, 0.25773)
 shape = SubResource("BoxShape3D_73k52")
 
-[node name="Monitor" type="Node3D" parent="." groups=["monitor"]]
+[node name="StaticBody3D" type="StaticBody3D" parent="DownButton" groups=["interactable"]]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DownButton/StaticBody3D" groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0271178, 0.560838, -0.143372)
+shape = SubResource("BoxShape3D_73k52")
+
+[node name="Monitor" type="Node3D" parent="."]
 transform = Transform3D(0.13191, 0, -0.991262, 0, 1, 0, 0.991262, 0, 0.13191, 0, 0.422692, -0.047278)
 
 [node name="Quad" type="MeshInstance3D" parent="Monitor"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8239e-05, 0.541285, 0.4303)
+transform = Transform3D(2.55484, 0, -0.197728, 0, 2.13985, 0, 0.42263, 0, 1.19528, 1.82241e-05, 0.725424, 0.4303)
 mesh = SubResource("QuadMesh_aee78")
 skeleton = NodePath("../..")
 
@@ -122,27 +90,4 @@ grow_horizontal = 2
 grow_vertical = 2
 bbcode_enabled = true
 text = "balalldsfjkskladjfl;sakdjf;lsdakfj"
-
-[node name="Screen" type="MeshInstance3D" parent="Monitor" groups=["computer"]]
-transform = Transform3D(-0.5, 0, 7.45058e-08, 0, 0.5, 0, -7.45058e-08, 0, -0.5, -0.00593541, 0.517654, 0.474717)
-mesh = SubResource("ArrayMesh_73k52")
-skeleton = NodePath("")
-
-[node name="Area3D" type="Area3D" parent="Monitor/Screen" groups=["computer"]]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Monitor/Screen/Area3D"]
-shape = SubResource("ConcavePolygonShape3D_448ux")
-
-[node name="StaticBody3D2" type="StaticBody3D" parent="Monitor" groups=["monitor"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6478e-05, 1.08257, 0.433069)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Monitor/StaticBody3D2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.154133, -0.00130313, -0.878636, 0.0707442)
-shape = SubResource("BoxShape3D_pt243")
-
-[node name="StaticBody3D" type="StaticBody3D" parent="Monitor" groups=["monitor"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8239e-05, 0.541285, 0.216535)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Monitor/StaticBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.154133, -0.00424194, 0.00140381, 0.214954)
-shape = SubResource("BoxShape3D_pt243")
+fit_content = true

@@ -53,7 +53,6 @@ func _process(_delta: float) -> void:
 		if cursor2:
 			cursor2.visible = can_interact
 
-# ... (rest of the script unchanged, keeping all variables and other functions as provided)
 
 func _update_interaction_raycast() -> void:
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
@@ -64,22 +63,49 @@ func _update_interaction_raycast() -> void:
 	var result: Dictionary = space_state.intersect_ray(query)
 	
 	can_interact = false
-	using_computer = null
+	var interaction_target = null # Changed from using_computer
 	if result and result.collider:
 		if result.collider.is_in_group("monitor"):
 			can_interact = true
-			using_computer = result.collider
+			interaction_target = result.collider
 		if result.collider.is_in_group("computer"):
 			can_interact = true
-			using_computer = result.collider
+			interaction_target = result.collider
 		if result.collider.is_in_group("grabbable"):
 			can_interact = true
-		if result.collider.is_in_group("interactable"): # Added to detect machine buttons
+			interaction_target = result.collider
+		if result.collider.is_in_group("interactable"): # Detects UpButton/DownButton
 			can_interact = true
-			using_computer = result.collider # Store collider for interaction
+			interaction_target = result.collider
+	self.using_computer = interaction_target # Update using_computer for compatibility
 
-
-
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion and not (Global.is_using_computer or Global.is_using_monitor):
+		head.rotate_y(-event.relative.x * SENSITIVITY)
+		camera.rotate_x(-event.relative.y * SENSITIVITY)
+		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-70), deg_to_rad(60))
+	
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if Global.is_using_computer or Global.is_using_monitor:
+			exit_computer_mode()
+		elif can_interact and using_computer:
+			if using_computer.is_in_group("monitor") and not held_object:
+				enter_monitor_mode()
+			elif using_computer.is_in_group("computer") and not held_object:
+				enter_computer_mode()
+			elif using_computer.is_in_group("interactable"):
+				if using_computer is Area3D:
+					var mouse_event = InputEventMouseButton.new()
+					mouse_event.button_index = MOUSE_BUTTON_LEFT
+					mouse_event.pressed = true
+					mouse_event.position = get_viewport().get_mouse_position()
+					using_computer._input_event(camera, mouse_event, using_computer.global_position, Vector3.UP, 0)
+			elif held_object and held_object.is_in_group("disk"):
+				insert_disk()
+		elif held_object == null and can_grab:
+			grab_object()
+		elif held_object and can_grab:
+			drop_object()
 
 func insert_disk() -> void:
 	if held_object == null or not can_grab or Global.is_using_computer or Global.is_using_monitor:
@@ -139,27 +165,6 @@ func enter_monitor_mode() -> void:
 				cursor1.visible = !can_interact
 			if cursor2:
 				cursor2.visible = can_interact
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion and not (Global.is_using_computer or Global.is_using_monitor):
-		head.rotate_y(-event.relative.x * SENSITIVITY)
-		camera.rotate_x(-event.relative.y * SENSITIVITY)
-		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-70), deg_to_rad(60))
-	
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		if Global.is_using_computer or Global.is_using_monitor:
-			exit_computer_mode()
-		elif can_interact and using_computer:
-			if using_computer.is_in_group("monitor") and not held_object:
-				enter_monitor_mode()
-			elif using_computer.is_in_group("computer") and not held_object:
-				enter_computer_mode()
-			elif held_object and held_object.is_in_group("disk"):
-				insert_disk()
-		elif held_object == null and can_grab:
-			grab_object()
-		elif held_object and can_grab:
-			drop_object()
 
 func enter_computer_mode() -> void:
 	if using_computer and not Global.is_using_computer and not Global.is_using_monitor:

@@ -1,7 +1,8 @@
-[gd_scene load_steps=10 format=3 uid="uid://c8canob25lyi"]
+[gd_scene load_steps=12 format=3 uid="uid://c8canob25lyi"]
 
 [ext_resource type="Script" uid="uid://b22uigsk5qpio" path="res://scripts/player.gd" id="1_bukt6"]
 [ext_resource type="PackedScene" uid="uid://di3q5pchjnbdt" path="res://assets/bunker/GLB/floppy_disc_2.glb" id="2_h3cwf"]
+[ext_resource type="Shader" uid="uid://ceqkphohw8enu" path="res://scenes/demo.gdshader" id="3_sjsxr"]
 
 [sub_resource type="Gradient" id="Gradient_6mmc7"]
 offsets = PackedFloat32Array(0.012987, 0.168831, 0.233766)
@@ -28,7 +29,24 @@ fill_to = Vector2(0.675214, 0.350427)
 [sub_resource type="BoxShape3D" id="BoxShape3D_6mmc7"]
 size = Vector3(1, 0.179199, 1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_h3cwf"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_n3amx"]
+render_priority = 0
+shader = ExtResource("3_sjsxr")
+shader_parameter/enable_fog = true
+shader_parameter/fog_color = Color(0, 0, 0, 1)
+shader_parameter/noise_color = Color(0.548963, 0.548963, 0.548963, 1)
+shader_parameter/fog_distance = 40.0
+shader_parameter/fog_fade_range = 40.0
+shader_parameter/enable_noise = true
+shader_parameter/noise_time_fac = 5.805
+shader_parameter/enable_color_limitation = true
+shader_parameter/color_levels = 127
+shader_parameter/enable_dithering = true
+shader_parameter/dither_strength = 0.317
+
+[sub_resource type="BoxMesh" id="BoxMesh_sjsxr"]
+material = SubResource("ShaderMaterial_n3amx")
+size = Vector3(2, 2, 1)
 
 [node name="Player" type="CharacterBody3D" groups=["player"]]
 script = ExtResource("1_bukt6")
@@ -92,7 +110,7 @@ shape = SubResource("BoxShape3D_6mmc7")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.38589, -0.360364, -0.891893)
 
 [node name="Placeholder" type="StaticBody3D" parent="Head/Camera3D"]
-visible = false
+transform = Transform3D(1, 0, 0, 0, 2.76551, 0, 0, 0, 1, 0, 0, 0)
 collision_layer = 2
 collision_mask = 2
 
@@ -101,5 +119,5 @@ transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.398642, -0.274516, -0
 shape = SubResource("BoxShape3D_6mmc7")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Head/Camera3D/Placeholder"]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0.398642, -0.274516, -0.885329)
-mesh = SubResource("BoxMesh_h3cwf")
+transform = Transform3D(0.416845, 0, 0, 0, 0.303345, 0, 0, 0, 0.2, 0.398642, -0.274516, -0.885329)
+mesh = SubResource("BoxMesh_sjsxr")

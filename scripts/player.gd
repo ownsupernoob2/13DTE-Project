@@ -94,12 +94,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			elif using_computer.is_in_group("computer") and not held_object:
 				enter_computer_mode()
 			elif using_computer.is_in_group("interactable"):
-				if using_computer is Area3D:
-					var mouse_event = InputEventMouseButton.new()
-					mouse_event.button_index = MOUSE_BUTTON_LEFT
-					mouse_event.pressed = true
-					mouse_event.position = get_viewport().get_mouse_position()
-					using_computer._input_event(camera, mouse_event, using_computer.global_position, Vector3.UP, 0)
+				var mouse_pos: Vector2 = get_viewport().get_mouse_position()
+				var ray_start: Vector3 = player_camera.project_ray_origin(mouse_pos)
+				var ray_end: Vector3 = ray_start + player_camera.project_ray_normal(mouse_pos) * 3.0
+				var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(ray_start, ray_end)
+				var result: Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
+				if result and result.collider == using_computer:
+					var parent = using_computer.get_parent()
+					if parent and parent.has_method("handle_button_press"):
+						parent.handle_button_press(using_computer.name)
 			elif held_object and held_object.is_in_group("disk"):
 				insert_disk()
 		elif held_object == null and can_grab:

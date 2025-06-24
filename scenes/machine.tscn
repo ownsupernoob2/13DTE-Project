@@ -56,9 +56,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0271178, 0.560838, 0.25773)
 shape = SubResource("BoxShape3D_73k52")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="DownButton" groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.00560659, 0.331206)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="DownButton/StaticBody3D" groups=["interactable"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0271178, 0.560838, -0.143372)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0271178, 0.560838, -0.0691316)
 shape = SubResource("BoxShape3D_73k52")
 
 [node name="Monitor" type="Node3D" parent="."]

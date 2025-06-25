@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://lby2ptultsvc"
-path="res://.godot/imported/SarcoPodMap8Export.glb-b52ad01c6811e9f09b5e3da1cd9c96c3.scn"
+uid="uid://dectaforclt20"
+path="res://.godot/imported/SarcoPodMap10Export (2).glb-a5bf7ab3b6c21fb07d91046ef21e12d1.scn"
 
 [deps]
 
-source_file="res://SarcoPodMap8Export.glb"
-dest_files=["res://.godot/imported/SarcoPodMap8Export.glb-b52ad01c6811e9f09b5e3da1cd9c96c3.scn"]
+source_file="res://SarcoPodMap10Export (2).glb"
+dest_files=["res://.godot/imported/SarcoPodMap10Export (2).glb-a5bf7ab3b6c21fb07d91046ef21e12d1.scn"]
 
 [params]
 

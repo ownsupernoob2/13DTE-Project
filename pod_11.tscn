@@ -8,7 +8,7 @@
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_gv60m"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_75itj"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_afc1q"]
 render_priority = 1
 shader = ExtResource("2_ewli3")
 shader_parameter/noise_scale = 0.1
@@ -22,7 +22,7 @@ shader_parameter/rotation_speed = 1.0
 shader_parameter/noise_texture = SubResource("NoiseTexture2D_gv60m")
 
 [sub_resource type="SphereMesh" id="SphereMesh_pjfdm"]
-material = SubResource("ShaderMaterial_75itj")
+material = SubResource("ShaderMaterial_afc1q")
 radial_segments = 256
 rings = 128
 
@@ -92,7 +92,7 @@ material = SubResource("ShaderMaterial_gv60m")
 radial_segments = 256
 rings = 128
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_0k5uu"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_oi6qu"]
 render_priority = 0
 shader = ExtResource("5_6mros")
 shader_parameter/sphere_color = Color(0, 0, 0, 0)
@@ -108,11 +108,12 @@ shader_parameter/star_axis_speed = 0.051
 shader_parameter/star_move_mode = 1
 
 [sub_resource type="SphereMesh" id="SphereMesh_4yr0o"]
-material = SubResource("ShaderMaterial_0k5uu")
+material = SubResource("ShaderMaterial_oi6qu")
 radial_segments = 256
 rings = 128
 
 [node name="Pod11" instance=ExtResource("1_bqs3a")]
+transform = Transform3D(1, 0, 0, 0, 1.25484, 0, 0, 0, 1.3721, 0, 0, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." index="0"]
 transform = Transform3D(8.8, 0, 0, 0, 8.8, 0, 0, 0, 8.8, -0.0223885, 2.63746, 0.0129004)

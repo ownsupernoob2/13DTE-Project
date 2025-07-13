@@ -1,9 +1,10 @@
-[gd_scene load_steps=17 format=4 uid="uid://u7lnosmcdssa"]
+[gd_scene load_steps=18 format=4 uid="uid://u7lnosmcdssa"]
 
 [ext_resource type="Script" uid="uid://d2vkfxd0ifcqn" path="res://scripts/computer.gd" id="1_6onhf"]
 [ext_resource type="Shader" uid="uid://dcvr6r1j1k4vq" path="res://resources/shaders/crt_shader.gdshader" id="2_i0b33"]
 [ext_resource type="PackedScene" uid="uid://divngw0b3efrf" path="res://addons/essence_console/Console.tscn" id="3_an41c"]
 [ext_resource type="Script" uid="uid://dvmlh0yjbj2vd" path="res://addons/essence_console/monitor.gd" id="3_kly2o"]
+[ext_resource type="PackedScene" uid="uid://bxfgaqgxqdrvb" path="res://assets/bunker/GLB/scanner_1.glb" id="5_6onhf"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_4arys"]
 resource_local_to_scene = true
@@ -102,7 +103,7 @@ ambient_light_source = 3
 glow_enabled = true
 
 [node name="Node3D" type="Node3D" groups=["monitor"]]
-transform = Transform3D(0.713579, 0, 0, 0, 0.708985, 0, 0, 0, 0.765617, 0, 0, 0)
+transform = Transform3D(1.05171, 0, 0, 0, 1.00935, 0, 0, 0, 0.765617, 0, 0, 0)
 
 [node name="Monitor" type="Node3D" parent="." groups=["monitor"]]
 script = ExtResource("1_6onhf")
@@ -148,7 +149,7 @@ offset_bottom = 40.0
 script = ExtResource("3_kly2o")
 
 [node name="Screen" type="MeshInstance3D" parent="Monitor" groups=["monitor"]]
-transform = Transform3D(-0.5, 0, 7.54979e-08, 0, 0.5, 0, -7.54979e-08, 0, -0.5, 1.8239e-05, 0.541285, 0.43006)
+transform = Transform3D(-0.3123, 0, 7.54979e-08, 0, 0.337241, 0, -4.7156e-08, 0, -0.5, 1.82366e-05, 0.546996, 0.44596)
 mesh = SubResource("ArrayMesh_a8auw")
 skeleton = NodePath("")
 
@@ -173,5 +174,18 @@ shape = SubResource("BoxShape3D_fpwu0")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_t3l2h")
+
+[node name="scanner_12" parent="." instance=ExtResource("5_6onhf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.626815, 0.386866)
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0708624, 0.699543, 0.444047)
+light_color = Color(0.300016, 0.736552, 0, 1)
+light_energy = 0.354
+
+[node name="OmniLight3D2" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0738408, 0.699543, 0.444047)
+light_color = Color(0.705882, 0, 0, 1)
+light_energy = 0.354
 
 [editable path="Monitor/SubViewport/Control/Console"]

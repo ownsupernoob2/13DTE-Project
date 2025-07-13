@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://cnprupmmgiyon"]
+[gd_scene load_steps=9 format=3 uid="uid://cnprupmmgiyon"]
 
 [ext_resource type="Script" uid="uid://cgg25tjkn7rq4" path="res://scripts/machine.gd" id="1_k2q3r"]
+[ext_resource type="PackedScene" uid="uid://bpssqmqtlg4k1" path="res://assets/bunker/GLB/machinery_3.glb" id="2_73k52"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_beb27"]
 
@@ -27,6 +28,7 @@ size = Vector2(0.4, 0.3)
 script = ExtResource("1_k2q3r")
 
 [node name="CSGMesh3D" type="CSGMesh3D" parent="."]
+visible = false
 mesh = SubResource("BoxMesh_beb27")
 
 [node name="UpButton" type="Area3D" parent="." groups=["interactable"]]
@@ -63,10 +65,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0271178, 0.560838, -0.06913
 shape = SubResource("BoxShape3D_73k52")
 
 [node name="Monitor" type="Node3D" parent="."]
-transform = Transform3D(0.13191, 0, -0.991262, 0, 1, 0, 0.991262, 0, 0.13191, 0, 0.422692, -0.047278)
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, -0.597, 0)
 
 [node name="Quad" type="MeshInstance3D" parent="Monitor"]
-transform = Transform3D(2.55484, 0, -0.197728, 0, 2.13985, 0, 0.42263, 0, 1.19528, 1.82241e-05, 0.725424, 0.4303)
+transform = Transform3D(2.58956, 0, 0, 0, 2.13985, 0, 0, 0, 1.21152, 0.264, 0.678, 0.55)
 mesh = SubResource("QuadMesh_aee78")
 skeleton = NodePath("../..")
 
@@ -92,3 +94,10 @@ grow_vertical = 2
 bbcode_enabled = true
 text = "balalldsfjkskladjfl;sakdjf;lsdakfj"
 fit_content = true
+
+[node name="machinery_32" parent="." instance=ExtResource("2_73k52")]
+transform = Transform3D(-1.3901, -1.41679e-07, 5.65896e-15, 0, -7.08396e-08, -1.48087, 1.21526e-07, -1.62062, 6.4731e-08, -0.00196633, 0.0441309, 0.946453)
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.416547, -0.348093, -0.65867)
+light_color = Color(0.784388, 0, 0.121916, 1)

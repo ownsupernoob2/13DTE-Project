@@ -4,8 +4,8 @@ extends Node3D
 @onready var up_button = $UpButton
 @onready var down_button = $DownButton
 
-var current_number: int = 0
-var up_button_held: bool = false
+var current_number: int = 5
+var up_button_held: bool = true
 var down_button_held: bool = false
 var timer: float = 0.0
 var game_ended: bool = false

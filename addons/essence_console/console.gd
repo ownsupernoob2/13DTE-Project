@@ -377,7 +377,6 @@ func pad_string_right(text: String, width: int) -> String:
 	return text + repeat_string(" ", padding_needed)
 
 func insert_disk(disk_name: String, disk_node: Node, disk_data: Dictionary = {}) -> void:
-	# Support multiple disk types (Class 1-4 only)
 	var valid_disks = ["Disk1", "Disk2", "Disk3", "Disk4"]
 	if not disk_name in valid_disks:
 		append_text("[color=RED]Error: Invalid disk name. Supported: " + str(valid_disks) + "[/color]")
@@ -389,12 +388,6 @@ func insert_disk(disk_name: String, disk_node: Node, disk_data: Dictionary = {})
 		append_text("[color=RED]Error: Computer already has a disk inserted (" + inserted_disk + ").[/color]")
 		newline()
 		append_text("[color=YELLOW]Use 'eject' command to remove current disk first.[/color]")
-		newline()
-		return
-
-	# Check if disk already inserted
-	if inserted_disk == disk_name:
-		append_text("[color=YELLOW]Warning: Disk " + disk_name + " already inserted.[/color]")
 		newline()
 		return
 
@@ -425,29 +418,24 @@ func insert_disk(disk_name: String, disk_node: Node, disk_data: Dictionary = {})
 	# Update the file system with disk-specific content
 	inserted_disk = disk_name
 	inserted_disk_node = disk_node # Store original disk_node for eject
-	var path_instance = get_path_instance(current_path)
 	
-	if !path_instance.has(null):
-		if !path_instance.has(disk_name):
-			# Create disk-specific content based on disk_data
-			if disk_data.has("files") and disk_data["files"] is Array:
-				var disk_files = {}
-				for file in disk_data["files"]:
-					disk_files[file] = generate_file_content(disk_name, file, disk_data)
-				path_instance[disk_name] = disk_files
-			else:
-				# Fallback content for unknown disks
-				path_instance[disk_name] = {"data.txt": "Contents of " + disk_name}
-			
-			append_text("[color=GREEN]Disk '" + disk_name + "' inserted successfully.[/color]")
-			newline()
-			
-			# Display disk information
-			display_disk_info(disk_name, disk_data)
+	# Always add disk data to /home
+	var home_path_instance = get_path_instance("/home")
+	if !home_path_instance.has(disk_name):
+		if disk_data.has("files") and disk_data["files"] is Array:
+			var disk_files = {}
+			for file in disk_data["files"]:
+				disk_files[file] = generate_file_content(disk_name, file, disk_data)
+			home_path_instance[disk_name] = disk_files
 		else:
-			append_text("[color=YELLOW]Warning: Disk already exists in directory.[/color]")
+			home_path_instance[disk_name] = {"data.txt": "Contents of " + disk_name}
+		append_text("[color=GREEN]Disk '" + disk_name + "' inserted successfully.[/color]")
+		newline()
+		
+		# Display disk information
+		display_disk_info(disk_name, disk_data)
 	else:
-		append_text("[color=RED]Error: Cannot access current directory.[/color]")
+		append_text("[color=YELLOW]Warning: Disk already exists in /home.[/color]")
 	newline()
 
 	# Hide the disk node after insertion (optional, depending on your animation)
@@ -473,16 +461,16 @@ func generate_file_content(disk_name: String, filename: String, disk_data: Dicti
 
 func generate_csv_content(disk_name: String, filename: String) -> String:
 	if filename == "weight_classes.csv":
-		return """WEIGHT_RANGE,EYE_COLOR,LIQUID_A,LIQUID_B,LIQUID_C,TOTAL
-130-139,Yellow,31,51,18,100
-130-139,Orange,28,49,23,100
-130-139,White,33,53,14,100
-140-145,Yellow,19,62,19,100
-140-145,Orange,21,58,21,100
-140-145,White,18,64,18,100
-146-150,Yellow,11,38,51,100
-146-150,Orange,9,42,49,100
-146-150,White,12,36,52,100"""
+		return """WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C
+130-139,31,51,18
+130-139,28,49,23
+130-139,33,53,14
+140-145,19,62,19
+140-145,21,58,21
+140-145,18,64,18
+146-150,11,38,51
+146-150,9,42,49
+146-150,12,36,52"""
 	return "CSV_ERROR: Unable to generate table for " + disk_name + " " + filename
 
 func display_disk_info(disk_name: String, disk_data: Dictionary) -> void:
@@ -984,31 +972,31 @@ func _built_in_command_init():
 	add_command(
 		"table",
 		func(filename: String = ""):
-			if inserted_disk == "":
-				append_text("[color=RED]No disk inserted.[/color]")
-				newline()
-				return
-			
+			append_text("[color=GRAY]Current path: " + current_path + "[/color]")
+			newline()
 			var path_instance = get_path_instance(current_path)
 			if not path_instance.has(inserted_disk):
-				append_text("[color=RED]Disk data not found.[/color]")
-				newline()
-				return
-			
+				# Try /home as fallback
+				var home_path_instance = get_path_instance("/home")
+				if home_path_instance.has(inserted_disk):
+					path_instance = home_path_instance
+					append_text("[color=YELLOW]Disk found in /home.[/color]")
+					newline()
+				else:
+					append_text("[color=RED]Disk data not found in current path or /home.[/color]")
+					newline()
+					append_text("[color=GRAY]fileDirectory: " + str(fileDirectory) + "[/color]")
+					newline()
+					return
 			var disk_data = path_instance[inserted_disk]
 			var csv_files = []
-			
-			# Find CSV files
 			for file_name in disk_data.keys():
 				if file_name.ends_with(".csv"):
 					csv_files.append(file_name)
-			
 			if csv_files.is_empty():
 				append_text("[color=YELLOW]No CSV files found on this disk.[/color]")
 				newline()
 				return
-			
-			# If filename specified, show that specific table
 			if filename != "" and filename in disk_data:
 				if filename.ends_with(".csv"):
 					show_csv_table(filename)
@@ -1016,7 +1004,6 @@ func _built_in_command_init():
 					append_text("[color=RED]File '" + filename + "' is not a CSV file.[/color]")
 					newline()
 			else:
-				# List available CSV files
 				append_text("[color=CYAN]Available CSV files:[/color]")
 				newline()
 				for csv_file in csv_files:

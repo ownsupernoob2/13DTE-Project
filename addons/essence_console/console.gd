@@ -40,7 +40,7 @@ var TextArtThin:Array[String] = [
 	"┇  ░░░░░░▒▒             ████████ ┇",
 	"┇        ▒▒      ▓▓▓▓▓▓▓▓        ┇",
 	"┇         ▒▒▒▒▒▒▒▒               ┇",
-	"┖┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┚"
+	"┖┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┚"
 ]
 # Input content
 var CurrentInputString: String = ""
@@ -68,6 +68,7 @@ var _just_save: String = ""
 var has_permission: bool = false
 var inserted_disk: String = ""
 var inserted_disk_node: Node = null
+var _table_mode: bool = false # Track when we're displaying a table
 
 func _ready() -> void:
 	if SetLocaleToEng:
@@ -106,6 +107,8 @@ func _process(delta: float) -> void:
 			if !CanInput:
 				clear()
 				CanInput = true
+				# Show initial commands on first boot
+				_show_startup_commands()
 			append_current_input_string()
 			_flash_timer.start()
 
@@ -219,6 +222,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 					CurrentMode = ""
 					CurrentInputString = ""
 					set_prefix()
+			"Escape":
+				if _table_mode:
+					_exit_table_mode()
+				else:
+					# Default escape behavior if needed
+					pass
 			_: print(event.as_text())
 		CurrentInputString_escaped = CurrentInputString.replace("[", "[lb]").replace("\n", "\u2B92\n")
 		append_current_input_string()
@@ -353,9 +362,39 @@ func set_prefix() -> void:
 			append_text(tr("error.mode_undefined"))
 			CurrentMode = ""
 
-func insert_disk(disk_name: String, disk_node: Node) -> void:
-	if disk_name != "Disk1":
-		append_text("[color=RED]Error: Invalid disk name.[/color]")
+# Helper function to repeat strings (GDScript doesn't support string * int)
+func repeat_string(text: String, count: int) -> String:
+	var result = ""
+	for i in range(count):
+		result += text
+	return result
+
+# Helper function to pad strings to the right (GDScript doesn't have pad_right)
+func pad_string_right(text: String, width: int) -> String:
+	if text.length() >= width:
+		return text.substr(0, width)
+	var padding_needed = width - text.length()
+	return text + repeat_string(" ", padding_needed)
+
+func insert_disk(disk_name: String, disk_node: Node, disk_data: Dictionary = {}) -> void:
+	# Support multiple disk types (Class 1-4 only)
+	var valid_disks = ["Disk1", "Disk2", "Disk3", "Disk4"]
+	if not disk_name in valid_disks:
+		append_text("[color=RED]Error: Invalid disk name. Supported: " + str(valid_disks) + "[/color]")
+		newline()
+		return
+
+	# Check if any disk is already inserted
+	if inserted_disk != "":
+		append_text("[color=RED]Error: Computer already has a disk inserted (" + inserted_disk + ").[/color]")
+		newline()
+		append_text("[color=YELLOW]Use 'eject' command to remove current disk first.[/color]")
+		newline()
+		return
+
+	# Check if disk already inserted
+	if inserted_disk == disk_name:
+		append_text("[color=YELLOW]Warning: Disk " + disk_name + " already inserted.[/color]")
 		newline()
 		return
 
@@ -383,14 +422,28 @@ func insert_disk(disk_name: String, disk_node: Node) -> void:
 		append_text("[color=YELLOW]Warning: No insertion animation found, proceeding with insertion.[/color]")
 		newline()
 
-	# Update the file system
+	# Update the file system with disk-specific content
 	inserted_disk = disk_name
 	inserted_disk_node = disk_node # Store original disk_node for eject
 	var path_instance = get_path_instance(current_path)
+	
 	if !path_instance.has(null):
 		if !path_instance.has(disk_name):
-			path_instance[disk_name] = {"data.txt": "Contents of Disk1"}
-			append_text("Disk 'Disk1' inserted successfully.")
+			# Create disk-specific content based on disk_data
+			if disk_data.has("files") and disk_data["files"] is Array:
+				var disk_files = {}
+				for file in disk_data["files"]:
+					disk_files[file] = generate_file_content(disk_name, file, disk_data)
+				path_instance[disk_name] = disk_files
+			else:
+				# Fallback content for unknown disks
+				path_instance[disk_name] = {"data.txt": "Contents of " + disk_name}
+			
+			append_text("[color=GREEN]Disk '" + disk_name + "' inserted successfully.[/color]")
+			newline()
+			
+			# Display disk information
+			display_disk_info(disk_name, disk_data)
 		else:
 			append_text("[color=YELLOW]Warning: Disk already exists in directory.[/color]")
 	else:
@@ -400,6 +453,74 @@ func insert_disk(disk_name: String, disk_node: Node) -> void:
 	# Hide the disk node after insertion (optional, depending on your animation)
 	if disk_node is Node3D:
 		disk_node.visible = false
+
+func generate_file_content(disk_name: String, filename: String, disk_data: Dictionary) -> String:
+	var content = ""
+	
+	# Use DiskManager to get file content
+	if DiskManager:
+		content = DiskManager.get_file_content(disk_name, filename)
+		
+		# Special handling for CSV files
+		if filename.ends_with(".csv"):
+			if content == "CSV_TABLE":
+				content = generate_csv_content(disk_name, filename)
+		
+		return content
+	
+	# Fallback content if DiskManager not available
+	return "ERROR: Unable to access file content"
+
+func generate_csv_content(disk_name: String, filename: String) -> String:
+	if filename == "weight_classes.csv":
+		return """WEIGHT_RANGE,EYE_COLOR,LIQUID_A,LIQUID_B,LIQUID_C,TOTAL
+130-139,Yellow,31,51,18,100
+130-139,Orange,28,49,23,100
+130-139,White,33,53,14,100
+140-145,Yellow,19,62,19,100
+140-145,Orange,21,58,21,100
+140-145,White,18,64,18,100
+146-150,Yellow,11,38,51,100
+146-150,Orange,9,42,49,100
+146-150,White,12,36,52,100"""
+	return "CSV_ERROR: Unable to generate table for " + disk_name + " " + filename
+
+func display_disk_info(disk_name: String, disk_data: Dictionary) -> void:
+	if disk_data.is_empty():
+		return
+		
+	append_text("[color=CYAN]" + repeat_string("=", 40) + "[/color]")
+	newline()
+	append_text("[color=CYAN]ALIEN SPECIES DATABASE[/color]")
+	newline()
+	append_text("[color=CYAN]" + repeat_string("=", 40) + "[/color]")
+	newline()
+	
+	if disk_data.has("species"):
+		append_text("[color=YELLOW]Species:[/color] " + disk_data["species"])
+		newline()
+	
+	if disk_data.has("weight_range"):
+		append_text("[color=YELLOW]Weight Range:[/color] " + disk_data["weight_range"])
+		newline()
+	
+	if disk_data.has("blood_types"):
+		append_text("[color=YELLOW]Blood Types:[/color] " + str(disk_data["blood_types"]))
+		newline()
+	
+	if disk_data.has("eye_colors"):
+		append_text("[color=YELLOW]Eye Colors:[/color] " + str(disk_data["eye_colors"]))
+		newline()
+	
+	if disk_data.has("files"):
+		append_text("[color=YELLOW]Available Files:[/color]")
+		newline()
+		for file in disk_data["files"]:
+			append_text("  - " + file)
+			newline()
+	
+	append_text("[color=CYAN]" + repeat_string("=", 40) + "[/color]")
+	newline()
 		
 func check_permission() -> bool:
 	return has_permission
@@ -461,7 +582,10 @@ func _built_in_command_init():
 	add_command(
 		"clear",
 		func():
-			clear(),
+			if _table_mode:
+				_exit_table_mode()
+			else:
+				clear(),
 		self,
 		tr("help.clear"),
 		tr("help.clear.detail")
@@ -539,37 +663,53 @@ func _built_in_command_init():
 	add_command(
 		"help",
 		func():
-			append_text("IBM 1974 Terminal")
+			append_text("[color=CYAN]" + repeat_string("═", 79) + "[/color]")
 			newline()
-			append_text("help: Display a list of all available commands with their descriptions")
+			append_text("[color=CYAN]                    ALIEN CLASSIFICATION TERMINAL - COMMAND REFERENCE[/color]")
 			newline()
-			append_text("clear: Clear the terminal screen")
+			append_text("[color=CYAN]" + repeat_string("═", 79) + "[/color]")
 			newline()
-			append_text("echo: Print a specified text string to the terminal")
 			newline()
-			append_text("ls: List the contents of the current directory")
+			append_text("[color=YELLOW]NAVIGATION COMMANDS:[/color]")
 			newline()
-			append_text("cd: Change the current directory to a specified path")
+			append_text("  [color=WHITE]ls[/color]         - List contents of current directory")
 			newline()
-			append_text("auth: Authenticate to gain write permissions")
+			append_text("  [color=WHITE]cd[/color]         - Change to specified directory")
 			newline()
-			append_text("mkdir: Create a new directory with the specified name (requires permission)")
+			append_text("  [color=WHITE]pwd[/color]        - Show current directory path")
 			newline()
-			append_text("touch: Create a new empty file with the specified name (requires permission)")
 			newline()
-			append_text("rm: Remove a specified file or directory (requires permission)")
+			append_text("[color=YELLOW]FILE OPERATIONS:[/color]")
 			newline()
-			append_text("mv: Move or rename a file or directory to a new location or name (requires permission)")
+			append_text("  [color=WHITE]cat[/color]        - Display contents of a text file")
 			newline()
-			append_text("cp: Copy a file or directory to a new location (requires permission)")
+			append_text("  [color=WHITE]table[/color]      - View CSV data in formatted table")
 			newline()
-			append_text("cat: Display the contents of a specified file")
 			newline()
-			append_text("nano: Edit the contents of a specified text file (requires permission)")
+			append_text("[color=YELLOW]DISK OPERATIONS:[/color]")
 			newline()
-			append_text("expr: Evaluate a mathematical expression and display the result")
+			append_text("  [color=WHITE]eject[/color]      - Remove currently inserted disk")
 			newline()
-			append_text("eject: Eject the inserted disk from the computer")
+			newline()
+			append_text("[color=YELLOW]CLASSIFICATION:[/color]")
+			newline()
+			append_text("  [color=WHITE]classify[/color]   - Classify alien specimen")
+			newline()
+			append_text("             Usage: classify <class> <weight> <blood> <eye_color>")
+			newline()
+			append_text("             Example: classify 'Class 1' 145 'X-Positive' 'Yellow'")
+			newline()
+			newline()
+			append_text("[color=YELLOW]UTILITY:[/color]")
+			newline()
+			append_text("  [color=WHITE]clear[/color]      - Clear the terminal screen")
+			newline()
+			append_text("  [color=WHITE]help[/color]       - Show this command reference")
+			newline()
+			newline()
+			append_text("[color=CYAN]" + repeat_string("═", 79) + "[/color]")
+			newline()
+			append_text("[color=GRAY]Insert a data disk and use these commands to analyze alien specimens[/color]")
 			newline(),
 		self,
 		"Show list of commands",
@@ -731,7 +871,9 @@ func _built_in_command_init():
 	add_command(
 		"eject",
 		func():
-			if inserted_disk != "Disk1" or not inserted_disk_node:
+			# Support ejecting any disk type
+			var valid_disks = ["Disk1", "Disk2", "Disk3", "Disk4"]
+			if inserted_disk == "" or not inserted_disk in valid_disks or not inserted_disk_node:
 				append_text("[color=RED]Error: No disk inserted or invalid disk.[/color]")
 				newline() 
 				return
@@ -784,7 +926,7 @@ func _built_in_command_init():
 				newline()
 
 			path_instance.erase(inserted_disk)
-			append_text("Disk 'Disk1' ejected successfully.")
+			append_text("[color=GREEN]Disk '" + inserted_disk + "' ejected successfully.[/color]")
 			newline()
 
 			if player and player.has_method("return_disk_to_hand"):
@@ -801,6 +943,139 @@ func _built_in_command_init():
 		self,
 		"Eject the inserted disk",
 		"Ejects the inserted disk from the computer, returning it to the player’s hand"
+	)
+	add_command(
+		"disks",
+		func():
+			if inserted_disk == "":
+				append_text("[color=YELLOW]No disks currently inserted.[/color]")
+			else:
+				append_text("[color=GREEN]Currently inserted disk: " + inserted_disk + "[/color]")
+			newline(),
+		self,
+		"Show inserted disks",
+		"Lists all currently inserted disks"
+	)
+	add_command(
+		"diskinfo",
+		func():
+			if inserted_disk == "":
+				append_text("[color=RED]No disk inserted.[/color]")
+				newline()
+				return
+			
+			var path_instance = get_path_instance(current_path)
+			if path_instance.has(inserted_disk):
+				append_text("[color=CYAN]Disk: " + inserted_disk + "[/color]")
+				newline()
+				append_text("[color=YELLOW]Files:[/color]")
+				newline()
+				var disk_data = path_instance[inserted_disk]
+				for file_name in disk_data.keys():
+					append_text("  - " + file_name)
+					newline()
+			else:
+				append_text("[color=RED]Disk data not found.[/color]")
+				newline(),
+		self,
+		"Show disk information",
+		"Displays information about the currently inserted disk"
+	)
+	add_command(
+		"table",
+		func(filename: String = ""):
+			if inserted_disk == "":
+				append_text("[color=RED]No disk inserted.[/color]")
+				newline()
+				return
+			
+			var path_instance = get_path_instance(current_path)
+			if not path_instance.has(inserted_disk):
+				append_text("[color=RED]Disk data not found.[/color]")
+				newline()
+				return
+			
+			var disk_data = path_instance[inserted_disk]
+			var csv_files = []
+			
+			# Find CSV files
+			for file_name in disk_data.keys():
+				if file_name.ends_with(".csv"):
+					csv_files.append(file_name)
+			
+			if csv_files.is_empty():
+				append_text("[color=YELLOW]No CSV files found on this disk.[/color]")
+				newline()
+				return
+			
+			# If filename specified, show that specific table
+			if filename != "" and filename in disk_data:
+				if filename.ends_with(".csv"):
+					show_csv_table(filename)
+				else:
+					append_text("[color=RED]File '" + filename + "' is not a CSV file.[/color]")
+					newline()
+			else:
+				# List available CSV files
+				append_text("[color=CYAN]Available CSV files:[/color]")
+				newline()
+				for csv_file in csv_files:
+					append_text("  - " + csv_file)
+					newline()
+				append_text("[color=GRAY]Use 'table filename.csv' to view a specific table[/color]")
+				newline(),
+		self,
+		"View CSV tables",
+		"Display CSV files in table format. Usage: table [filename.csv]"
+	)
+	add_command(
+		"classify",
+		func(species: String, weight: String, blood: String, eye: String):
+			if not GameManager:
+				append_text("[color=RED]Error: GameManager not available.[/color]")
+				newline()
+				return
+			
+			# Convert weight to int
+			var weight_int = weight.to_int()
+			if weight_int <= 0:
+				append_text("[color=RED]Error: Invalid weight. Please enter a positive number.[/color]")
+				newline()
+				return
+			
+			# Perform classification
+			var is_correct = GameManager.classify_alien(species, weight_int, blood, eye)
+			
+			if is_correct:
+				append_text("[color=GREEN]CLASSIFICATION CORRECT![/color]")
+				newline()
+				append_text("The alien is indeed a " + species + ".")
+				newline()
+			else:
+				append_text("[color=RED]CLASSIFICATION INCORRECT![/color]")
+				newline()
+				append_text("The alien is NOT a " + species + ". Check the data again!")
+				newline()
+				append_text("[color=YELLOW]Warning: Machine speed may have increased.[/color]")
+				newline()
+			
+			# Show current game stats
+			var stats = GameManager.get_classification_stats()
+			append_text("[color=CYAN]Current Stats:[/color]")
+			newline()
+			append_text("Total Classifications: " + str(stats["total_classifications"]))
+			newline()
+			append_text("Correct: " + str(stats["correct_classifications"]))
+			newline()
+			append_text("Incorrect: " + str(stats["incorrect_classifications"]))
+			newline()
+			append_text("Machine Speed Level: " + str(stats["machine_speed_level"]))
+			newline()
+			append_text("Accuracy: " + str(stats["accuracy"]).substr(0, 5) + "%")
+			newline(),
+		self,
+		"Classify an alien species",
+		"Usage: classify <class> <weight> <blood_type> <eye_color>\nExample: classify 'Class 1' 145 'X-Positive' 'Yellow'"
 	)
 	# Other commands unchanged
 
@@ -826,7 +1101,7 @@ func get_path_instance(path: String, goto: bool = false) -> Dictionary:
 			elif current_path_instance.get(i) is Dictionary:
 				current_path_instance = current_path_instance[i]
 			else:
-				return {null:"[i]" + path + "[/i] " + tr("error.not_valid_directory")}
+				return {null:"[i]" + path + "[/i] " + tr("error.not.valid_directory")}
 	if goto:
 		current_path = ""
 		for i in path_array:
@@ -844,3 +1119,154 @@ func match_file_type(type: String = "Text", content: String = "", append_error: 
 			if append_error:
 				append_text(tr("error.unknown_file_type") % [type])
 			return false
+func parse_csv_line(line):
+	var result = []
+	var current = ""
+	var in_quotes = false
+	for c in line:
+		if c == '"':
+			in_quotes = !in_quotes
+		elif c == ',' and !in_quotes:
+			result.append(current)
+			current = ""
+		else:
+			current += c
+	result.append(current)
+	return result
+
+func show_csv_table(filename: String) -> void:
+	var csv_content = generate_csv_content(inserted_disk, filename)
+	if csv_content.begins_with("CSV_ERROR"):
+		append_text("[color=RED]" + csv_content + "[/color]")
+		newline()
+		return
+	
+	# Parse CSV content
+	var lines = csv_content.split("\n")
+	if lines.is_empty():
+		append_text("[color=RED]Empty CSV file.[/color]")
+		newline()
+		return
+	
+	var headers = parse_csv_line(lines[0])
+	var data_rows = []
+	for i in range(1, lines.size()):
+		if lines[i].strip_edges() != "":
+			data_rows.append(parse_csv_line(lines[i]))
+	
+	# Dynamically calculate column widths
+	var column_widths = []
+	for i in range(headers.size()):
+		var max_len = headers[i].strip_edges().length()
+		for row in data_rows:
+			if i < row.size():
+				max_len = max(max_len, row[i].strip_edges().length())
+		column_widths.append(max(max_len + 2, 10))
+	
+	# Enter table mode and hide terminal UI
+	_table_mode = true
+	clear()
+	_hide_terminal_ui()
+	
+	# Table title
+	append_text("[color=CYAN]" + repeat_string("=", 80) + "[/color]")
+	newline()
+	append_text("[color=CYAN]          ALIEN SPECIES CLASSIFICATION DATA TABLE[/color]")
+	newline()
+	append_text("[color=CYAN]          FILE: " + filename.to_upper() + "[/color]")
+	newline()
+	append_text("[color=CYAN]          DISK: " + inserted_disk.to_upper() + "[/color]")
+	newline()
+	append_text("[color=CYAN]" + repeat_string("=", 80) + "[/color]")
+	newline()
+	newline()
+	
+	# Display headers
+	var header_line = ""
+	for i in range(headers.size()):
+		var width = column_widths[i]
+		header_line += "[color=YELLOW][b]" + pad_string_right(headers[i].strip_edges(), width) + "[/b][/color]"
+		if i < headers.size() - 1:
+			header_line += " │ "
+	append_text(header_line)
+	newline()
+	
+	# Separator line
+	var separator = ""
+	for i in range(headers.size()):
+		var width = column_widths[i]
+		separator += repeat_string("─", width)
+		if i < headers.size() - 1:
+			separator += "─┼─"
+	append_text("[color=GRAY]" + separator + "[/color]")
+	newline()
+	
+	# Display data rows
+	for row in data_rows:
+		var row_line = ""
+		for i in range(headers.size()):
+			var cell_value = row[i].strip_edges() if i < row.size() else ""
+			var width = column_widths[i]
+			var colored_value = "[color=WHITE]" + pad_string_right(cell_value, width) + "[/color]"
+			row_line += colored_value
+			if i < headers.size() - 1:
+				row_line += " │ "
+		append_text(row_line)
+		newline()
+	
+	newline()
+	append_text("[color=GRAY]" + repeat_string("=", 80) + "[/color]")
+	newline()
+	append_text("[color=ORANGE][b]LIQUID RATIOS TOTAL TO 100 FOR CLASSIFICATION[/b][/color]")
+	newline()
+	append_text("[color=GRAY]• High values (50+): [color=RED]Critical levels[/color]")
+	newline()
+	append_text("[color=GRAY]• Medium values (30-49): [color=YELLOW]Caution required[/color]")
+	newline()
+	append_text("[color=GRAY]• Low values (<30): [color=GREEN]Safe levels[/color]")
+	newline()
+	newline()
+	append_text("[color=GRAY]Press [color=WHITE]ESC[/color] to return to terminal, or type [color=WHITE]'clear'[/color] to clear table[/color]")
+	newline()
+
+func _exit_table_mode() -> void:
+	_table_mode = false
+	_restore_terminal_ui()
+	
+	newline()
+	append_text("[color=GREEN]Returned to terminal.[/color]")
+	newline()
+	set_prefix()
+
+func _hide_terminal_ui() -> void:
+	# This function can be used to hide terminal UI elements during table display
+	# Implementation depends on your UI structure
+	pass
+
+func _restore_terminal_ui() -> void:
+	# This function can be used to restore terminal UI elements after table display
+	# Implementation depends on your UI structure
+	pass
+
+func _show_startup_commands() -> void:
+	append_text("[color=CYAN]ALIEN CLASSIFICATION TERMINAL[/color]")
+	newline()
+	append_text("[color=YELLOW]Basic Commands:[/color]")
+	newline()
+	append_text("  help     - Show all available commands")
+	newline()
+	append_text("  ls       - List files and directories")
+	newline()
+	append_text("  cd       - Change directory")
+	newline()
+	append_text("  cat      - Display file contents")
+	newline()
+	append_text("  table    - View CSV data tables")
+	newline()
+	append_text("  classify - Classify alien species")
+	newline()
+	append_text("  eject    - Remove inserted disk")
+	newline()
+	append_text("[color=GRAY]Insert a data disk to begin analysis...[/color]")
+	newline()
+	newline()

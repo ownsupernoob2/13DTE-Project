@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Test Godot Project",
+			"type": "shell",
+			"command": "godot",
+			"args": [
+				"--headless",
+				"--validate-project"
+			],
+			"group": "test",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

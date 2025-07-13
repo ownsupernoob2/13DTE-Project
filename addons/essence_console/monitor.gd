@@ -3,32 +3,32 @@ extends RichTextLabel
 # Base
 @export var console_size: Vector2 = Vector2(100, 30)
 
-# Data generation
+# Data generation - Using Class system for aliens
 var species_data: Dictionary = {
-	"Class_1": {
-		"eye_colors": ["Blue", "Green", "Brown", "Red"],
-		"weight_range": [30, 80],  # kg
-		"blood_types": ["A1", "A2"]
+	"Class 1": {
+		"eye_colors": ["Yellow", "Orange", "White", "Red"],  # Some correct, some incorrect
+		"weight_range": [120, 160],  # Slightly broader range to include edge cases
+		"blood_types": ["X-Positive", "O-Negative", "Z-Flux", "A-Neutral"]  # Mix correct/incorrect
 	},
-	"Class_2": {
-		"eye_colors": ["Blue", "Green", "Brown", "Red"],
-		"weight_range": [40, 90],  # kg
-		"blood_types": ["B1", "B2"]
+	"Class 2": {
+		"eye_colors": ["Green", "Cyan", "Amber", "Blue"],
+		"weight_range": [75, 105],
+		"blood_types": ["A-Neutral", "B-Static", "X-Positive"]
 	},
-	"Class_3": {
-		"eye_colors": ["Blue", "Green", "Brown", "Red"],
-		"weight_range": [35, 85],  # kg
-		"blood_types": ["C1", "C2"]
+	"Class 3": {
+		"eye_colors": ["Blue", "Indigo", "Red", "Purple"],
+		"weight_range": [190, 260],
+		"blood_types": ["B-Volatile", "C-Pulse", "D-Heavy"]
 	},
-	"Class_4": {
-		"eye_colors": ["Blue", "Green", "Brown", "Red"],
-		"weight_range": [45, 100],  # kg
-		"blood_types": ["D1", "D2"]
+	"Class 4": {
+		"eye_colors": ["Purple", "Violet", "Magenta", "Blue"],
+		"weight_range": [45, 75],
+		"blood_types": ["C-Stable", "D-Light", "A-Neutral"]
 	}
 }
-var species_list: Array = ["Class_1", "Class_2", "Class_3", "Class_4"]
-var all_eye_colors: Array = ["Blue", "Green", "Brown", "Red", "Purple"]  # Includes invalid option
-var all_blood_types: Array = ["A1", "A2", "B1", "B2", "C1", "C2", "D1", "D2", "X"]  # Includes invalid option
+var species_list: Array = ["Class 1", "Class 2", "Class 3", "Class 4"]
+var all_eye_colors: Array = ["Yellow", "Orange", "White", "Green", "Cyan", "Amber", "Blue", "Indigo", "Red", "Purple", "Violet", "Magenta", "Crimson", "Scarlet"]
+var all_blood_types: Array = ["X-Positive", "O-Negative", "Z-Flux", "A-Neutral", "B-Static", "B-Volatile", "C-Pulse", "C-Stable", "D-Light", "D-Heavy", "E-Dense"]  # All known blood types
 
 # Display and input control
 var _flash_timer = Timer.new()

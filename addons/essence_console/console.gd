@@ -857,81 +857,82 @@ func _built_in_command_init():
 		tr("help.expr.detail")
 	)
 	add_command(
-		"eject",
-		func():
-			# Support ejecting any disk type
-			var valid_disks = ["Disk1", "Disk2", "Disk3", "Disk4"]
-			if inserted_disk == "" or not inserted_disk in valid_disks or not inserted_disk_node:
-				append_text("[color=RED]Error: No disk inserted or invalid disk.[/color]")
-				newline() 
-				return
+	"eject",
+	func():
+		# Support ejecting any disk type
+		var valid_disks = ["Disk1", "Disk2", "Disk3", "Disk4"]
+		if inserted_disk == "" or not inserted_disk in valid_disks or not inserted_disk_node:
+			append_text("[color=RED]Error: No disk inserted or invalid disk.[/color]")
+			newline()
+			return
 
-			var path_instance = get_path_instance(current_path)
-			if path_instance.has(null):
-				append_text("[color=RED]Error: Cannot access current directory.[/color]")
-				newline()
-				return
-			if not path_instance.has(inserted_disk):
-				append_text("[color=RED]Error: Disk not found in current directory.[/color]")
-				newline()
-				return
+		var path_instance = get_path_instance(current_path)
+		if path_instance.has(null):
+			append_text("[color=RED]Error: Cannot access current directory.[/color]")
+			newline()
+			return
+		if not path_instance.has(inserted_disk):
+			append_text("[color=RED]Error: Disk not found in current directory.[/color]")
+			newline()
+			return
 
-			# Immediately exit computer mode
-			var player = get_tree().get_first_node_in_group("player")
-			if player and player.has_method("exit_computer_mode"):
-				player.exit_computer_mode()
-				print("Exited computer mode") # Debug
-			else:
-				append_text("[color=RED]Error: Player not found.[/color]")
-				newline()
-				return
+		# Immediately exit computer mode
+		var player = get_tree().get_first_node_in_group("player")
+		if player and player.has_method("exit_computer_mode"):
+			player.exit_computer_mode()
+			print("Exited computer mode")
+		else:
+			append_text("[color=RED]Error: Player not found.[/color]")
+			newline()
+			return
 
-			var fake_disk = $"../../../FakeDisk"
-			if not fake_disk:
-				append_text("[color=RED]Error: FakeDisk node not found.[/color]")
-				newline()
-				return
-			print("FakeDisk found, initial visible: ", fake_disk.visible) 
+		# Use the correct disk node based on inserted_disk
+		var disk_node = get_node_or_null("../../../" + inserted_disk)
+		if not disk_node:
+			append_text("[color=RED]Error: " + inserted_disk + " node not found.[/color]")
+			newline()
+			return
+		print(inserted_disk + " found, initial visible: ", disk_node.visible)
 
-			var animation_player = $"../../../AnimationPlayer"
-			if not animation_player:
-				animation_player = fake_disk.get_parent().get_node_or_null("AnimationPlayer")
-			if not animation_player:
-				append_text("[color=RED]Error: AnimationPlayer not found.[/color]")
-				newline()
-				return
-			print("AnimationPlayer found: ", animation_player)
+		var animation_player = disk_node.get_node_or_null("AnimationPlayer")
+		if not animation_player:
+			animation_player = disk_node.get_parent().get_node_or_null("AnimationPlayer")
+		if not animation_player:
+			append_text("[color=RED]Error: AnimationPlayer not found for " + inserted_disk + ".[/color]")
+			newline()
+			return
+		print("AnimationPlayer found for " + inserted_disk + ": ", animation_player)
 
-			if animation_player.has_animation("eject"):
-				fake_disk.visible = true
-				print("FakeDisk set visible for eject animation") 
-				animation_player.play("eject")
-				await animation_player.animation_finished
-				fake_disk.visible = false
-				print("Eject animation finished, FakeDisk hidden")
-			else:
-				append_text("[color=YELLOW]Warning: No ejection animation found, proceeding with ejection.[/color]")
-				newline()
-
-			path_instance.erase(inserted_disk)
-			append_text("[color=GREEN]Disk '" + inserted_disk + "' ejected successfully.[/color]")
+		if animation_player.has_animation("eject"):
+			disk_node.visible = true
+			print(inserted_disk + " set visible for eject animation")
+			animation_player.play("eject")
+			await animation_player.animation_finished
+			disk_node.visible = false
+			print("Eject animation finished, " + inserted_disk + " hidden")
+		else:
+			append_text("[color=YELLOW]Warning: No ejection animation found for " + inserted_disk + ", proceeding with ejection.[/color]")
 			newline()
 
-			if player and player.has_method("return_disk_to_hand"):
-				inserted_disk_node.add_to_group("grabbable")
-				player.return_disk_to_hand(inserted_disk, inserted_disk_node)
-				print("Disk returned to player’s hand") 
-			else:
-				append_text("[color=RED]Error: Player not found for disk return.[/color]")
-				newline()
+		path_instance.erase(inserted_disk)
+		append_text("[color=GREEN]Disk '" + inserted_disk + "' ejected successfully.[/color]")
+		newline()
 
-			inserted_disk = ""
-			inserted_disk_node = null
-			,
-		self,
-		"Eject the inserted disk",
-		"Ejects the inserted disk from the computer, returning it to the player’s hand"
-	)
+		if player and player.has_method("return_disk_to_hand"):
+			inserted_disk_node.add_to_group("grabbable")
+			player.return_disk_to_hand(inserted_disk, inserted_disk_node)
+			print("Disk returned to player’s hand")
+		else:
+			append_text("[color=RED]Error: Player not found for disk return.[/color]")
+			newline()
+
+		inserted_disk = ""
+		inserted_disk_node = null
+		,
+	self,
+	"Eject the inserted disk",
+	"Ejects the inserted disk from the computer, returning it to the player’s hand"
+)
 	add_command(
 		"disks",
 		func():

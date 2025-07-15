@@ -391,25 +391,23 @@ func insert_disk(disk_name: String, disk_node: Node, disk_data: Dictionary = {})
 		newline()
 		return
 
-	# Reference the FakeDisk node in the scene (adjust path as needed)
-	var fake_disk = $"../../../FakeDisk"
+	# Reference the FakeDisk node in the scene (dynamic path)
+	var fake_disk = get_node_or_null("../../../" + disk_name)
 	if not fake_disk:
-		append_text("[color=RED]Error: FakeDisk node not found.[/color]")
+		append_text("[color=RED]Error: " + disk_name + " node not found.[/color]")
 		newline()
 		return
 
 	# Check for AnimationPlayer on FakeDisk or its parent
-	var animation_player = $"../../../AnimationPlayer"
+	var animation_player = fake_disk.get_node_or_null("AnimationPlayer")
 	if not animation_player:
 		animation_player = fake_disk.get_parent().get_node_or_null("AnimationPlayer")
 	
 	if animation_player and animation_player.has_animation("insert"):
 		# Make FakeDisk visible if hidden
-		if fake_disk:
-			fake_disk.visible = true
+		fake_disk.visible = true
 		# Play the disk insertion animation
 		animation_player.play("insert")
-		# Wait for the animation to finish
 		await animation_player.animation_finished
 	else:
 		append_text("[color=YELLOW]Warning: No insertion animation found, proceeding with insertion.[/color]")
@@ -886,7 +884,7 @@ func _built_in_command_init():
 			newline()
 			return
 
-		# Use the correct disk node based on inserted_disk
+		# Use the correct disk node based on inserted_disk (dynamic path)
 		var disk_node = get_node_or_null("../../../" + inserted_disk)
 		if not disk_node:
 			append_text("[color=RED]Error: " + inserted_disk + " node not found.[/color]")

@@ -7,7 +7,13 @@ extends RichTextLabel
 var CurrentMode:String = ""
 # Data
 @export var commands:Dictionary = {}
-@export var fileDirectory:Dictionary = {"home":{},"config":{}}
+@export var fileDirectory:Dictionary = {
+	"home":{},
+	"config":{},
+	"eye_color": {
+		"weight_classes.csv": "WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C\n130-139,31,51,18\n130-139,28,49,23\n130-139,33,53,14\n140-145,19,62,19\n140-145,21,58,21\n140-145,18,64,18\n146-150,11,38,51\n146-150,9,42,49\n146-150,12,36,52"
+	}
+}
 var current_path:String = "/home"
 # Setup text art
 var TextArt:Array[String] = [
@@ -420,16 +426,20 @@ func insert_disk(disk_name: String, disk_node: Node, disk_data: Dictionary = {})
 	# Always add disk data to /home
 	var home_path_instance = get_path_instance("/home")
 	if !home_path_instance.has(disk_name):
+		var disk_files = {}
 		if disk_data.has("files") and disk_data["files"] is Array:
-			var disk_files = {}
 			for file in disk_data["files"]:
-				disk_files[file] = generate_file_content(disk_name, file, disk_data)
+				if file == "weight_classes.csv":
+					if !disk_files.has("eye_color"):
+						disk_files["eye_color"] = {}
+					disk_files["eye_color"][file] = generate_file_content(disk_name, file, disk_data)
+				else:
+					disk_files[file] = generate_file_content(disk_name, file, disk_data)
 			home_path_instance[disk_name] = disk_files
 		else:
 			home_path_instance[disk_name] = {"data.txt": "Contents of " + disk_name}
 		append_text("[color=GREEN]Disk '" + disk_name + "' inserted successfully.[/color]")
 		newline()
-		
 		# Display disk information
 		display_disk_info(disk_name, disk_data)
 	else:

@@ -10,9 +10,6 @@ var CurrentMode:String = ""
 @export var fileDirectory:Dictionary = {
 	"home":{},
 	"config":{},
-	"eye_color": {
-		"weight_classes.csv": "WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C\n130-139,31,51,18\n130-139,28,49,23\n130-139,33,53,14\n140-145,19,62,19\n140-145,21,58,21\n140-145,18,64,18\n146-150,11,38,51\n146-150,9,42,49\n146-150,12,36,52"
-	}
 }
 var current_path:String = "/home"
 # Setup text art
@@ -469,16 +466,16 @@ func generate_file_content(disk_name: String, filename: String, disk_data: Dicti
 
 func generate_csv_content(disk_name: String, filename: String) -> String:
 	if filename == "weight_classes.csv":
-		return """WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C
-130-139,31,51,18
-130-139,28,49,23
-130-139,33,53,14
-140-145,19,62,19
-140-145,21,58,21
-140-145,18,64,18
-146-150,11,38,51
-146-150,9,42,49
-146-150,12,36,52"""
+		if disk_name == "Disk1":
+			return """WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C\n130-139,31,51,18\n130-139,28,49,23\n130-139,33,53,14\n140-145,19,62,19\n140-145,21,58,21\n140-145,18,64,18\n146-150,11,38,51\n146-150,9,42,49\n146-150,12,36,52"""
+		elif disk_name == "Disk2":
+			return """WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C\n130-139,28,49,23\n130-139,33,53,14\n140-145,21,58,21\n140-145,18,64,18\n146-150,12,36,52\n146-150,15,40,45\n151-155,20,30,50\n151-155,18,32,50\n155-160,25,25,50"""
+		elif disk_name == "Disk3":
+			return """WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C\n140-145,18,64,18\n146-150,12,36,52\n146-150,15,40,45\n151-155,20,30,50\n151-155,18,32,50\n155-160,25,25,50\n160-165,30,20,50\n160-165,28,22,50\n165-170,35,15,50"""
+		elif disk_name == "Disk4":
+			return """WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C\n151-155,18,32,50\n155-160,25,25,50\n160-165,30,20,50\n160-165,28,22,50\n165-170,35,15,50\n170-175,40,10,50\n170-175,38,12,50\n175-180,45,5,50\n175-180,42,8,50"""
+		else:
+			return "CSV_ERROR: Unable to generate table for " + disk_name + " " + filename
 	return "CSV_ERROR: Unable to generate table for " + disk_name + " " + filename
 
 func display_disk_info(disk_name: String, disk_data: Dictionary) -> void:
@@ -1210,20 +1207,6 @@ func show_csv_table(filename: String) -> void:
 		append_text(row_line)
 		newline()
 	
-	newline()
-	append_text("[color=GRAY]" + repeat_string("=", 80) + "[/color]")
-	newline()
-	append_text("[color=ORANGE][b]LIQUID RATIOS TOTAL TO 100 FOR CLASSIFICATION[/b][/color]")
-	newline()
-	append_text("[color=GRAY]• High values (50+): [color=RED]Critical levels[/color]")
-	newline()
-	append_text("[color=GRAY]• Medium values (30-49): [color=YELLOW]Caution required[/color]")
-	newline()
-	append_text("[color=GRAY]• Low values (<30): [color=GREEN]Safe levels[/color]")
-	newline()
-	newline()
-	append_text("[color=GRAY]Press [color=WHITE]ESC[/color] to return to terminal, or type [color=WHITE]'clear'[/color] to clear table[/color]")
-	newline()
 
 func _exit_table_mode() -> void:
 	_table_mode = false
@@ -1258,8 +1241,6 @@ func _show_startup_commands() -> void:
 	append_text("  cat      - Display file contents")
 	newline()
 	append_text("  table    - View CSV data tables")
-	newline()
-	append_text("  classify - Classify alien species")
 	newline()
 	append_text("  eject    - Remove inserted disk")
 	newline()

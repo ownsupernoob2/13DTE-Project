@@ -38,7 +38,7 @@ shader = ExtResource("39_n3amx")
 shader_parameter/enable_fog = true
 shader_parameter/fog_color = Color(0.219393, 0.131903, 0.0662079, 1)
 shader_parameter/noise_color = Color(0, 0, 0, 1)
-shader_parameter/fog_distance = 3560.85
+shader_parameter/fog_distance = 150.0
 shader_parameter/fog_fade_range = 10.0
 shader_parameter/enable_noise = true
 shader_parameter/noise_time_fac = 4.0
@@ -522,7 +522,7 @@ omni_range = 5.739
 omni_attenuation = -0.625
 
 [node name="Machine" parent="Light" instance=ExtResource("23_tmadj")]
-transform = Transform3D(-0.992853, 0, 0.11934, 0, 1, 0, -0.11934, 0, -0.992853, -37.6827, 141.793, -18.7078)
+transform = Transform3D(-0.992853, 0, 0.11934, 0, 1, 0, -0.11934, 0, -0.992853, -36.5613, 141.793, -16.1641)
 
 [node name="chair_wooden_12" parent="Light" instance=ExtResource("9_ixuqm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.2197, 141.294, -11.3759)
@@ -570,7 +570,7 @@ transform = Transform3D(0.0238457, 0, -0.76519, 0, 0.708985, 0, 0.71318, 0, 0.02
 transform = Transform3D(1.40139, 0, -1.49012e-07, 0, 1.41047, 0, 0, 0, 1.30614, -0.00705321, 0.548354, 0.576901)
 
 [node name="SarcoPodMap10Export (2)" parent="." instance=ExtResource("38_keb61")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.0738, -1.65938, 6.81835)
+transform = Transform3D(0.719625, 0, 0, 0, 0.719625, 0, 0, 0, 0.719625, 3.158, 38.48, 2.55)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="SarcoPodMap10Export (2)/fence_e_1" index="0"]
 
@@ -615,7 +615,7 @@ transform = Transform3D(0.147257, 0, 0.989098, 0, 1, 0, -0.989098, 0, 0.147257, 
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.8142, 142.471, -10.7005)
 
 [node name="Scaffolding" type="Node3D" parent="."]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, -36.8148, 143.245, -8.74576)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, -34.5063, 143.245, -8.19529)
 
 [node name="beam_62" parent="Scaffolding" instance=ExtResource("16_kxneo")]
 transform = Transform3D(-1.49532e-10, 1, 4.37111e-08, -0.0034209, -4.37114e-08, 0.999994, 0.999994, 0, 0.0034209, 1.90308, -0.207119, -5.8023)

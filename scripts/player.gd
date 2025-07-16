@@ -129,17 +129,20 @@ func insert_disk() -> void:
 		original_rotation = Vector3.ZERO
 
 func return_disk_to_hand(disk_name: String, disk_node: Node) -> void:
-	# Support all disk types using DiskManager
 	var disk_info = DiskManager.get_disk_info(disk_name)
 	if not disk_info.is_empty() and disk_node and disk_node.is_in_group("disk"):
 		held_object = disk_node
 		held_object_name = disk_name
-		held_object.add_to_group("grabbable") # Restore grabbable state
-		var mesh: MeshInstance3D = held_object.get_node_or_null("MeshInstance3D")
-		if mesh and mesh is MeshInstance3D:
-			original_material = mesh.get_surface_override_material(0) if mesh.get_surface_override_material(0) else mesh.mesh.surface_get_material(0)
-			mesh.set_surface_override_material(0, highlight_material)
-		held_object.visible = false
+		original_position = disk_node.global_position
+		original_rotation = disk_node.global_rotation
+		held_object.add_to_group("grabbable")
+		for child in held_object.get_children():
+			if child is MeshInstance3D:
+				# Always store the base mesh material, not the override
+				original_material = child.mesh.surface_get_material(0)
+				child.set_surface_override_material(0, highlight_material)
+				break
+		held_object.visible = true
 		var held_version: Node = camera.get_node_or_null(held_object_name + "_Held")
 		var placeholder: Node = camera.get_node_or_null("Placeholder")
 		if held_version:
@@ -147,7 +150,7 @@ func return_disk_to_hand(disk_name: String, disk_node: Node) -> void:
 		elif placeholder:
 			placeholder.visible = true
 		exit_computer_mode()
-		
+
 func press_machine_button() -> void:
 	if not using_computer or Global.is_using_computer or Global.is_using_monitor:
 		return
@@ -294,7 +297,6 @@ func grab_object() -> void:
 	var result: Dictionary = space_state.intersect_ray(query)
 
 	if result and result.collider and result.collider.is_in_group("grabbable"):
-		# Only highlight the picked disk
 		held_object = result.collider
 		held_object_name = held_object.name
 		original_position = held_object.global_position
@@ -302,17 +304,16 @@ func grab_object() -> void:
 
 		# Restore all disks' materials
 		for node in get_tree().get_nodes_in_group("grabbable"):
-			var mesh: MeshInstance3D = node.get_node_or_null("MeshInstance3D")
-			if mesh and mesh is MeshInstance3D:
-				mesh.set_surface_override_material(0, mesh.mesh.surface_get_material(0))
+			for child in node.get_children():
+				if child is MeshInstance3D:
+					child.set_surface_override_material(0, child.mesh.surface_get_material(0))
 
 		# Highlight the held disk
-		var mesh: MeshInstance3D = held_object.get_node_or_null("MeshInstance3D")
-		if mesh and mesh is MeshInstance3D:
-			original_material = mesh.get_surface_override_material(0) if mesh.get_surface_override_material(0) else mesh.mesh.surface_get_material(0)
-			mesh.set_surface_override_material(0, highlight_material)
-
-		# Do NOT hide the held disk here
+		for child in held_object.get_children():
+			if child is MeshInstance3D:
+				original_material = child.mesh.surface_get_material(0) # Use base material
+				child.set_surface_override_material(0, highlight_material)
+				break
 
 		var held_version: Node = camera.get_node_or_null(held_object_name + "_Held")
 		var placeholder: Node = camera.get_node_or_null("Placeholder")
@@ -324,9 +325,9 @@ func grab_object() -> void:
 			held_version.visible = true
 		elif placeholder:
 			placeholder.visible = true
-
+			
 func drop_object() -> void:
-	if held_object == null or not can_grab or Global is_using_computer or Global is_using_monitor:
+	if held_object == null or not can_grab or Global.is_using_computer or Global.is_using_monitor:
 		return
 
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
@@ -346,9 +347,10 @@ func drop_object() -> void:
 		return
 
 	# Restore the held disk's material
-	var mesh: MeshInstance3D = held_object.get_node_or_null("MeshInstance3D")
-	if mesh and mesh is MeshInstance3D and original_material:
-		mesh.set_surface_override_material(0, original_material)
+	for child in held_object.get_children():
+		if child is MeshInstance3D and original_material:
+			child.set_surface_override_material(0, original_material)
+			break  # Only need to process the first MeshInstance3D
 
 	held_object.visible = true
 
@@ -366,6 +368,7 @@ func drop_object() -> void:
 	held_object = null
 	held_object_name = ""
 	original_material = null
+
 
 func _on_grab_area_body_entered(body: Node) -> void:
 	if body == self:

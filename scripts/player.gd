@@ -285,103 +285,84 @@ func _headbob(time: float) -> Vector3:
 func grab_object() -> void:
 	if held_object != null or not can_grab or Global.is_using_computer or Global.is_using_monitor:
 		return
+
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
 	var ray_start: Vector3 = player_camera.project_ray_origin(mouse_pos)
 	var ray_end: Vector3 = ray_start + player_camera.project_ray_normal(mouse_pos) * 20.0
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(ray_start, ray_end)
 	var result: Dictionary = space_state.intersect_ray(query)
-	
+
 	if result and result.collider and result.collider.is_in_group("grabbable"):
+		# Only highlight the picked disk
 		held_object = result.collider
 		held_object_name = held_object.name
 		original_position = held_object.global_position
 		original_rotation = held_object.global_rotation
-		
-		# Try to find the mesh for different disk types
-		var mesh: MeshInstance3D = null
-		# Look for common mesh patterns for different disks
-		var possible_mesh_paths = [
-			"MeshInstance3D",
-			held_object_name + "/floppy_disc_2",
-			"Disk1/floppy_disc_2",
-			"floppy_disc_2"
-		]
-		
-		for path in possible_mesh_paths:
-			mesh = held_object.get_node_or_null(path)
+
+		# Restore all disks' materials
+		for node in get_tree().get_nodes_in_group("grabbable"):
+			var mesh: MeshInstance3D = node.get_node_or_null("MeshInstance3D")
 			if mesh and mesh is MeshInstance3D:
-				break
-		
+				mesh.set_surface_override_material(0, mesh.mesh.surface_get_material(0))
+
+		# Highlight the held disk
+		var mesh: MeshInstance3D = held_object.get_node_or_null("MeshInstance3D")
 		if mesh and mesh is MeshInstance3D:
 			original_material = mesh.get_surface_override_material(0) if mesh.get_surface_override_material(0) else mesh.mesh.surface_get_material(0)
-			if can_grab:
-				mesh.set_surface_override_material(0, highlight_material)
-		
-		held_object.visible = false
-		
+			mesh.set_surface_override_material(0, highlight_material)
+
+		# Do NOT hide the held disk here
+
 		var held_version: Node = camera.get_node_or_null(held_object_name + "_Held")
 		var placeholder: Node = camera.get_node_or_null("Placeholder")
-		
+
 		if placeholder:
 			placeholder.visible = false
-		
+
 		if held_version:
 			held_version.visible = true
 		elif placeholder:
 			placeholder.visible = true
 
 func drop_object() -> void:
-	if held_object == null or not can_grab or Global.is_using_computer or Global.is_using_monitor:
+	if held_object == null or not can_grab or Global is_using_computer or Global is_using_monitor:
 		return
-	
+
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
 	var ray_start: Vector3 = player_camera.project_ray_origin(mouse_pos)
 	var ray_end: Vector3 = ray_start + player_camera.project_ray_normal(mouse_pos) * 20.0
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(ray_start, ray_end)
 	var result: Dictionary = space_state.intersect_ray(query)
-	
+
 	var can_drop: bool = false
 	if result and result.collider == held_object:
 		can_drop = true
 	elif result and result.position.distance_to(original_position) < 0.5:
 		can_drop = true
-	
+
 	if not can_drop:
 		return
-	
-	for node in get_tree().get_nodes_in_group("grabbable"):
-		# Try to find mesh for any disk type
-		var mesh: MeshInstance3D = null
-		var possible_mesh_paths = [
-			"MeshInstance3D",
-			node.name + "/floppy_disc_2", 
-			"Disk1/floppy_disc_2",
-			"floppy_disc_2"
-		]
-		
-		for path in possible_mesh_paths:
-			mesh = node.get_node_or_null(path)
-			if mesh and mesh is MeshInstance3D:
-				break
-				
-		if mesh and mesh is MeshInstance3D:
-			mesh.set_surface_override_material(0, mesh.mesh.surface_get_material(0))
-	
+
+	# Restore the held disk's material
+	var mesh: MeshInstance3D = held_object.get_node_or_null("MeshInstance3D")
+	if mesh and mesh is MeshInstance3D and original_material:
+		mesh.set_surface_override_material(0, original_material)
+
 	held_object.visible = true
-	
+
 	var held_version: Node = camera.get_node_or_null(held_object_name + "_Held")
 	var placeholder: Node = camera.get_node_or_null("Placeholder")
-	
+
 	if held_version:
 		held_version.visible = false
 	if placeholder:
 		placeholder.visible = false
-	
+
 	held_object.global_position = original_position
 	held_object.global_rotation = original_rotation
-	
+
 	held_object = null
 	held_object_name = ""
 	original_material = null
@@ -406,7 +387,7 @@ func _on_grab_area_body_exited(body: Node) -> void:
 	if body == self:
 		can_grab = false
 		if held_object:
-			held_object.visible = false
+			held_object.visible = false # Hide held disk when leaving area
 		else:
 			for node in get_tree().get_nodes_in_group("grabbable"):
 				var mesh: MeshInstance3D = node.get_node_or_null("MeshInstance3D")

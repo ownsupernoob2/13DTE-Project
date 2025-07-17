@@ -75,11 +75,11 @@ func _update_interaction_raycast() -> void:
 		if result.collider.is_in_group("grabbable"):
 			can_interact = true
 		# Add machine button detection
-		if result.collider.name == "UpButton" or result.collider.name == "DownButton":
+		if  result.collider.name == "StartButton":
 			can_interact = true
 			using_computer = result.collider
 		# Check if collision is with StaticBody3D child of a button
-		elif result.collider.get_parent() and (result.collider.get_parent().name == "UpButton" or result.collider.get_parent().name == "DownButton"):
+		elif result.collider.get_parent() and (result.collider.get_parent().name == "StartButton"):
 			can_interact = true
 			using_computer = result.collider.get_parent()
 
@@ -154,20 +154,24 @@ func return_disk_to_hand(disk_name: String, disk_node: Node) -> void:
 func press_machine_button() -> void:
 	if not using_computer or Global.is_using_computer or Global.is_using_monitor:
 		return
-		
+	
 	# Find the machine that contains this button
 	var machine_node = get_node_or_null("../Light/Machine")
 	if not machine_node:
 		print("Machine node not found!")
 		return
 	
-	# Call the machine's button handler with the button name
-	if machine_node.has_method("handle_button_press"):
-		machine_node.handle_button_press(using_computer.name)
+	# Simulate the input event for the StartButton
+	if using_computer.name == "StartButton":
+		var input_event = InputEventMouseButton.new()
+		input_event.button_index = MOUSE_BUTTON_LEFT
+		input_event.pressed = true
+		machine_node._on_start_button_input(null, input_event, Vector3.ZERO, Vector3.ZERO, 0)
 		print("Player pressed machine button: ", using_computer.name)
 	else:
-		print("Machine doesn't have handle_button_press method!")
-
+		print("No valid button detected!")
+		
+	
 func enter_monitor_mode() -> void:
 	if using_computer and not Global.is_using_computer and not Global.is_using_monitor:
 		active_computer_camera = get_node_or_null("../Monitor/MonitorCamera")
@@ -204,7 +208,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				enter_computer_mode()
 			elif held_object and held_object.is_in_group("disk"):
 				insert_disk()
-			elif using_computer.name == "UpButton" or using_computer.name == "DownButton":
+			elif using_computer.name == "StartButton":
 				press_machine_button()
 		elif held_object == null and can_grab:
 			grab_object()

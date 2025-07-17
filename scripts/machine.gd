@@ -1,33 +1,23 @@
 extends Node3D
 
 @onready var rich_text_label = $Monitor/SubViewport/Control/RichTextLabel
-@onready var up_button = $UpButton
-@onready var down_button = $DownButton
+@onready var start_button = $StartButton
 
-var current_number: int = 5
-var up_button_held: bool = true
-var down_button_held: bool = false
+var total_seconds: int = 300 # 5 minutes default
 var timer: float = 0.0
 var game_ended: bool = false
+var is_running: bool = false # Tracks if timer is running
 
 # Signal for game end
-signal game_over(final_count: int)
-
-# Speed level system
-var speed_level: int = 1
-var base_update_interval: float = 0.5
-var current_update_interval: float = 0.5
+signal game_over
 
 func _ready() -> void:
 	if rich_text_label == null:
 		push_error("RichTextLabel not found at 'Monitor/SubViewport/Control/RichTextLabel'. Check scene structure.")
 		_debug_print_node_tree()
 		return
-	if up_button == null:
-		push_error("UpButton not found at 'UpButton'. Ensure Area3D node exists.")
-		return
-	if down_button == null:
-		push_error("DownButton not found at 'DownButton'. Ensure Area3D node exists.")
+	if start_button == null:
+		push_error("StartButton not found at 'StartButton'. Ensure Area3D node exists.")
 		return
 
 	# Configure RichTextLabel
@@ -45,150 +35,91 @@ func _ready() -> void:
 		rich_text_label.fit_content = false
 		rich_text_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		rich_text_label.clip_contents = false
-		var sub_viewport = rich_text_label.get_node_or_null("../../../")
-		if sub_viewport and sub_viewport is SubViewport:
-			var viewport_size = sub_viewport.size.y
-			var font_size = max(48, int(viewport_size * 0.9))
-			rich_text_label.text = "[center][valign center][font_size=%d]%d[/font_size][/valign][/center]" % [font_size, current_number]
+		_update_display()
 
-	# Connect button signals if they exist
+	# Connect button signals
 	_setup_button_connections()
 
-	# Start with random direction
-	_update_display()
-
 func _setup_button_connections() -> void:
-	# Try to connect to button signals if buttons are Area3D nodes
-	if up_button and up_button.has_signal("input_event"):
-		if not up_button.is_connected("input_event", _on_up_button_input):
-			up_button.connect("input_event", _on_up_button_input)
-	
-	if down_button and down_button.has_signal("input_event"):
-		if not down_button.is_connected("input_event", _on_down_button_input):
-			down_button.connect("input_event", _on_down_button_input)
+	if start_button and start_button.has_signal("input_event"):
+		if not start_button.is_connected("input_event", _on_start_button_input):
+			start_button.connect("input_event", _on_start_button_input)
 
-func _on_up_button_input(camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		up_button_held = event.pressed
-
-func _on_down_button_input(camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		down_button_held = event.pressed
+func _on_start_button_input(_camera: Node, event: InputEvent, _event_position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if not is_running and not game_ended and total_seconds > 0:
+			is_running = true
+			var monitor_node = get_node_or_null("Monitor")
+			if monitor_node and monitor_node.has_method("show_alien_info"):
+				monitor_node.show_alien_info()
 
 func _process(delta: float) -> void:
-	if rich_text_label == null or game_ended:
+	if rich_text_label == null or game_ended or not is_running:
 		return
 
-	timer += delta
-	if timer >= current_update_interval:
-		timer -= current_update_interval
-
-		var changed = false
-		if up_button_held:
-			current_number += 1
-			changed = true
-		elif down_button_held:
-			current_number -= 1
-			changed = true
-		
-		if changed:
-			current_number = clamp(current_number, -100, 100)
-			
-			# Check for game end condition
-			if abs(current_number) >= 100:
-				_trigger_game_end()
-				return
-			
+	if total_seconds > 0:
+		timer += delta
+		if timer >= 1.0:
+			timer -= 1.0
+			total_seconds -= 1
 			_update_display()
+			
+			if total_seconds <= 0:
+				_trigger_game_end()
 
 func _trigger_game_end() -> void:
 	if game_ended:
 		return
 		
 	game_ended = true
-	
-	# Clamp the number to exactly 100 or -100
-	current_number = 100 if current_number > 0 else -100
+	is_running = false
 	_update_display()
 	
-	print("GAME OVER - Machine counter reached: ", current_number)
-	emit_signal("game_over", current_number)
+	emit_signal("game_over")
 	
-	# Display game over message
 	if rich_text_label:
-		await get_tree().create_timer(1.0).timeout # Brief pause
+		await get_tree().create_timer(1.0).timeout
 		var font_size = 200
 		var sub_viewport = rich_text_label.get_node_or_null("../../../")
 		if sub_viewport and sub_viewport is SubViewport:
 			var viewport_size = sub_viewport.size.y
 			font_size = max(32, int(viewport_size * 0.4))
 		
-		rich_text_label.text = "[center][font_size=%d]GAME OVER[/font_size]\n[font_size=%d]Final Count: %d[/font_size][/center]" % [font_size, font_size/2, current_number]
+		rich_text_label.text = "[center][font_size=%d]TIME'S UP[/font_size][/center]" % font_size
 		rich_text_label.modulate = Color.RED
 		
-		# Optional: Restart the scene or show end screen after delay
 		await get_tree().create_timer(3.0).timeout
-		_show_end_screen()
+		_reset_timer()
 
 func _update_display() -> void:
 	if rich_text_label == null:
 		return
+		
+	var minutes = total_seconds / 60
+	var seconds = total_seconds % 60
 	var font_size = 400
 	var sub_viewport = rich_text_label.get_node_or_null("../../../")
 	if sub_viewport and sub_viewport is SubViewport:
 		var viewport_size = sub_viewport.size.y
 		font_size = max(48, int(viewport_size * 0.9))
-	rich_text_label.text = "[center][font_size=%d]%d[/font_size][/center]" % [font_size, current_number]
-	var redness = min(abs(current_number) / 100.0, 1.0)
+	
+	rich_text_label.text = "[center][font_size=%d]%02d:%02d[/font_size][/center]" % [font_size, minutes, seconds]
+	
+	# Color transition from white to red as timer approaches 0
+	var redness = 1.0 - clamp(float(total_seconds) / 30.0, 0.0, 1.0) # Full red in last 30 seconds
 	var color = Color(1.0, 1.0 - redness, 1.0 - redness, 1.0)
 	rich_text_label.modulate = color
 
-func reset_counter() -> void:
-	if game_ended:
-		return
-		
-	current_number = 0
-	_update_display()
-
-func _show_end_screen() -> void:
-	# You can customize this to show a proper end screen
-	# For now, just restart the scene or show options
-	print("Showing end screen...")
-	
-	# Option 1: Restart the current scene
-	# get_tree().reload_current_scene()
-	
-	# Option 2: Load a different end screen scene
-	# get_tree().change_scene_to_file("res://scenes/end_screen.tscn")
-	
-	# Option 3: Just reset the machine
-	_reset_machine()
-
-func _reset_machine() -> void:
+func _reset_timer() -> void:
 	game_ended = false
-	current_number = 0
-	up_button_held = false
-	down_button_held = false
-	speed_level = 1
-	current_update_interval = base_update_interval
+	is_running = false
+	total_seconds = 300 # Reset to 5 minutes
+	timer = 0.0
 	_update_display()
-	print("Machine reset - game continues")
-
-func set_speed_level(new_level: int) -> void:
-	"""Set the machine speed level (1-10, higher = faster)"""
-	speed_level = clamp(new_level, 1, 10)
-	# Faster speeds mean shorter intervals
-	current_update_interval = base_update_interval / speed_level
-	print("Machine speed set to level ", speed_level, " (interval: ", current_update_interval, "s)")
-
-func get_speed_level() -> int:
-	return speed_level
 
 func _debug_print_node_tree() -> void:
-	print("Debug: Node tree for ", get_path())
 	_print_node_children(self, "")
 
 func _print_node_children(node: Node, indent: String) -> void:
-	print(indent, node.name, " (", node.get_class(), ")")
 	for child in node.get_children():
 		_print_node_children(child, indent + "  ")

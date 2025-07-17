@@ -3,32 +3,32 @@ extends RichTextLabel
 # Base
 @export var console_size: Vector2 = Vector2(100, 30)
 
-# Data generation - Using Class system for aliens
+# Data generation - Using numeric system for aliens
 var species_data: Dictionary = {
-	"Class 1": {
-		"eye_colors": ["Yellow", "Orange", "White", "Red"],  # Some correct, some incorrect
-		"weight_range": [120, 160],  # Slightly broader range to include edge cases
-		"blood_types": ["X-Positive", "O-Negative", "Z-Flux", "A-Neutral"]  # Mix correct/incorrect
+	"1": {
+		#"eye_colors": ["Yellow", "Orange", "Red"],  # Limited to 3, commented out
+		"weight_range": [130, 150],  # Matches Disk1 weight_classes.csv
+		#"blood_types": ["X-Positive", "O-Negative", "A-Neutral"]
 	},
-	"Class 2": {
-		"eye_colors": ["Green", "Cyan", "Amber", "Blue"],
-		"weight_range": [75, 105],
-		"blood_types": ["A-Neutral", "B-Static", "X-Positive"]
+	"2": {
+		#"eye_colors": ["Green", "Cyan", "Blue"],  # Limited to 3, commented out
+		"weight_range": [130, 160],  # Matches Disk2 weight_classes.csv
+		#"blood_types": ["A-Neutral", "B-Static", "X-Positive"]
 	},
-	"Class 3": {
-		"eye_colors": ["Blue", "Indigo", "Red", "Purple"],
-		"weight_range": [190, 260],
-		"blood_types": ["B-Volatile", "C-Pulse", "D-Heavy"]
+	"3": {
+		#"eye_colors": ["Blue", "Indigo", "Purple"],  # Limited to 3, commented out
+		"weight_range": [140, 170],  # Matches Disk3 weight_classes.csv
+		#"blood_types": ["B-Volatile", "C-Pulse", "D-Heavy"]
 	},
-	"Class 4": {
-		"eye_colors": ["Purple", "Violet", "Magenta", "Blue"],
-		"weight_range": [45, 75],
-		"blood_types": ["C-Stable", "D-Light", "A-Neutral"]
+	"4": {
+		#"eye_colors": ["Purple", "Violet", "Magenta"],  # Limited to 3, commented out
+		"weight_range": [151, 180],  # Matches Disk4 weight_classes.csv
+		#"blood_types": ["C-Stable", "D-Light", "A-Neutral"]
 	}
 }
-var species_list: Array = ["Class 1", "Class 2", "Class 3", "Class 4"]
+var species_list: Array = ["1", "2", "3", "4"]
 var all_eye_colors: Array = ["Yellow", "Orange", "White", "Green", "Cyan", "Amber", "Blue", "Indigo", "Red", "Purple", "Violet", "Magenta", "Crimson", "Scarlet"]
-var all_blood_types: Array = ["X-Positive", "O-Negative", "Z-Flux", "A-Neutral", "B-Static", "B-Volatile", "C-Pulse", "C-Stable", "D-Light", "D-Heavy", "E-Dense"]  # All known blood types
+var all_blood_types: Array = ["X-Positive", "O-Negative", "Z-Flux", "A-Neutral", "B-Static", "B-Volatile", "C-Pulse", "C-Stable", "D-Light", "D-Heavy", "E-Dense"]
 
 # Display and input control
 var _flash_timer = Timer.new()
@@ -48,6 +48,13 @@ func _ready() -> void:
 	_flash_timer.start(0.1)  # Initial start
 	_flash_timer.timeout.connect(_update_display)
 	_update_display()  # Immediate initial display
+
+func show_alien_info() -> void:
+	var alien_label = get_node_or_null("SubViewport/Control/RichTextLabel")
+	if alien_label:
+		alien_label.text = "[center][font_size=200]Alien Data: Classified[/font_size][/center]"
+	else:
+		print("Warning: Alien label not found at SubViewport/Control/RichTextLabel")
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not _can_input or not event.is_pressed():
@@ -90,20 +97,24 @@ func _update_display() -> void:
 	if _entries.is_empty():
 		_entries = []
 		for i in 4:  # Generate exactly 4 aliens
-			_entries.append(_generate_random_entry())
+			var entry = _generate_random_entry()
+			if entry.species != "" and entry.weight > 0:  # Ensure valid entry
+				_entries.append(entry)
+			else:
+				print("Warning: Invalid entry generated, skipping")
 	
 	# Display current entry
 	if _current_entry < _entries.size():
 		var entry = _entries[_current_entry]
 		var entry_text = (
 			"[color=WEB_GRAY]Species:[/color] %s\n" +
-			"[color=WEB_GRAY]Eye Color:[/color] %s\n" +
-			"[color=WEB_GRAY]Weight:[/color] %.1f kg\n" +
-			"[color=WEB_GRAY]Blood Type:[/color] %s"
-		) % [entry.species, entry.eye_color, entry.weight, entry.blood_type]
+			"[color=WEB_GRAY]Weight:[/color] %.1f kg"
+		) % [entry.species, entry.weight]
 		push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
 		append_text(entry_text)
 		pop()
+	else:
+		append_text("[color=RED]No valid entries to display.[/color]")
 	
 	# Display feedback
 	if _feedback != "":
@@ -122,38 +133,44 @@ func _generate_random_entry() -> Dictionary:
 	var species = species_list[randi() % species_list.size()]
 	var data = species_data[species]
 	var is_correct = randi() % 2 == 0  
-	var eye_color: String
-	var weight: float
-	var blood_type: String
+	var weight: float = 0.0
+
+	# Reference console.gd's inserted_disk to align weight ranges
+	var console_node = get_node_or_null("/Computer/Computer/SubViewport/Control/Console")
+	var disk_name = console_node.inserted_disk if console_node and console_node.inserted_disk != "" else "Disk1"
+	var weight_range = data.weight_range
+
+	# Adjust weight range based on disk_name to match console.gd's CSV
+	match disk_name:
+		"Disk1":
+			weight_range = [130, 150]
+		"Disk2":
+			weight_range = [130, 160]
+		"Disk3":
+			weight_range = [140, 170]
+		"Disk4":
+			weight_range = [151, 180]
+		_:
+			print("Warning: Unknown disk_name '", disk_name, "', defaulting to Disk1")
+			weight_range = [130, 150]
 
 	if is_correct:
-		eye_color = data.eye_colors[randi() % data.eye_colors.size()]
-		weight = randf_range(data.weight_range[0], data.weight_range[1])
-		blood_type = data.blood_types[randi() % data.blood_types.size()]
+		weight = randf_range(weight_range[0], weight_range[1])
 	else:
 		var wrong_field = randi() % 3
-		eye_color = data.eye_colors[randi() % data.eye_colors.size()]
-		weight = randf_range(data.weight_range[0], data.weight_range[1])
-		blood_type = data.blood_types[randi() % data.blood_types.size()]
-		if wrong_field == 0:
-			eye_color = all_eye_colors[randi() % all_eye_colors.size()]
-			while eye_color in data.eye_colors:
-				eye_color = all_eye_colors[randi() % all_eye_colors.size()]
-		elif wrong_field == 1:
+		if wrong_field == 1:
 			if randi() % 2 == 0:
-				weight = randf_range(data.weight_range[0] - 20, data.weight_range[0] - 10)
+				weight = randf_range(weight_range[0] - 20, weight_range[0] - 10)
 			else:
-				weight = randf_range(data.weight_range[1] + 10, data.weight_range[1] + 20)
+				weight = randf_range(weight_range[1] + 10, weight_range[1] + 20)
 		else:
-			blood_type = all_blood_types[randi() % all_blood_types.size()]
-			while blood_type in data.blood_types:
-				blood_type = all_blood_types[randi() % all_blood_types.size()]
+			weight = randf_range(weight_range[0], weight_range[1])
 
 	return {
 		"species": species,
-		"eye_color": eye_color,
+		"eye_color": "",
 		"weight": weight,
-		"blood_type": blood_type,
+		"blood_type": "",
 		"is_correct": is_correct
 	}
 

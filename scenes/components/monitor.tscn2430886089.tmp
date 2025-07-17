@@ -180,13 +180,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.626815, 0.386866)
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0708624, 0.699543, 0.444047)
-visible = false
 light_color = Color(0.300016, 0.736552, 0, 1)
 light_energy = 0.354
 
 [node name="OmniLight3D2" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0738408, 0.699543, 0.444047)
-visible = false
 light_color = Color(0.705882, 0, 0, 1)
 light_energy = 0.354
 

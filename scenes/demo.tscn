@@ -52,7 +52,7 @@ material = SubResource("ShaderMaterial_s3vvr")
 size = Vector3(500, 500, 500)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_7qr1p"]
-size = Vector3(3, 2, 3)
+size = Vector3(1.18262, 1.58154, 1.05658)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_74ng0"]
 resource_name = "Material.001"
@@ -408,18 +408,11 @@ transform = Transform3D(6.19595, 0, 0, 0, 1.16996, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("BoxMesh_6cg1f")
 skeleton = NodePath("../Computer")
 
-[node name="Object2" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.2463, 141.54, 5.92799)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Object2"]
-transform = Transform3D(0.974938, 0, 0, 0, 0.974938, 0, 0, 0, 0.974938, 0, 0, 0)
-shape = SubResource("BoxShape3D_7qr1p")
-
 [node name="GrabArea" type="Area3D" parent="."]
 transform = Transform3D(-0.0155635, -0.000360251, -0.999879, -0.023141, 0.999732, 5.4629e-10, 0.999611, 0.0231382, -0.0155677, -32.4346, 141.94, -12.3787)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="GrabArea"]
-transform = Transform3D(0.974938, 0, 0, 0, 0.974938, 0, 0, 0, 0.974938, 0, 0, 0)
+transform = Transform3D(0.974967, 2.90573e-07, -3.21306e-07, -3.37139e-07, 0.974975, -3.49246e-09, 1.65775e-07, 3.11411e-09, 0.974958, 1.44768, 0.203888, -0.336182)
 shape = SubResource("BoxShape3D_7qr1p")
 
 [node name="ActualDisk" type="Node3D" parent="."]
@@ -702,8 +695,6 @@ transform = Transform3D(274.235, 0, 0, 0, 9, 0, 0, 0, 352.337, 0, 88.999, 0)
 mesh = SubResource("SphereMesh_ssbcb")
 skeleton = NodePath("")
 
-[connection signal="body_entered" from="Object2" to="Player" method="_on_grab_area_body_entered"]
-[connection signal="body_exited" from="Object2" to="Player" method="_on_grab_area_body_exited"]
 [connection signal="body_entered" from="GrabArea" to="Player" method="_on_grab_area_body_entered"]
 [connection signal="body_exited" from="GrabArea" to="Player" method="_on_grab_area_body_exited"]
 

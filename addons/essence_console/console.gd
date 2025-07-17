@@ -77,6 +77,8 @@ func _ready() -> void:
 	if SetLocaleToEng:
 		TranslationServer.set_locale("en_US")
 	size = Vector2(console_size.x * 12.5, console_size.y * 23)
+	theme = Theme.new()
+	theme.set_font_size("normal_font_size", "RichTextLabel", 28)  # Increased from 24 to 28
 	_built_in_command_init()
 	add_child(_flash_timer)
 	text = ""
@@ -88,7 +90,7 @@ func _ready() -> void:
 		print("FakeDisk hidden at startup")
 	else:
 		print("Warning: FakeDisk not found at startup")
-
+		
 func _process(delta: float) -> void:
 	set_prefix()
 	if _flash_timer.time_left == 0:
@@ -386,7 +388,6 @@ func insert_disk(disk_name: String, disk_node: Node, disk_data: Dictionary = {})
 		newline()
 		return
 
-	# Check if any disk is already inserted
 	if inserted_disk != "":
 		append_text("[color=RED]Error: Computer already has a disk inserted (" + inserted_disk + ").[/color]")
 		newline()
@@ -394,56 +395,44 @@ func insert_disk(disk_name: String, disk_node: Node, disk_data: Dictionary = {})
 		newline()
 		return
 
-	# Reference the FakeDisk node in the scene (dynamic path)
 	var fake_disk = get_node_or_null("../../../" + disk_name)
 	if not fake_disk:
 		append_text("[color=RED]Error: " + disk_name + " node not found.[/color]")
 		newline()
 		return
 
-	# Check for AnimationPlayer on FakeDisk or its parent
 	var animation_player = fake_disk.get_node_or_null("AnimationPlayer")
 	if not animation_player:
 		animation_player = fake_disk.get_parent().get_node_or_null("AnimationPlayer")
 	
 	if animation_player and animation_player.has_animation("insert"):
-		# Make FakeDisk visible if hidden
 		fake_disk.visible = true
-		# Play the disk insertion animation
 		animation_player.play("insert")
 		await animation_player.animation_finished
 	else:
 		append_text("[color=YELLOW]Warning: No insertion animation found, proceeding with insertion.[/color]")
 		newline()
 
-	# Update the file system with disk-specific content
 	inserted_disk = disk_name
-	inserted_disk_node = disk_node # Store original disk_node for eject
-	
-	# Always add disk data to /home
+	inserted_disk_node = disk_node
 	var home_path_instance = get_path_instance("/home")
 	if !home_path_instance.has(disk_name):
-		var disk_files = {}
-		if disk_data.has("files") and disk_data["files"] is Array:
-			for file in disk_data["files"]:
-				if file == "weight_classes.csv":
-					if !disk_files.has("eye_color"):
-						disk_files["eye_color"] = {}
-					disk_files["eye_color"][file] = generate_file_content(disk_name, file, disk_data)
-				else:
-					disk_files[file] = generate_file_content(disk_name, file, disk_data)
-			home_path_instance[disk_name] = disk_files
-		else:
-			home_path_instance[disk_name] = {"data.txt": "Contents of " + disk_name}
+		var disk_files = {
+			"weight_classes.csv": generate_csv_content(disk_name, "weight_classes.csv"),
+			"eye_color": {
+				"eye_color_data1.csv": generate_csv_content(disk_name, "eye_color_data1.csv"),
+				"eye_color_data2.csv": generate_csv_content(disk_name, "eye_color_data2.csv"),
+				"eye_color_data3.csv": generate_csv_content(disk_name, "eye_color_data3.csv")
+			}
+		}
+		home_path_instance[disk_name] = disk_files
 		append_text("[color=GREEN]Disk '" + disk_name + "' inserted successfully.[/color]")
 		newline()
-		# Display disk information
 		display_disk_info(disk_name, disk_data)
 	else:
 		append_text("[color=YELLOW]Warning: Disk already exists in /home.[/color]")
-	newline()
+		newline()
 
-	# Hide the disk node after insertion (optional, depending on your animation)
 	if disk_node is Node3D:
 		disk_node.visible = false
 

@@ -78,7 +78,7 @@ func _ready() -> void:
 		TranslationServer.set_locale("en_US")
 	size = Vector2(console_size.x * 12.5, console_size.y * 23)
 	theme = Theme.new()
-	theme.set_font_size("normal_font_size", "RichTextLabel", 28)  # Increased from 24 to 28
+	theme.set_font_size("normal_font_size", "RichTextLabel", 548) 
 	_built_in_command_init()
 	add_child(_flash_timer)
 	text = ""

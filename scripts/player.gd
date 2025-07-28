@@ -54,7 +54,6 @@ func _process(_delta: float) -> void:
 			cursor1.visible = !can_interact
 		if cursor2:
 			cursor2.visible = can_interact
-
 func _update_interaction_raycast() -> void:
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
@@ -62,9 +61,10 @@ func _update_interaction_raycast() -> void:
 	var ray_end: Vector3 = ray_start + player_camera.project_ray_normal(mouse_pos) * 3.0
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(ray_start, ray_end)
 	var result: Dictionary = space_state.intersect_ray(query)
-	
+
 	can_interact = false
 	using_computer = null
+
 	if result and result.collider:
 		if result.collider.is_in_group("monitor"):
 			can_interact = true
@@ -74,15 +74,17 @@ func _update_interaction_raycast() -> void:
 			using_computer = result.collider
 		if result.collider.is_in_group("grabbable"):
 			can_interact = true
-		# Add machine button detection
-		if  result.collider.name == "StartButton":
+		if result.collider.name == "StartButton":
 			can_interact = true
 			using_computer = result.collider
-		# Check if collision is with StaticBody3D child of a button
+		# Check for lever handles
+		if result.collider.name in ["Handle", "Handle2", "Handle3"]:
+			can_interact = true
+			using_computer = result.collider.get_parent().get_parent() # Get the lever node (lever1, lever2, lever3)
 		elif result.collider.get_parent() and (result.collider.get_parent().name == "StartButton"):
 			can_interact = true
 			using_computer = result.collider.get_parent()
-
+			
 func insert_disk() -> void:
 	if held_object == null or not can_grab or Global.is_using_computer or Global.is_using_monitor:
 		return
@@ -197,23 +199,39 @@ func _unhandled_input(event: InputEvent) -> void:
 		head.rotate_y(-event.relative.x * SENSITIVITY)
 		camera.rotate_x(-event.relative.y * SENSITIVITY)
 		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-70), deg_to_rad(60))
-	
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if Global.is_using_computer or Global.is_using_monitor:
-			exit_computer_mode()
+			if event.pressed:
+				return
+			else:
+				exit_computer_mode()
 		elif can_interact and using_computer:
 			if using_computer.is_in_group("monitor") and not held_object:
-				enter_monitor_mode()
+				if event.pressed:
+					enter_monitor_mode()
 			elif using_computer.is_in_group("computer") and not held_object:
-				enter_computer_mode()
+				if event.pressed:
+					enter_computer_mode()
 			elif held_object and held_object.is_in_group("disk"):
-				insert_disk()
+				if event.pressed:
+					insert_disk()
 			elif using_computer.name == "StartButton":
-				press_machine_button()
-		elif held_object == null and can_grab:
-			grab_object()
-		elif held_object and can_grab:
-			drop_object()
+				if event.pressed:
+					press_machine_button()
+			elif using_computer.is_in_group("lever") and not held_object:
+				var levers_node = $"../LeverGutentagPosition"
+				if levers_node and levers_node.has_method("start_holding_lever") and levers_node.has_method("stop_holding_lever"):
+					if event.pressed:
+						levers_node.start_holding_lever(using_computer.name)
+					else:
+						levers_node.stop_holding_lever(using_computer.name)
+			elif held_object == null and can_grab:
+				if event.pressed:
+					grab_object()
+			elif held_object and can_grab:
+				if event.pressed:
+					drop_object()
 
 func enter_computer_mode() -> void:
 	if using_computer and not Global.is_using_computer and not Global.is_using_monitor:

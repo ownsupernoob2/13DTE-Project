@@ -41,3 +41,4 @@ bbcode_enabled = true
 scroll_active = false
 scroll_following = true
 script = ExtResource("1_73s1d")
+ShowTextArt = false

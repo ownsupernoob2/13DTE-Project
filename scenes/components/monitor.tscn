@@ -26,9 +26,9 @@ shader_parameter/roll_speed = 8.0
 shader_parameter/roll_size = 9.975
 shader_parameter/roll_variation = 1.48
 shader_parameter/distort_intensity = 0.0
-shader_parameter/noise_opacity = 0.467
+shader_parameter/noise_opacity = 0.162
 shader_parameter/noise_speed = 5.0
-shader_parameter/static_noise_intensity = 0.146
+shader_parameter/static_noise_intensity = 0.034
 shader_parameter/aberration = 0.015
 shader_parameter/brightness = 1.45
 shader_parameter/discolor = true
@@ -147,6 +147,7 @@ anchor_bottom = 0.0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("3_kly2o")
+console_size = Vector2(100, 30)
 
 [node name="Screen" type="MeshInstance3D" parent="Monitor" groups=["monitor"]]
 transform = Transform3D(-0.3123, 0, 7.54979e-08, 0, 0.337241, 0, -4.7156e-08, 0, -0.5, 1.82366e-05, 0.546996, 0.44596)

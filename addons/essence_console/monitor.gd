@@ -3,27 +3,31 @@ extends RichTextLabel
 # Base
 @export var console_size: Vector2 = Vector2(100, 30)
 
-# Data generation - Using numeric system for aliens
+# Data generation - Using numeric system for aliens - Updated with overlapping weight ranges
 var species_data: Dictionary = {
 	"1": {
-		#"eye_colors": ["Yellow", "Orange", "Red"],  # Limited to 3, commented out
-		"weight_range": [130, 150],  # Matches Disk1 weight_classes.csv
-		#"blood_types": ["X-Positive", "O-Negative", "A-Neutral"]
+		"eye_colors": ["Yellow", "Orange", "White"],  # From DiskManager Class 1
+		"weight_range": [120, 160],  # Updated range - overlaps with other classes
+		"blood_types": ["X-Positive", "O-Negative", "Z-Flux"],  # From DiskManager Class 1
+		"species_name": "Class 1"
 	},
 	"2": {
-		#"eye_colors": ["Green", "Cyan", "Blue"],  # Limited to 3, commented out
-		"weight_range": [130, 160],  # Matches Disk2 weight_classes.csv
-		#"blood_types": ["A-Neutral", "B-Static", "X-Positive"]
+		"eye_colors": ["Green", "Cyan", "Amber"],  # From DiskManager Class 2
+		"weight_range": [75, 125],  # Updated range - overlaps with Class 1 and 4
+		"blood_types": ["A-Neutral", "B-Static"],  # From DiskManager Class 2
+		"species_name": "Class 2"
 	},
 	"3": {
-		#"eye_colors": ["Blue", "Indigo", "Purple"],  # Limited to 3, commented out
-		"weight_range": [140, 170],  # Matches Disk3 weight_classes.csv
-		#"blood_types": ["B-Volatile", "C-Pulse", "D-Heavy"]
+		"eye_colors": ["Blue", "Indigo", "Red"],  # From DiskManager Class 3
+		"weight_range": [180, 280],  # Updated range - overlaps with Class 1
+		"blood_types": ["B-Volatile", "C-Pulse"],  # From DiskManager Class 3
+		"species_name": "Class 3"
 	},
 	"4": {
-		#"eye_colors": ["Purple", "Violet", "Magenta"],  # Limited to 3, commented out
-		"weight_range": [151, 180],  # Matches Disk4 weight_classes.csv
-		#"blood_types": ["C-Stable", "D-Light", "A-Neutral"]
+		"eye_colors": ["Purple", "Violet", "Magenta"],  # From DiskManager Class 4
+		"weight_range": [45, 85],  # Updated range - overlaps with Class 1 and 2
+		"blood_types": ["C-Stable", "D-Light"],  # From DiskManager Class 4
+		"species_name": "Class 4"
 	}
 }
 var species_list: Array = ["1", "2", "3", "4"]
@@ -39,10 +43,10 @@ var _can_input: bool = false
 var _feedback: String = ""
 
 func _ready() -> void:
-	size = Vector2(console_size.x * 12.5, console_size.y * 23)
-	# Increase text size
+	size = Vector2(console_size.x * 32.0, console_size.y * 64.0)  # Much much larger for excellent readability
+	# Increase text size significantly
 	theme = Theme.new()
-	theme.set_font_size("normal_font_size", "RichTextLabel", 24)  # Larger text size
+	theme.set_font_size("normal_font_size", "RichTextLabel", 64)  # Very large text size for excellent readability
 	add_child(_flash_timer)
 	_flash_timer.set_one_shot(false)
 	_flash_timer.start(0.1)  # Initial start
@@ -70,8 +74,17 @@ func _unhandled_key_input(event: InputEvent) -> void:
 func _evaluate_input(user_says_correct: bool) -> void:
 	if _entries.is_empty() or _current_entry >= _entries.size():
 		return
+	
 	var entry = _entries[_current_entry]
-	var is_correct = entry.is_correct
+	
+	# Check if alien has been sedated first
+	if not ("sedated" in entry and entry.sedated):
+		_feedback = "[color=YELLOW]Specimen must be sedated before classification![/color]"
+		_update_display()
+		return
+	
+	# Now process classification since sedation is complete
+	var is_correct = entry.is_correct  # Always true now since weight matches species
 	var user_correct = (user_says_correct == is_correct)
 	_feedback = "[color=%s]%s[/color]" % [
 		"LIME_GREEN" if user_correct else "CRIMSON",
@@ -106,10 +119,21 @@ func _update_display() -> void:
 	# Display current entry
 	if _current_entry < _entries.size():
 		var entry = _entries[_current_entry]
+		var status_text = "Status: Sedation Required"
+		if "sedated" in entry and entry.sedated:
+			status_text = "Status: Ready for Classification"
+		
 		var entry_text = (
-			"[color=WEB_GRAY]Species:[/color] %s\n" +
-			"[color=WEB_GRAY]Weight:[/color] %.1f kg"
-		) % [entry.species, entry.weight]
+			"[color=WHITE]Species:[/color] %s\n" +
+			"[color=WHITE]Weight:[/color] %.1f kg\n" +
+			"\n[color=YELLOW]%s[/color]\n" +
+			"\n[color=GRAY]Use lever system to sedate before classification[/color]"
+		) % [entry.species, entry.weight, status_text]
+		
+		# Only show classification options if sedated
+		if "sedated" in entry and entry.sedated:
+			entry_text += "\n[color=CYAN]Left Arrow: Reject | Right Arrow: Accept[/color]"
+		
 		push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
 		append_text(entry_text)
 		pop()
@@ -132,47 +156,125 @@ func _update_display() -> void:
 func _generate_random_entry() -> Dictionary:
 	var species = species_list[randi() % species_list.size()]
 	var data = species_data[species]
-	var is_correct = randi() % 2 == 0  
 	var weight: float = 0.0
+	var eye_color: String = ""
+	var blood_type: String = ""
 
-	# Reference console.gd's inserted_disk to align weight ranges
-	var console_node = get_node_or_null("/Computer/Computer/SubViewport/Control/Console")
-	var disk_name = console_node.inserted_disk if console_node and console_node.inserted_disk != "" else "Disk1"
+	# Get the correct weight range from our species_data (which matches DiskManager)
 	var weight_range = data.weight_range
-
-	# Adjust weight range based on disk_name to match console.gd's CSV
-	match disk_name:
-		"Disk1":
-			weight_range = [130, 150]
-		"Disk2":
-			weight_range = [130, 160]
-		"Disk3":
-			weight_range = [140, 170]
-		"Disk4":
-			weight_range = [151, 180]
-		_:
-			print("Warning: Unknown disk_name '", disk_name, "', defaulting to Disk1")
-			weight_range = [130, 150]
-
-	if is_correct:
-		weight = randf_range(weight_range[0], weight_range[1])
-	else:
-		var wrong_field = randi() % 3
-		if wrong_field == 1:
-			if randi() % 2 == 0:
-				weight = randf_range(weight_range[0] - 20, weight_range[0] - 10)
-			else:
-				weight = randf_range(weight_range[1] + 10, weight_range[1] + 20)
-		else:
-			weight = randf_range(weight_range[0], weight_range[1])
+	
+	# ALWAYS generate correct weight within the species range - no incorrect weights
+	weight = randf_range(weight_range[0], weight_range[1])
+	
+	# Generate random eye color and blood type for liquid ratio calculation
+	eye_color = data.eye_colors[randi() % data.eye_colors.size()]
+	blood_type = data.blood_types[randi() % data.blood_types.size()]
 
 	return {
-		"species": species,
-		"eye_color": "",
+		"species": data.species_name,
+		"eye_color": eye_color,
 		"weight": weight,
-		"blood_type": "",
-		"is_correct": is_correct
+		"blood_type": blood_type,
+		"is_correct": true,  # Always correct now since weight matches species
+		"liquid_ratios": _get_liquid_ratios(species, weight, eye_color)  # [A, B, C] values 0-100
 	}
 
 func newline() -> void:
 	append_text("\n")
+
+# Function to get current liquid ratios for lever validation
+func get_current_liquid_ratios() -> Array:
+	if _current_entry < _entries.size():
+		var entry = _entries[_current_entry]
+		if "liquid_ratios" in entry:
+			print("DEBUG Monitor: Returning liquid ratios: ", entry.liquid_ratios)
+			return entry.liquid_ratios
+	print("DEBUG Monitor: No current entry or liquid ratios, returning [0,0,0]")
+	return [0, 0, 0]  # Default fallback
+
+# Function to enable classification after successful sedation
+func enable_classification() -> void:
+	if _current_entry < _entries.size():
+		_entries[_current_entry].sedated = true
+		_feedback = "[color=GREEN]Sedation successful! You may now classify this specimen.[/color]"
+		_update_display()
+
+func _get_liquid_ratios(species_num: String, weight: float, eye_color: String) -> Array:
+	"""
+	Get the liquid ratios [A, B, C] based on species, weight, and eye color
+	This matches the updated overlapping weight ranges in CSV files
+	"""
+	var weight_int = int(weight)
+	var ratios = [0, 0, 0]
+	
+	print("DEBUG: Getting liquid ratios for species ", species_num, " weight ", weight_int)
+	
+	match species_num:
+		"1":  # Class 1: 120-160 kg - Overlaps with other classes
+			if weight_int >= 120 and weight_int <= 125:
+				ratios = [31, 51, 18]
+			elif weight_int >= 126 and weight_int <= 131:
+				ratios = [28, 49, 23]
+			elif weight_int >= 132 and weight_int <= 137:
+				ratios = [33, 53, 14]
+			elif weight_int >= 138 and weight_int <= 143:
+				ratios = [19, 62, 19]
+			elif weight_int >= 144 and weight_int <= 149:
+				ratios = [25, 45, 30]
+			elif weight_int >= 150 and weight_int <= 160:
+				ratios = [35, 40, 25]
+			else:
+				print("WARNING: Weight ", weight_int, " not in any Class 1 range!")
+		
+		"2":  # Class 2: 75-125 kg - Overlaps with Class 1 and 4
+			if weight_int >= 75 and weight_int <= 80:
+				ratios = [42, 38, 20]
+			elif weight_int >= 81 and weight_int <= 86:
+				ratios = [38, 42, 20]
+			elif weight_int >= 87 and weight_int <= 92:
+				ratios = [32, 28, 40]
+			elif weight_int >= 93 and weight_int <= 98:
+				ratios = [22, 18, 60]
+			elif weight_int >= 99 and weight_int <= 104:
+				ratios = [45, 30, 25]
+			elif weight_int >= 105 and weight_int <= 125:
+				ratios = [50, 25, 25]
+			else:
+				print("WARNING: Weight ", weight_int, " not in any Class 2 range!")
+		
+		"3":  # Class 3: 180-280 kg - Overlaps with Class 1
+			if weight_int >= 180 and weight_int <= 195:
+				ratios = [50, 45, 15]
+			elif weight_int >= 196 and weight_int <= 211:
+				ratios = [45, 50, 15]
+			elif weight_int >= 212 and weight_int <= 227:
+				ratios = [40, 35, 35]
+			elif weight_int >= 228 and weight_int <= 243:
+				ratios = [30, 25, 55]
+			elif weight_int >= 244 and weight_int <= 259:
+				ratios = [35, 30, 35]
+			elif weight_int >= 260 and weight_int <= 280:
+				ratios = [25, 35, 40]
+			else:
+				print("WARNING: Weight ", weight_int, " not in any Class 3 range!")
+		
+		"4":  # Class 4: 45-85 kg - Overlaps with Class 1 and 2
+			if weight_int >= 45 and weight_int <= 50:
+				ratios = [60, 55, 10]
+			elif weight_int >= 51 and weight_int <= 56:
+				ratios = [55, 45, 25]
+			elif weight_int >= 57 and weight_int <= 62:
+				ratios = [50, 35, 45]
+			elif weight_int >= 63 and weight_int <= 68:
+				ratios = [45, 30, 50]
+			elif weight_int >= 69 and weight_int <= 74:
+				ratios = [40, 40, 20]
+			elif weight_int >= 75 and weight_int <= 85:
+				ratios = [35, 35, 30]
+			else:
+				print("WARNING: Weight ", weight_int, " not in any Class 4 range!")
+		_:
+			print("ERROR: Unknown species number: ", species_num)
+	
+	print("DEBUG: Calculated ratios: ", ratios)
+	return ratios

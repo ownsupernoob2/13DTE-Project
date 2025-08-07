@@ -1,6 +1,6 @@
 extends RichTextLabel
 # Base
-@export var console_size: Vector2 = Vector2(100,30)
+@export var console_size: Vector2 = Vector2(35,10)  # Even smaller grid for massive font
 @export var USER_Name:String = "@USER"
 @export var ShowTextArt:bool = true
 @export var CanInput:bool = false
@@ -76,9 +76,40 @@ var _table_mode: bool = false # Track when we're displaying a table
 func _ready() -> void:
 	if SetLocaleToEng:
 		TranslationServer.set_locale("en_US")
-	size = Vector2(console_size.x * 12.5, console_size.y * 23)
+	size = Vector2(console_size.x * 35.0, console_size.y * 60.0)  # Even larger size
+	
+	# Create theme and use system font
 	theme = Theme.new()
-	theme.set_font_size("normal_font_size", "RichTextLabel", 548) 
+	
+	# Load the custom font using the correct Godot 4 method
+	# var custom_font = load("res://addons/essence_console/hailtotem_next.ttf") as FontFile
+	
+	# if custom_font:
+		# Set the custom font for all font types
+		# theme.set_font("normal_font", "RichTextLabel", custom_font)
+		# theme.set_font("bold_font", "RichTextLabel", custom_font)
+		# theme.set_font("italics_font", "RichTextLabel", custom_font)
+		# theme.set_font("bold_italics_font", "RichTextLabel", custom_font)
+		# theme.set_font("mono_font", "RichTextLabel", custom_font)
+		
+		# print("Custom font loaded successfully")
+	# else:
+		# print("Warning: Could not load custom font, using system font")
+	
+	# Set font sizes using add_theme_font_size_override (more direct method)
+	add_theme_font_size_override("normal_font_size", 35)
+	add_theme_font_size_override("bold_font_size", 35)
+	add_theme_font_size_override("italics_font_size", 35)
+	add_theme_font_size_override("bold_italics_font_size", 35)
+	add_theme_font_size_override("mono_font_size", 35)
+	
+	# Also set in theme as backup
+	theme.set_font_size("normal_font_size", "RichTextLabel", 35)
+	theme.set_font_size("bold_font_size", "RichTextLabel", 35)
+	theme.set_font_size("italics_font_size", "RichTextLabel", 35)
+	theme.set_font_size("bold_italics_font_size", "RichTextLabel", 35)
+	theme.set_font_size("mono_font_size", "RichTextLabel", 35)
+	
 	_built_in_command_init()
 	add_child(_flash_timer)
 	text = ""
@@ -94,17 +125,8 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	set_prefix()
 	if _flash_timer.time_left == 0:
-		if _start_up == 0 and ShowTextArt:
-			for i in(console_size.y / 2 + 7):
-				if i < console_size.y / 2 - 7:
-					newline()
-				else:
-					if console_size.x >= 63:
-						append_text(TextArt[i-console_size.y / 2 + 7])
-					elif console_size.x >= 34:
-						append_text(TextArtThin[i-console_size.y / 2 + 7])
-					pop()
-					newline()
+		if _start_up == 0:
+			# Skip text art display and go straight to console
 			_start_up += 1
 			_flash_timer.start()
 		else:
@@ -114,6 +136,9 @@ func _process(delta: float) -> void:
 				CanInput = true
 				# Show initial commands on first boot
 				_show_startup_commands()
+				# Ensure we scroll to the bottom after startup commands
+				scroll_to_line(get_line_count())
+				_current_line = 0
 			append_current_input_string()
 			_flash_timer.start()
 
@@ -292,6 +317,9 @@ func append_current_input_string(enter:bool=false) -> void:
 			push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
 			append_text(_PrefixText + CurrentInputString_escaped + " ")
 			pop()
+		# Auto-scroll to keep current input visible
+		scroll_to_line(get_line_count())
+		_current_line = 0
 	else:
 		_current_cursor_pos = 0
 		push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
@@ -381,6 +409,15 @@ func pad_string_right(text: String, width: int) -> String:
 	var padding_needed = width - text.length()
 	return text + repeat_string(" ", padding_needed)
 
+# Helper function to center text within a given width
+func pad_string_center(text: String, width: int) -> String:
+	if text.length() >= width:
+		return text.substr(0, width)
+	var padding_needed = width - text.length()
+	var left_padding = padding_needed / 2
+	var right_padding = padding_needed - left_padding
+	return repeat_string(" ", left_padding) + text + repeat_string(" ", right_padding)
+
 func insert_disk(disk_name: String, disk_node: Node, disk_data: Dictionary = {}) -> void:
 	var valid_disks = ["Disk1", "Disk2", "Disk3", "Disk4"]
 	if not disk_name in valid_disks:
@@ -455,53 +492,81 @@ func generate_file_content(disk_name: String, filename: String, disk_data: Dicti
 
 func generate_csv_content(disk_name: String, filename: String) -> String:
 	if filename == "weight_classes.csv":
-		if disk_name == "Disk1":
-			return """WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C\n130-139,31,51,18\n130-139,28,49,23\n130-139,33,53,14\n140-145,19,62,19\n140-145,21,58,21\n140-145,18,64,18\n146-150,11,38,51\n146-150,9,42,49\n146-150,12,36,52"""
-		elif disk_name == "Disk2":
-			return """WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C\n130-139,28,49,23\n130-139,33,53,14\n140-145,21,58,21\n140-145,18,64,18\n146-150,12,36,52\n146-150,15,40,45\n151-155,20,30,50\n151-155,18,32,50\n155-160,25,25,50"""
-		elif disk_name == "Disk3":
-			return """WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C\n140-145,18,64,18\n146-150,12,36,52\n146-150,15,40,45\n151-155,20,30,50\n151-155,18,32,50\n155-160,25,25,50\n160-165,30,20,50\n160-165,28,22,50\n165-170,35,15,50"""
-		elif disk_name == "Disk4":
-			return """WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C\n151-155,18,32,50\n155-160,25,25,50\n160-165,30,20,50\n160-165,28,22,50\n165-170,35,15,50\n170-175,40,10,50\n170-175,38,12,50\n175-180,45,5,50\n175-180,42,8,50"""
+		if disk_name == "Disk1":  # Class 1: 120-160 kg - Overlaps with Disk2 and Disk4
+			return """WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C
+120-125,31,51,18
+126-131,28,49,23
+132-137,33,53,14
+138-143,19,62,19
+144-149,25,45,30
+150-160,35,40,25"""
+		elif disk_name == "Disk2":  # Class 2: 75-125 kg - Overlaps with Disk1 and Disk4
+			return """WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C
+75-80,42,38,20
+81-86,38,42,20
+87-92,32,28,40
+93-98,22,18,60
+99-104,45,30,25
+105-125,50,25,25"""
+		elif disk_name == "Disk3":  # Class 3: 180-280 kg - Overlaps with Disk1
+			return """WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C
+180-195,50,45,15
+196-211,45,50,15
+212-227,40,35,35
+228-243,30,25,55
+244-259,35,30,35
+260-280,25,35,40"""
+		elif disk_name == "Disk4":  # Class 4: 45-85 kg - Overlaps with Disk1 and Disk2
+			return """WEIGHT_RANGE,LIQUID_A,LIQUID_B,LIQUID_C
+45-50,60,55,10
+51-56,55,45,25
+57-62,50,35,45
+63-68,45,30,50
+69-74,40,40,20
+75-85,35,35,30"""
 		else:
 			return "CSV_ERROR: Unable to generate table for " + disk_name + " " + filename
 	return "CSV_ERROR: Unable to generate table for " + disk_name + " " + filename
 
 func display_disk_info(disk_name: String, disk_data: Dictionary) -> void:
-	if disk_data.is_empty():
-		return
-		
-	append_text("[color=CYAN]" + repeat_string("=", 40) + "[/color]")
+	append_text("[color=CYAN]" + repeat_string("=", 60) + "[/color]")
 	newline()
-	append_text("[color=CYAN]ALIEN SPECIES DATABASE[/color]")
+	append_text("[color=CYAN]              ALIEN CLASSIFICATION DATA DISK INSERTED[/color]")
 	newline()
-	append_text("[color=CYAN]" + repeat_string("=", 40) + "[/color]")
+	append_text("[color=CYAN]" + repeat_string("=", 60) + "[/color]")
 	newline()
 	
-	if disk_data.has("species"):
-		append_text("[color=YELLOW]Species:[/color] " + disk_data["species"])
-		newline()
+	append_text("[color=YELLOW]Disk:[/color] " + disk_name)
+	newline()
+	newline()
 	
-	if disk_data.has("weight_range"):
-		append_text("[color=YELLOW]Weight Range:[/color] " + disk_data["weight_range"])
-		newline()
+	append_text("[color=GREEN]COMMANDS TO GET STARTED:[/color]")
+	newline()
+	append_text("  [color=WHITE]table weight_classes.csv[/color] - View weight/liquid ratio data")
+	newline()
+	append_text("  [color=WHITE]ls[/color]                        - List all files on disk")
+	newline()
+	append_text("  [color=WHITE]cat filename[/color]              - Read file contents")
+	newline()
+	append_text("  [color=WHITE]eject[/color]                     - Remove this disk")
+	newline()
+	newline()
 	
-	if disk_data.has("blood_types"):
-		append_text("[color=YELLOW]Blood Types:[/color] " + str(disk_data["blood_types"]))
-		newline()
+	append_text("[color=YELLOW]WORKFLOW:[/color]")
+	newline()
+	append_text("1. Check alien weight on monitor system")
+	newline()
+	append_text("2. Find matching weight range in CSV data")
+	newline()
+	append_text("3. Set lever values to match liquid ratios")
+	newline()
+	append_text("4. Press SEDATE button to inject")
+	newline()
+	append_text("5. Accept/Reject alien classification")
+	newline()
+	newline()
 	
-	if disk_data.has("eye_colors"):
-		append_text("[color=YELLOW]Eye Colors:[/color] " + str(disk_data["eye_colors"]))
-		newline()
-	
-	if disk_data.has("files"):
-		append_text("[color=YELLOW]Available Files:[/color]")
-		newline()
-		for file in disk_data["files"]:
-			append_text("  - " + file)
-			newline()
-	
-	append_text("[color=CYAN]" + repeat_string("=", 40) + "[/color]")
+	append_text("[color=CYAN]" + repeat_string("=", 60) + "[/color]")
 	newline()
 		
 func check_permission() -> bool:
@@ -519,6 +584,9 @@ func process(command: String) -> void:
 		append_text("[color=RED]" + tr("error.command_not_found") + "[/color] " + cmd)
 		pop()
 		newline()
+		# Auto-scroll after error message
+		scroll_to_line(get_line_count())
+		_current_line = 0
 		return
 	
 	var commandData = commands[cmd]
@@ -530,6 +598,9 @@ func process(command: String) -> void:
 						% [str(expected_arg_count), args])
 		pop()
 		newline()
+		# Auto-scroll after error message
+		scroll_to_line(get_line_count())
+		_current_line = 0
 		return
 	
 	if cmd in ["mkdir", "touch", "rm", "mv", "cp", "nano"] and not check_permission():
@@ -537,9 +608,17 @@ func process(command: String) -> void:
 		append_text("[color=RED]Insufficient permissions. Use 'auth' to gain access.[/color]")
 		pop()
 		newline()
+		# Auto-scroll after permission error
+		scroll_to_line(get_line_count())
+		_current_line = 0
 		return
 	
 	commandData.function.callv(args)
+	
+	# Auto-scroll after command execution (unless in table mode)
+	if not _table_mode:
+		scroll_to_line(get_line_count())
+		_current_line = 0
 
 func add_command(id: String, function: Callable, functionInstance: Object, helpText: String = "", helpDetail: String = ""):
 	commands[id] = EC_CommandClass.new(id, function, functionInstance, helpText, helpDetail)
@@ -853,10 +932,9 @@ func _built_in_command_init():
 	add_command(
 	"eject",
 	func():
-		# Support ejecting any disk type
-		var valid_disks = ["Disk1", "Disk2", "Disk3", "Disk4"]
-		if inserted_disk == "" or not inserted_disk in valid_disks or not inserted_disk_node:
-			append_text("[color=RED]Error: No disk inserted or invalid disk.[/color]")
+		# Simple eject command - works from any directory
+		if inserted_disk == "":
+			append_text("[color=YELLOW]No disk currently inserted.[/color]")
 			newline()
 			return
 
@@ -874,7 +952,7 @@ func _built_in_command_init():
 		var player = get_tree().get_first_node_in_group("player")
 		if player and player.has_method("exit_computer_mode"):
 			player.exit_computer_mode()
-			print("Exited computer mode")
+			print("Exited computer mode for eject")
 		else:
 			append_text("[color=RED]Error: Player not found.[/color]")
 			newline()
@@ -927,6 +1005,32 @@ func _built_in_command_init():
 	"Eject the inserted disk",
 	"Ejects the inserted disk from the computer, returning it to the player’s hand"
 )
+	add_command(
+		"e",
+		func():
+			# Quick shortcut for eject
+			if inserted_disk == "":
+				append_text("[color=YELLOW]No disk currently inserted.[/color]")
+				newline()
+				return
+			# Call the main eject function - simplified approach
+			var player = get_tree().get_first_node_in_group("player")
+			if player and player.has_method("exit_computer_mode"):
+				player.exit_computer_mode()
+			if player and player.has_method("return_disk_to_hand") and inserted_disk_node:
+				inserted_disk_node.add_to_group("grabbable")
+				player.return_disk_to_hand(inserted_disk, inserted_disk_node)
+			var home_path_instance = get_path_instance("/home")
+			if home_path_instance.has(inserted_disk):
+				home_path_instance.erase(inserted_disk)
+			append_text("[color=GREEN]Disk '" + inserted_disk + "' ejected.[/color]")
+			newline()
+			inserted_disk = ""
+			inserted_disk_node = null,
+		self,
+		"Quick eject shortcut",
+		"Same as 'eject' command - quickly remove the current disk"
+	)
 	add_command(
 		"disks",
 		func():
@@ -1136,30 +1240,51 @@ func show_csv_table(filename: String) -> void:
 		if lines[i].strip_edges() != "":
 			data_rows.append(parse_csv_line(lines[i]))
 	
-	# Dynamically calculate column widths
+	# Calculate column widths to fill entire screen
+	var available_width = int(console_size.x) - (headers.size() - 1) * 3  # Account for separators
+	var min_column_width = 8
 	var column_widths = []
+	
+	# First pass: calculate minimum required widths
+	var min_widths = []
 	for i in range(headers.size()):
 		var max_len = headers[i].strip_edges().length()
 		for row in data_rows:
 			if i < row.size():
 				max_len = max(max_len, row[i].strip_edges().length())
-		column_widths.append(max(max_len + 2, 10))
+		min_widths.append(max(max_len + 2, min_column_width))
+	
+	# Calculate total minimum width needed
+	var total_min_width = 0
+	for width in min_widths:
+		total_min_width += width
+	
+	# If we have extra space, distribute it proportionally
+	if total_min_width < available_width:
+		var extra_space = available_width - total_min_width
+		var space_per_column = extra_space / headers.size()
+		for i in range(headers.size()):
+			column_widths.append(min_widths[i] + space_per_column)
+	else:
+		# Use minimum widths if screen is too small
+		column_widths = min_widths
 	
 	# Enter table mode and hide terminal UI
 	_table_mode = true
 	clear()
 	_hide_terminal_ui()
 	
-	# Table title
-	append_text("[color=CYAN]" + repeat_string("=", 80) + "[/color]")
+	# Table title with full width border-to-border
+	var title_width = int(console_size.x)
+	append_text("[color=CYAN]" + repeat_string("═", title_width) + "[/color]")
 	newline()
-	append_text("[color=CYAN]          ALIEN SPECIES CLASSIFICATION DATA TABLE[/color]")
+	append_text("[color=CYAN]" + pad_string_center("ALIEN SPECIES CLASSIFICATION DATA TABLE", title_width) + "[/color]")
 	newline()
-	append_text("[color=CYAN]          FILE: " + filename.to_upper() + "[/color]")
+	append_text("[color=CYAN]" + pad_string_center("FILE: " + filename.to_upper(), title_width) + "[/color]")
 	newline()
-	append_text("[color=CYAN]          DISK: " + inserted_disk.to_upper() + "[/color]")
+	append_text("[color=CYAN]" + pad_string_center("DISK: " + inserted_disk.to_upper(), title_width) + "[/color]")
 	newline()
-	append_text("[color=CYAN]" + repeat_string("=", 80) + "[/color]")
+	append_text("[color=CYAN]" + repeat_string("═", title_width) + "[/color]")
 	newline()
 	newline()
 	
@@ -1195,6 +1320,11 @@ func show_csv_table(filename: String) -> void:
 				row_line += " │ "
 		append_text(row_line)
 		newline()
+	
+	# Table footer with full width border-to-border
+	newline()
+	append_text("[color=CYAN]" + repeat_string("═", title_width) + "[/color]")
+	newline()
 	
 
 func _exit_table_mode() -> void:

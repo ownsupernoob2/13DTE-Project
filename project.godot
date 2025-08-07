@@ -46,6 +46,7 @@ disk=""
 player=""
 monitor=""
 interactable=""
+lever=""
 
 [input]
 

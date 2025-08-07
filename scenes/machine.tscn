@@ -14,14 +14,14 @@ size = Vector3(0.2, 0.05, 0.2)
 [sub_resource type="ViewportTexture" id="ViewportTexture_a5lir"]
 viewport_path = NodePath("Monitor/SubViewport")
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a5lir"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_73k52"]
 resource_local_to_scene = true
 albedo_texture = SubResource("ViewportTexture_a5lir")
 proximity_fade_distance = 19.99
 
 [sub_resource type="QuadMesh" id="QuadMesh_aee78"]
 resource_local_to_scene = true
-material = SubResource("StandardMaterial3D_a5lir")
+material = SubResource("StandardMaterial3D_73k52")
 size = Vector2(0.4, 0.3)
 
 [node name="Machine" type="Node3D" groups=["interactable"]]

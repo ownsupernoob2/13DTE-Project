@@ -71,10 +71,10 @@ func _process(_delta: float) -> void:
 	# Much less frequent validation for lever interaction to prevent interruptions
 	if is_holding_lever:
 		lever_validation_timer += _delta
-		if lever_validation_timer >= 0.5:  # Check every 500ms instead of 100ms for stability
+		if lever_validation_timer >= 1.0:  # Check every 1000ms instead of 500ms for even more stability
 			lever_validation_timer = 0.0
 			# Only validate if there's been no recent motion (don't interrupt active use)
-			if abs(lever_accumulated_motion) < 5.0:  # Only check when not actively moving
+			if abs(lever_accumulated_motion) < 10.0:  # Increased from 5.0 to 10.0 for more tolerance
 				if not _validate_lever_raycast():
 					print("Lever interaction stopped: Periodic validation failed")
 					_stop_lever_interaction()
@@ -118,6 +118,14 @@ func _update_interaction_raycast() -> void:
 			using_computer = result.collider
 		# Check for injection button
 		elif result.collider.name == "InjectButton" or result.collider.is_in_group("inject_button"):
+			can_interact = true
+			using_computer = result.collider
+		# Check for medical scanner
+		elif result.collider.is_in_group("scanner"):
+			can_interact = true
+			using_computer = result.collider
+		# Check for caulk item
+		elif result.collider.is_in_group("caulk"):
 			can_interact = true
 			using_computer = result.collider
 
@@ -247,8 +255,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_handle_lever_drag_motion()
 			
 			# Camera rotation - ONLY vertical movement (no horizontal when holding lever)
-			# Increased vertical sensitivity to sync with lever movement
-			camera.rotate_x(-event.relative.y * SENSITIVITY * 0.6)  # Increased from 0.3 for better sync
+			# Reduced vertical sensitivity to match lever movement speed better
+			camera.rotate_x(-event.relative.y * SENSITIVITY * 0.3)  # Reduced from 0.6 to 0.15 for closer sync with lever
 			camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-70), deg_to_rad(60))
 			
 		elif can_rotate_camera:
@@ -262,10 +270,25 @@ func _unhandled_input(event: InputEvent) -> void:
 			if abs(event.relative.y) > 1.0:
 				print("Camera rotation blocked - Computer:", Global.is_using_computer, " Monitor:", Global.is_using_monitor)
 	
+	# When in scanner mode, let the scanner UI handle all input
+	if Global.is_using_computer or Global.is_using_monitor:
+		var scanner_node = get_node_or_null("../MedicalScanner")
+		if scanner_node and scanner_node.is_active:
+			# Don't handle any input in player script when scanner is active
+			# Let the scanner UI handle everything directly
+			return
+	
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			if Global.is_using_computer or Global.is_using_monitor:
-				exit_computer_mode()
+				# Check if we're in scanner mode specifically
+				var scanner_node = get_node_or_null("../MedicalScanner")
+				if scanner_node and scanner_node.is_active:
+					# Let the scanner UI handle the click (it will call exit)
+					print("Scanner click - exiting scanner mode")
+					exit_computer_mode()
+				else:
+					exit_computer_mode()
 			elif can_interact and using_computer:
 				if using_computer.is_in_group("monitor") and not held_object:
 					enter_monitor_mode()
@@ -279,6 +302,10 @@ func _unhandled_input(event: InputEvent) -> void:
 					_start_lever_interaction()
 				elif using_computer.name == "InjectButton" or using_computer.is_in_group("inject_button"):
 					_inject_fluids()
+				elif using_computer.is_in_group("scanner"):
+					_use_medical_scanner()
+				elif using_computer.is_in_group("caulk"):
+					_use_caulk()
 			elif held_object == null and can_grab:
 				grab_object()
 			elif held_object and can_grab:
@@ -542,14 +569,14 @@ func _start_lever_interaction() -> void:
 	print("Started holding ", current_lever_name, " with initial value: ", lever_initial_value)
 
 func _validate_lever_raycast() -> bool:
-	# More lenient validation - check a larger area around the lever
+	# Much more lenient validation - check a larger area around the lever
 	if not is_holding_lever:
 		return false
 	
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
 	var ray_start: Vector3 = player_camera.project_ray_origin(mouse_pos)
-	var ray_end: Vector3 = ray_start + player_camera.project_ray_normal(mouse_pos) * 8.0  # Longer range
+	var ray_end: Vector3 = ray_start + player_camera.project_ray_normal(mouse_pos) * 12.0  # Even longer range
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(ray_start, ray_end)
 	var result: Dictionary = space_state.intersect_ray(query)
 	
@@ -566,19 +593,24 @@ func _validate_lever_raycast() -> bool:
 		if parent and parent.get_parent() and parent.get_parent().name == "LeverGutentagPosition":
 			return true
 	
-	# Additional check: Test multiple raycast points around the center for more tolerance
+	# Additional check: Test multiple raycast points around the center for much more tolerance
 	var viewport_size = get_viewport().get_visible_rect().size
-	var center_offset = 50.0  # pixels around center
+	var center_offset = 100.0  # Much larger area - doubled from 50 to 100 pixels
 	var test_positions = [
 		mouse_pos + Vector2(-center_offset, 0),
 		mouse_pos + Vector2(center_offset, 0),
 		mouse_pos + Vector2(0, -center_offset),
-		mouse_pos + Vector2(0, center_offset)
+		mouse_pos + Vector2(0, center_offset),
+		# Add diagonal tests for even more coverage
+		mouse_pos + Vector2(-center_offset * 0.7, -center_offset * 0.7),
+		mouse_pos + Vector2(center_offset * 0.7, -center_offset * 0.7),
+		mouse_pos + Vector2(-center_offset * 0.7, center_offset * 0.7),
+		mouse_pos + Vector2(center_offset * 0.7, center_offset * 0.7)
 	]
 	
 	for test_pos in test_positions:
 		ray_start = player_camera.project_ray_origin(test_pos)
-		ray_end = ray_start + player_camera.project_ray_normal(test_pos) * 8.0
+		ray_end = ray_start + player_camera.project_ray_normal(test_pos) * 12.0  # Longer range
 		query = PhysicsRayQueryParameters3D.create(ray_start, ray_end)
 		result = space_state.intersect_ray(query)
 		
@@ -660,6 +692,16 @@ func _inject_fluids() -> void:
 		print("Lever system not found!")
 		return
 	
+	# Get the current alien's liquid ratios from monitor FIRST for debug
+	var monitor_system = get_node_or_null("../Monitor/Monitor/SubViewport/Control/Console")
+	if monitor_system and monitor_system.has_method("get_current_liquid_ratios"):
+		var correct_ratios = monitor_system.get_current_liquid_ratios()
+		print("=== DEBUG: CORRECT LEVER COMBINATION ===")
+		print("Lever 1 (A): ", correct_ratios[0])
+		print("Lever 2 (B): ", correct_ratios[1]) 
+		print("Lever 3 (C): ", correct_ratios[2])
+		print("========================================")
+	
 	var combination = lever_system.get_combination()
 	
 	# Check if lever values have been changed from initial state
@@ -684,7 +726,6 @@ func _inject_fluids() -> void:
 	print("Injecting fluids with combination: ", combination[0], "/", combination[1], "/", combination[2])
 	
 	# Get the current alien's liquid ratios from monitor
-	var monitor_system = get_node_or_null("../Monitor/Monitor/SubViewport/Control/Console")
 	if monitor_system and monitor_system.has_method("get_current_liquid_ratios"):
 		var correct_ratios = monitor_system.get_current_liquid_ratios()
 		var tolerance = 3  # Allow 3 point tolerance for precision
@@ -714,10 +755,97 @@ func _inject_fluids() -> void:
 		else:
 			print("FAILURE! Wrong sedation ratios. Expected: ", correct_ratios, " Got: ", combination)
 			print("FAILURE! Tolerance: ", tolerance, " points")
-			# Reset levers for another attempt
-			lever_system.reset_levers()
-			# Reset tracking values since levers were reset
-			initial_lever_values = [0, 0, 0]
-			have_lever_values_changed = false
+			
+			# Trigger failure system for incorrect sedation
+			var failure_manager = get_node_or_null("/root/FailureManager")
+			if not failure_manager:
+				failure_manager = get_tree().current_scene.get_node_or_null("FailureManager")
+			if failure_manager and failure_manager.has_method("trigger_failure"):
+				failure_manager.trigger_failure("Incorrect sedation ratios")
+			else:
+				# Fallback: Reset levers for another attempt
+				lever_system.reset_levers()
+				# Reset tracking values since levers were reset
+				initial_lever_values = [0, 0, 0]
+				have_lever_values_changed = false
 	else:
 		print("Monitor system not found or missing method!")
+
+func _use_medical_scanner() -> void:
+	# Find the medical scanner
+	var scanner_node = get_node_or_null("../MedicalScanner")
+	if not scanner_node:
+		print("Medical scanner not found!")
+		return
+	
+	# TEMPORARY: Skip sedation requirement for testing
+	print("Activating medical scanner (TESTING MODE - NO SEDATION REQUIRED)")
+	
+	# TODO: Re-enable sedation check later:
+	# var lever_system = get_node_or_null("../LeverGutentagPosition")
+	# if not lever_system:
+	#     print("Cannot scan - lever system not found!")
+	#     return
+	# if not have_lever_values_changed:
+	#     print("Cannot scan - alien must be sedated first! Use the lever system to sedate the alien.")
+	#     return
+	
+	# Get current alien data from game manager
+	var scanner_data = {}
+	
+	if GameManager and GameManager.current_alien:
+		var alien_data = GameManager.current_alien
+		# Convert alien data to scanner format
+		scanner_data["EYE_COLOR"] = alien_data.get("eye_color", "Unknown")
+		scanner_data["BLOOD_TYPE"] = alien_data.get("blood", "Unknown")
+		scanner_data["AUDIO_FREQUENCY"] = 440.0 + (alien_data.get("class", 1) - 1) * 100.0  # Different frequency per class
+		scanner_data["SCAN_SPEED"] = 1.0 + (alien_data.get("class", 1) - 1) * 0.3  # Faster for higher classes
+	else:
+		# Fallback default data
+		scanner_data["EYE_COLOR"] = "Blue"
+		scanner_data["BLOOD_TYPE"] = "AB-Positive"
+		scanner_data["AUDIO_FREQUENCY"] = 440.0
+		scanner_data["SCAN_SPEED"] = 1.0
+	
+	# Switch to scanner camera mode
+	enter_scanner_mode()
+	
+	# Start the scanning process
+	if scanner_node.has_method("start_scan"):
+		scanner_node.start_scan(scanner_data)
+
+func enter_scanner_mode() -> void:
+	if using_computer and not Global.is_using_computer and not Global.is_using_monitor:
+		active_computer_camera = get_node_or_null("../MedicalScanner/ScannerCamera")
+		if active_computer_camera and active_computer_camera is Camera3D:
+			Global.is_using_computer = true
+			Global.is_using_monitor = false
+			player_camera.current = false
+			active_computer_camera.current = true
+			velocity = Vector3.ZERO
+			
+			if cursor1:
+				cursor1.visible = false
+			if cursor2:
+				cursor2.visible = false
+		else:
+			print("Scanner camera not found!")
+			if cursor1:
+				cursor1.visible = !can_interact
+			if cursor2:
+				cursor2.visible = can_interact
+
+func _use_caulk() -> void:
+	if not using_computer or not using_computer.is_in_group("caulk"):
+		print("No caulk selected!")
+		return
+	
+	var caulk_node = using_computer
+	if caulk_node.has_method("use_caulk"):
+		var success = caulk_node.use_caulk()
+		if success:
+			print("🔧 Applied caulk to pod!")
+		else:
+			print("❌ Failed to use caulk")
+	else:
+		print("Error: Caulk node missing use_caulk method!")

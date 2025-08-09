@@ -1,15 +1,12 @@
 extends Node
 
 # Game Manager for Alien Classification System
-# Manages the 5-stage progression: Tutorial → Easy → Easy → Medium → Hard
+# Manages the gameplay loop of checking aliens, fact-checking, and machine speed
 
 signal alien_classified(correct: bool)
 signal machine_speed_increased(speed_level: int)
 signal game_over(reason: String)
 signal stage_completed(stage: int)
-
-# Failure Manager reference
-var failure_manager: Node = null
 
 # Core progression system - 5 stages total
 var current_stage: int = 1  # 1=Tutorial, 2=Easy, 3=Easy, 4=Medium, 5=Hard
@@ -32,17 +29,7 @@ var stage_descriptions: Array = [
 # Current alien and game state
 var current_alien: Dictionary = {}
 var game_active: bool = false
-var current_stage_completed: bool = false
-
-# Pod integrity system (for medium/hard stages)
-var pod_integrity: float = 100.0
-var pod_breaking_active: bool = false
-var caulk_available: bool = false
-var caulk_fuel: float = 100.0  # Caulk has limited fuel
-
-signal pod_integrity_changed(integrity: float)
-signal pod_repaired()
-signal caulk_depleted()
+var stage_completed: bool = false
 
 # Game balance settings
 const MAX_SPEED_LEVEL: int = 10
@@ -52,61 +39,36 @@ const MAX_MISTAKES: int = 30 # Game over after 30 total mistakes
 # Alien data for verification - Now using Class system
 var alien_species_data: Dictionary = {
 	"Class 1": {
-		"eye_colors": ["Yellow", "Orange", "White"],
+		"weight_range": [130, 150],
 		"blood_types": ["X-Positive", "O-Negative", "Z-Flux"],
-		"weight_range": [130, 150]
+		"eye_colors": ["Yellow", "Orange", "White"]
 	},
 	"Class 2": {
-		"eye_colors": ["Green", "Cyan", "Amber"],
+		"weight_range": [80, 100],
 		"blood_types": ["A-Neutral", "B-Static"],
-		"weight_range": [151, 180]
+		"eye_colors": ["Green", "Cyan", "Amber"]
 	},
 	"Class 3": {
-		"eye_colors": ["Blue", "Indigo", "Red"],
+		"weight_range": [200, 250],
 		"blood_types": ["B-Volatile", "C-Pulse"],
-		"weight_range": [181, 220]
+		"eye_colors": ["Blue", "Indigo", "Red"]
 	},
 	"Class 4": {
-		"eye_colors": ["Purple", "Violet", "Magenta", "Crimson", "Scarlet"],
-		"blood_types": ["C-Stable", "D-Light", "D-Heavy", "E-Dense"],
-		"weight_range": [221, 280]
+		"weight_range": [50, 70],
+		"blood_types": ["C-Stable", "D-Light"],
+		"eye_colors": ["Purple", "Violet", "Magenta"]
 	}
 }
 
 func _ready() -> void:
 	print("GameManager initialized - Starting Stage 1: TUTORIAL")
-	
-	# Initialize failure manager
-	_setup_failure_manager()
-	
 	start_new_stage()
-
-func _setup_failure_manager() -> void:
-	# Create failure manager if it doesn't exist
-	failure_manager = get_node_or_null("/root/FailureManager")
-	if not failure_manager:
-		# Create and add failure manager
-		var failure_script = preload("res://scripts/failure_manager.gd")
-		failure_manager = Node.new()
-		failure_manager.set_script(failure_script)
-		failure_manager.name = "FailureManager"
-		get_tree().current_scene.add_child(failure_manager)
-		print("🚨 FailureManager created and initialized")
-	else:
-		print("🚨 FailureManager found and connected")
 
 func start_new_stage() -> void:
 	aliens_processed_this_stage = 0
 	correct_classifications = 0
-	current_stage_completed = false
+	stage_completed = false
 	game_active = true
-	
-	# Initialize pod system for medium+ stages
-	if current_stage >= 4:  # Medium and Hard stages
-		_initialize_pod_system()
-	else:
-		pod_breaking_active = false
-		pod_integrity = 100.0
 	
 	print("=== STAGE ", current_stage, ": ", stage_names[current_stage - 1], " ===")
 	print("Target: ", aliens_required_per_stage[current_stage - 1], " aliens")
@@ -115,98 +77,8 @@ func start_new_stage() -> void:
 	# Generate first alien for this stage
 	generate_new_alien()
 
-func _initialize_pod_system() -> void:
-	pod_integrity = 100.0
-	pod_breaking_active = true
-	caulk_available = true
-	caulk_fuel = 100.0
-	
-	print("⚠️ POD INTEGRITY SYSTEM ACTIVE ⚠️")
-	print("Pod will deteriorate over time - use caulk to repair!")
-	
-	# Spawn caulk item in the scene
-	_spawn_caulk_item()
-	
-	# Start pod degradation timer
-	_start_pod_degradation()
-
-func _spawn_caulk_item() -> void:
-	# Create caulk as a grabbable item
-	var caulk_scene = preload("res://scenes/components/caulk.tscn")  # We'll create this
-	if not caulk_scene:
-		print("Warning: Caulk scene not found - creating placeholder")
-		return
-	
-	var caulk_instance = caulk_scene.instantiate()
-	var main_scene = get_tree().current_scene
-	if main_scene:
-		# Position caulk near the pod
-		caulk_instance.global_position = Vector3(2, 1, -1)  # Adjust position as needed
-		main_scene.add_child(caulk_instance)
-		print("✓ Caulk spawned - grab it to repair the pod!")
-
-func _start_pod_degradation() -> void:
-	# Create timer for pod degradation
-	var degradation_timer = Timer.new()
-	degradation_timer.wait_time = 2.0  # Degrade every 2 seconds
-	degradation_timer.autostart = true
-	degradation_timer.timeout.connect(_degrade_pod)
-	add_child(degradation_timer)
-
-func _degrade_pod() -> void:
-	if not pod_breaking_active or current_stage_completed:
-		return
-	
-	# Degrade pod integrity
-	var degradation_rate = 3.0  # Lose 3% every 2 seconds
-	if current_stage == 5:  # Hard mode - faster degradation
-		degradation_rate = 5.0
-	
-	pod_integrity -= degradation_rate
-	pod_integrity = max(0.0, pod_integrity)
-	
-	pod_integrity_changed.emit(pod_integrity)
-	
-	if pod_integrity <= 0:
-		_pod_critical_failure()
-	elif pod_integrity <= 25:
-		print("🚨 CRITICAL: Pod integrity at ", "%.1f" % pod_integrity, "%!")
-	elif pod_integrity <= 50:
-		print("⚠️ WARNING: Pod integrity at ", "%.1f" % pod_integrity, "%")
-
-func _pod_critical_failure() -> void:
-	print("💥 POD FAILURE - GAME OVER!")
-	game_active = false
-	game_over.emit("Pod integrity failure - containment breached!")
-	
-	# Trigger failure system for pod critical failure
-	if failure_manager and failure_manager.has_method("trigger_failure"):
-		failure_manager.trigger_failure("Pod integrity critical failure - containment breached")
-
-func repair_pod_with_caulk() -> void:
-	if not caulk_available or caulk_fuel <= 0:
-		print("No caulk available or caulk depleted!")
-		return
-	
-	# Repair amount depends on caulk fuel
-	var repair_amount = min(25.0, caulk_fuel * 0.5)  # Up to 25% repair
-	caulk_fuel -= repair_amount * 2  # Caulk fuel depletes
-	caulk_fuel = max(0.0, caulk_fuel)
-	
-	pod_integrity += repair_amount
-	pod_integrity = min(100.0, pod_integrity)
-	
-	print("🔧 Pod repaired! Integrity: ", "%.1f" % pod_integrity, "% | Caulk fuel: ", "%.1f" % caulk_fuel, "%")
-	
-	pod_repaired.emit()
-	
-	if caulk_fuel <= 0:
-		print("🔋 Caulk depleted!")
-		caulk_available = false
-		caulk_depleted.emit()
-
 func generate_new_alien() -> void:
-	if current_stage_completed or not game_active:
+	if stage_completed or not game_active:
 		return
 		
 	# Generate alien based on current stage difficulty
@@ -218,13 +90,9 @@ func generate_new_alien() -> void:
 	print("Eye Color: ", current_alien.eye_color)
 	print("Blood Type: ", current_alien.blood_type)
 	print("Progress: ", aliens_processed_this_stage + 1, "/", aliens_required_per_stage[current_stage - 1])
-	
-	# Show pod status if active
-	if pod_breaking_active:
-		print("Pod Integrity: ", "%.1f" % pod_integrity, "%")
 
 func classify_alien(player_says_accept: bool) -> bool:
-	if not game_active or current_stage_completed:
+	if not game_active or stage_completed:
 		return false
 		
 	var is_correct = _validate_alien_classification(player_says_accept)
@@ -235,14 +103,8 @@ func classify_alien(player_says_accept: bool) -> bool:
 	if is_correct:
 		correct_classifications += 1
 		print("✓ CORRECT classification!")
-		# Trigger success indicator
-		if failure_manager:
-			failure_manager.trigger_success()
 	else:
 		print("✗ INCORRECT classification!")
-		# Trigger failure for incorrect classification
-		if failure_manager:
-			failure_manager.trigger_failure("Incorrect alien classification")
 	
 	# Calculate stage accuracy
 	stage_accuracy = float(correct_classifications) / float(aliens_processed_this_stage) * 100.0
@@ -260,12 +122,7 @@ func classify_alien(player_says_accept: bool) -> bool:
 	return is_correct
 
 func _complete_current_stage() -> void:
-	current_stage_completed = true
-	
-	# Stop pod degradation
-	if pod_breaking_active:
-		pod_breaking_active = false
-		print("🛡️ Pod systems stabilized")
+	stage_completed = true
 	
 	print("\n=== STAGE ", current_stage, " COMPLETED ===")
 	print("Accuracy: ", "%.1f" % stage_accuracy, "%")
@@ -305,15 +162,9 @@ func reset_game() -> void:
 	correct_classifications = 0
 	total_classifications = 0
 	stage_accuracy = 0.0
-	current_stage_completed = false
+	stage_completed = false
 	game_active = false
 	current_alien = {}
-	
-	# Reset pod system
-	pod_integrity = 100.0
-	pod_breaking_active = false
-	caulk_available = false
-	caulk_fuel = 100.0
 	
 	print("Game reset - Returning to Tutorial")
 	start_new_stage()
@@ -412,9 +263,184 @@ func get_current_stage_info() -> Dictionary:
 		"progress": aliens_processed_this_stage,
 		"target": aliens_required_per_stage[current_stage - 1] if current_stage <= 5 else 0,
 		"accuracy": stage_accuracy,
-		"game_active": game_active,
-		"pod_integrity": pod_integrity,
-		"pod_active": pod_breaking_active,
-		"caulk_available": caulk_available,
-		"caulk_fuel": caulk_fuel
+		"game_active": game_active
 	}
+	var weight_correct = actual_weight >= species_data["weight_range"][0] and actual_weight <= species_data["weight_range"][1]
+	
+	# Check blood type
+	var blood_correct = actual_blood in species_data["blood_types"]
+	
+	# Check eye color
+	var eye_correct = actual_eye in species_data["eye_colors"]
+	
+	var is_correct = weight_correct and blood_correct and eye_correct
+	
+	if is_correct:
+		classification_streak += 1
+		print("CORRECT classification! Streak: ", classification_streak)
+	else:
+		classification_streak = 0
+		incorrect_classifications += 1
+		_handle_incorrect_classification()
+		print("INCORRECT classification! Total mistakes: ", incorrect_classifications)
+	
+	emit_signal("alien_classified", is_correct)
+	return is_correct
+
+func _handle_incorrect_classification() -> void:
+	"""Handle the consequences of an incorrect classification"""
+	
+	# Increase machine speed every few mistakes
+	if incorrect_classifications % SPEED_INCREASE_THRESHOLD == 0:
+		machine_speed_level = min(machine_speed_level + 1, MAX_SPEED_LEVEL)
+		_increase_machine_speed()
+		emit_signal("machine_speed_increased", machine_speed_level)
+		print("Machine speed increased to level: ", machine_speed_level)
+	
+	# Check for game over condition
+	if incorrect_classifications >= MAX_MISTAKES:
+		emit_signal("game_over", "Too many incorrect classifications!")
+		print("GAME OVER: Too many mistakes!")
+
+func _increase_machine_speed() -> void:
+	"""Increase the machine's update speed based on current speed level"""
+	var machine = get_node_or_null("../Light/Machine")
+	if machine and machine.has_method("set_speed_level"):
+		machine.set_speed_level(machine_speed_level)
+	else:
+		print("Machine not found or doesn't support speed changes")
+
+func _on_machine_game_over(final_count: int) -> void:
+	"""Handle game over from machine reaching limit"""
+	emit_signal("game_over", "Machine counter reached critical level: " + str(final_count))
+	print("GAME OVER: Machine critical failure!")
+
+func get_classification_stats() -> Dictionary:
+	"""Return current game statistics"""
+	return {
+		"total_classifications": total_classifications,
+		"incorrect_classifications": incorrect_classifications,
+		"correct_classifications": total_classifications - incorrect_classifications,
+		"current_streak": classification_streak,
+		"machine_speed_level": machine_speed_level,
+		"accuracy": 0.0 if total_classifications == 0 else float(total_classifications - incorrect_classifications) / float(total_classifications) * 100.0
+	}
+
+func reset_game() -> void:
+	"""Reset the game state"""
+	machine_speed_level = 1
+	classification_streak = 0
+	total_classifications = 0
+	incorrect_classifications = 0
+	current_alien = {}
+	
+	# Reset machine speed
+	var machine = get_node_or_null("../Light/Machine")
+	if machine and machine.has_method("_reset_machine"):
+		machine._reset_machine()
+	
+	print("Game reset - Ready for new session!")
+
+# Utility function to generate test alien data
+func generate_test_alien(species_name: String = "") -> Dictionary:
+	"""Generate a test alien with random characteristics"""
+	var species_names = alien_species_data.keys()
+	if species_name == "":
+		species_name = species_names[randi() % species_names.size()]
+	
+	var species_data = alien_species_data[species_name]
+	var weight = randi_range(species_data["weight_range"][0], species_data["weight_range"][1])
+	var blood = species_data["blood_types"][randi() % species_data["blood_types"].size()]
+	var eye = species_data["eye_colors"][randi() % species_data["eye_colors"].size()]
+	
+	var alien = {
+		"species": species_name,
+		"weight": weight,
+		"blood_type": blood,
+		"eye_color": eye
+	}
+	
+	# Progressive complexity based on day
+	if current_day > 3:
+		alien["requires_decontamination"] = randf() < 0.3
+	if current_day > 5:
+		alien["psychological_evaluation_needed"] = randf() < 0.25
+	if current_day > 7:
+		alien["quarantine_protocols"] = ["standard", "enhanced", "maximum"][randi() % 3]
+	
+	# Hybrid aliens (unlocked later)
+	if hybrid_aliens_unlocked and randf() < 0.15:
+		alien["is_hybrid"] = true
+		alien["primary_species"] = species_name
+		alien["secondary_species"] = species_names[randi() % species_names.size()]
+		# Hybrid aliens have mixed characteristics
+		alien["eye_color"] = _get_hybrid_eye_color(alien.primary_species, alien.secondary_species)
+		alien["blood_type"] = _get_hybrid_blood_type(alien.primary_species, alien.secondary_species)
+	
+	# Equipment-dependent aliens
+	if current_day > 4:
+		alien["requires_special_equipment"] = randf() < 0.2
+		if alien.get("requires_special_equipment", false):
+			alien["special_equipment_type"] = ["UV_SCANNER", "DEEP_TISSUE", "NEURAL_PROBE"][randi() % 3]
+	
+	# Trigger random events
+	trigger_random_event()
+	
+	return alien
+
+func _get_hybrid_eye_color(primary: String, secondary: String) -> String:
+	# Mixed eye colors for hybrids
+	var hybrid_colors = ["Amber-Green", "Blue-Yellow", "Purple-Red", "Cyan-Orange"]
+	return hybrid_colors[randi() % hybrid_colors.size()]
+
+func _get_hybrid_blood_type(primary: String, secondary: String) -> String:
+	# Mixed blood types for hybrids  
+	var hybrid_types = ["XA-Flux", "BC-Variable", "ZO-Unstable", "CD-Compound"]
+	return hybrid_types[randi() % hybrid_types.size()]
+
+func _apply_event_effect(effect: String) -> void:
+	match effect:
+		"scanner_unreliable":
+			# Scanner may give false readings
+			equipment_malfunction_chance = 0.3
+		"sedation_difficult":
+			# Aliens resist sedation more
+			alien_resistance_level = 2
+		"time_pressure":
+			# Reduce available time
+			var machine = get_node_or_null("../Light/Machine")
+			if machine:
+				machine.total_seconds = max(60, machine.total_seconds - 120)  # 2 minutes less
+		"hybrid_alien":
+			# Enable hybrid aliens
+			hybrid_aliens_unlocked = true
+		"lever_drift":
+			# Levers slowly drift from set values
+			_start_lever_drift()
+
+func _start_lever_drift() -> void:
+	var lever_system = get_node_or_null("../LeverGutentagPosition")
+	if lever_system:
+		# Create a timer to randomly adjust lever values
+		var drift_timer = Timer.new()
+		drift_timer.wait_time = 5.0
+		drift_timer.timeout.connect(_apply_lever_drift)
+		add_child(drift_timer)
+		drift_timer.start()
+
+func _apply_lever_drift() -> void:
+	var lever_system = get_node_or_null("../LeverGutentagPosition")
+	if lever_system:
+		# Randomly drift one lever by ±1-3 points
+		var lever_to_drift = randi() % 3 + 1
+		var drift_amount = randi_range(-3, 3)
+		var current_value = 0
+		
+		match lever_to_drift:
+			1: current_value = lever_system.counter1
+			2: current_value = lever_system.counter2  
+			3: current_value = lever_system.counter3
+		
+		var new_value = clamp(current_value + drift_amount, 0, 100)
+		lever_system.set_lever_value(lever_to_drift, new_value)
+		print("POWER FLUCTUATION: Lever ", lever_to_drift, " drifted to ", new_value)

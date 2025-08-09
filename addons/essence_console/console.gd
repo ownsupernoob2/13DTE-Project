@@ -1122,6 +1122,12 @@ func _built_in_command_init():
 				newline()
 				return
 			
+			# Check if there's a current alien
+			if not GameManager.current_alien or GameManager.current_alien.is_empty():
+				append_text("[color=RED]Error: No alien currently being processed.[/color]")
+				newline()
+				return
+			
 			# Convert weight to int
 			var weight_int = weight.to_int()
 			if weight_int <= 0:
@@ -1129,18 +1135,33 @@ func _built_in_command_init():
 				newline()
 				return
 			
-			# Perform classification
-			var is_correct = GameManager.classify_alien(species, weight_int, blood, eye)
+			# Check if provided data matches current alien
+			var current_alien = GameManager.current_alien
+			var matches_species = current_alien.species == species
+			var matches_weight = current_alien.weight == weight_int
+			var matches_blood = current_alien.blood_type == blood
+			var matches_eye = current_alien.eye_color == eye
+			
+			var all_match = matches_species and matches_weight and matches_blood and matches_eye
+			
+			# If all data matches, we're saying "ACCEPT", otherwise "REJECT"
+			var is_correct = await GameManager.classify_alien(all_match)
 			
 			if is_correct:
 				append_text("[color=GREEN]CLASSIFICATION CORRECT![/color]")
 				newline()
-				append_text("The alien is indeed a " + species + ".")
+				if all_match:
+					append_text("The alien data matches - ACCEPTED.")
+				else:
+					append_text("The alien data doesn't match - REJECTED.")
 				newline()
 			else:
 				append_text("[color=RED]CLASSIFICATION INCORRECT![/color]")
 				newline()
-				append_text("The alien is NOT a " + species + ". Check the data again!")
+				if all_match:
+					append_text("You accepted the alien but should have rejected!")
+				else:
+					append_text("You rejected the alien but should have accepted!")
 				newline()
 				append_text("[color=YELLOW]Warning: Machine speed may have increased.[/color]")
 				newline()

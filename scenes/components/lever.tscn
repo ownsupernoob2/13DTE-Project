@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=4 uid="uid://dxfunwodw2xu3"]
+[gd_scene load_steps=36 format=4 uid="uid://dxfunwodw2xu3"]
 
 [ext_resource type="Script" uid="uid://b7gseqs67phyt" path="res://scenes/components/lever.gd" id="1_gl814"]
 [ext_resource type="Texture2D" uid="uid://k0o55iom6axe" path="res://assets/LeverGutentagPosition_metal_6.png" id="1_h80ut"]
@@ -225,6 +225,12 @@ size = Vector2(0.4, 0.3)
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_xv0i6"]
 data = PackedVector3Array(0.2, -0.15, 0, -0.2, -0.15, 0, 0.2, 0.15, 0, -0.2, -0.15, 0, -0.2, 0.15, 0, 0.2, 0.15, 0)
 
+[sub_resource type="BoxMesh" id="BoxMesh_InjectButton"]
+size = Vector3(0.2, 0.1, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_InjectButton"]
+size = Vector3(0.2, 0.1, 0.1)
+
 [node name="LeverGutentagPosition" type="Node3D"]
 script = ExtResource("1_gl814")
 
@@ -421,3 +427,12 @@ fit_content = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="lever3/Quad/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_xv0i6")
+
+[node name="SedateButton" type="StaticBody3D" parent="." groups=["inject_button"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.958101, 0.46781, 0.725425)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SedateButton"]
+mesh = SubResource("BoxMesh_InjectButton")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SedateButton"]
+shape = SubResource("BoxShape3D_InjectButton")

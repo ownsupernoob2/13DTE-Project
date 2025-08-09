@@ -7,9 +7,6 @@ extends Node3D
 @onready var screen2 = $lever2/Quad/SubViewport/Control/RichTextLabel
 @onready var screen3 = $lever3/Quad/SubViewport/Control/RichTextLabel
 
-# Sedate button
-var sedate_button: StaticBody3D
-
 # Counter values for each lever (0-100 system)
 var counter1: int = 0
 var counter2: int = 0
@@ -51,17 +48,12 @@ func _ready() -> void:
 	# Verify node references
 	if !screen or !screen2 or !screen3:
 		push_error("One or more screen nodes are not found!")
-	
-	# Create sedate button
-	_create_sedate_button()
 	if !handle or !handle2 or !handle3:
 		push_error("One or more handle nodes are not found!")
-	
 	# Add levers to groups for player interaction
 	$lever1.add_to_group("lever")
 	$lever2.add_to_group("lever") 
 	$lever3.add_to_group("lever")
-	
 	# Also add handle StaticBody3D nodes to lever group for interaction
 	if $lever1/Handle/Handle:
 		$lever1/Handle/Handle.add_to_group("lever")
@@ -121,6 +113,12 @@ func set_lever_value(lever_index: int, value: int) -> void:
 	# Update color based on value
 	screen_node.add_theme_color_override("default_color", get_color(value))
 	
+	# Update font size based on value (smaller font for 100 to fit better)
+	var font_size = BASE_FONT_SIZE
+	if value == 100:
+		font_size = int(BASE_FONT_SIZE * 0.75)  # 25% smaller for 100
+	screen_node.add_theme_font_size_override("normal_font_size", font_size)
+	
 	# Update handle rotation (starts at MIN_ROTATION_DEGREES for 0, goes to MAX_ROTATION_DEGREES for 100)
 	var rotation_range = MAX_ROTATION_DEGREES - MIN_ROTATION_DEGREES
 	var rotation_z = MIN_ROTATION_DEGREES + (float(value) / MAX_VALUE) * rotation_range
@@ -133,9 +131,14 @@ func set_lever_value(lever_index: int, value: int) -> void:
 
 # Function to update all screens and handle rotations
 func update_screens() -> void:
-	screen.add_theme_font_size_override("normal_font_size", BASE_FONT_SIZE)
-	screen2.add_theme_font_size_override("normal_font_size", BASE_FONT_SIZE)
-	screen3.add_theme_font_size_override("normal_font_size", BASE_FONT_SIZE)
+	# Update font sizes based on values (smaller font for 100)
+	var font_size1 = BASE_FONT_SIZE if counter1 != 100 else int(BASE_FONT_SIZE * 0.75)
+	var font_size2 = BASE_FONT_SIZE if counter2 != 100 else int(BASE_FONT_SIZE * 0.75)
+	var font_size3 = BASE_FONT_SIZE if counter3 != 100 else int(BASE_FONT_SIZE * 0.75)
+	
+	screen.add_theme_font_size_override("normal_font_size", font_size1)
+	screen2.add_theme_font_size_override("normal_font_size", font_size2)
+	screen3.add_theme_font_size_override("normal_font_size", font_size3)
 	
 	screen.add_theme_color_override("default_color", get_color(counter1))
 	screen2.add_theme_color_override("default_color", get_color(counter2))
@@ -160,50 +163,3 @@ func reset_levers() -> void:
 	set_lever_value(1, 0)
 	set_lever_value(2, 0)
 	set_lever_value(3, 0)
-
-func _create_sedate_button() -> void:
-	# Create sedate button as a clickable 3D object
-	sedate_button = StaticBody3D.new()
-	sedate_button.name = "SedateButton"
-	
-	# Create mesh for the button
-	var mesh_instance = MeshInstance3D.new()
-	var box_mesh = BoxMesh.new()
-	box_mesh.size = Vector3(0.3, 0.1, 0.15)  # Button size
-	mesh_instance.mesh = box_mesh
-	
-	# Create material for the button
-	var material = StandardMaterial3D.new()
-	material.albedo_color = Color(1.0, 0.2, 0.2, 1.0)  # Red color
-	material.emission_enabled = true
-	material.emission = Color(0.3, 0.0, 0.0, 1.0)  # Slight red glow
-	mesh_instance.set_surface_override_material(0, material)
-	
-	# Create collision shape
-	var collision_shape = CollisionShape3D.new()
-	var box_shape = BoxShape3D.new()
-	box_shape.size = box_mesh.size
-	collision_shape.shape = box_shape
-	
-	# Add components to button
-	sedate_button.add_child(mesh_instance)
-	sedate_button.add_child(collision_shape)
-	
-	# Position the button (to the right of the levers)
-	sedate_button.position = Vector3(0.6, 0.0, 0.0)
-	
-	# Add button to the lever group so it can be interacted with
-	sedate_button.add_to_group("inject_button")
-	
-	# Add button to scene
-	add_child(sedate_button)
-	
-	# Create a label for the button
-	var label_3d = Label3D.new()
-	label_3d.text = "SEDATE"
-	label_3d.font_size = 64
-	label_3d.position = Vector3(0, 0.15, 0)  # Above the button
-	label_3d.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	sedate_button.add_child(label_3d)
-	
-	print("Sedate button created and positioned")

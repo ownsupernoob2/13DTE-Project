@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="13DTE-Project"
-run/main_scene="uid://db2h3t17k37pe"
+run/main_scene="res://scenes/main_menu_new.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -20,15 +20,16 @@ config/icon="res://icon.svg"
 Global="*res://scripts/global.gd"
 DiskManager="*res://scripts/disk_manager.gd"
 GameManager="*res://scripts/game_manager.gd"
+SaveSystem="*res://scripts/save_system.gd"
 
 [display]
 
-window/size/viewport_width=850
-window/size/viewport_height=540
+window/size/viewport_width=1920
+window/size/viewport_height=1080
 window/size/mode=3
-window/size/resizable=false
-window/stretch/mode="viewport"
-mouse_cursor/size/viewport_height=540
+window/size/resizable=true
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [editor_plugins]
 

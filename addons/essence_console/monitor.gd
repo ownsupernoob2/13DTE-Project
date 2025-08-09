@@ -50,19 +50,102 @@ func _ready() -> void:
 	add_child(_flash_timer)
 	_flash_timer.set_one_shot(false)
 	_flash_timer.start(0.1)  # Initial start
+	
+	# Wait a moment then start the game
+	await get_tree().create_timer(1.0).timeout
+	if GameManager:
+		show_alien_info()
+	else:
+		append_text("[center][color=red]ERROR: GameManager not found[/color][/center]")
 	_flash_timer.timeout.connect(_update_display)
 	_update_display()  # Immediate initial display
 
 func show_alien_info() -> void:
-	var alien_label = get_node_or_null("SubViewport/Control/RichTextLabel")
-	if alien_label:
-		alien_label.text = "[center][font_size=200]Alien Data: Classified[/font_size][/center]"
-	else:
-		print("Warning: Alien label not found at SubViewport/Control/RichTextLabel")
+	if not GameManager or not GameManager.game_active:
+		_update_display()
+		return
+	
+	var alien = GameManager.current_alien
+	if alien.is_empty():
+		_update_display()
+		return
+	
+	var stage_info = GameManager.get_current_stage_info()
+	
+	# Clear and build display
+	clear()
+	newline()
+	
+	# Header with stage info
+	append_text("[center][color=cyan]STAGE " + str(stage_info.stage) + ": " + stage_info.stage_name + "[/color][/center]")
+	newline()
+	append_text("[center][color=white]PROGRESS: " + str(stage_info.progress) + "/" + str(stage_info.target) + " | ACCURACY: " + "%.1f" % stage_info.accuracy + "%[/color][/center]")
+	newline()
+	newline()
+	
+	# Specimen information
+	append_text("[color=yellow]SPECIMEN ANALYSIS:[/color]")
+	newline()
+	append_text("[color=white]Species: " + alien.species + "[/color]")
+	newline()
+	append_text("[color=white]Weight: " + str(alien.weight) + " kg[/color]")
+	newline()
+	append_text("[color=white]Eye Color: " + alien.eye_color + "[/color]")
+	newline()
+	append_text("[color=white]Blood Type: " + alien.blood_type + "[/color]")
+	newline()
+	
+	# Show complications if any
+	var complications = alien.get("complications", [])
+	if not complications.is_empty():
+		newline()
+		append_text("[color=red]COMPLICATIONS DETECTED:[/color]")
+		newline()
+		for complication in complications:
+			var comp_text = complication.replace("_", " ").to_upper()
+			append_text("[color=red]- " + comp_text + "[/color]")
+			newline()
+	
+	newline()
+	append_text("[color=cyan]Press LEFT ARROW to REJECT or RIGHT ARROW to ACCEPT[/color]")
+	
+	_can_input = true
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not _can_input or not event.is_pressed():
 		return
+	
+	if not GameManager or not GameManager.game_active:
+		return
+	
+	var player_says_accept = false
+	
+	if event.keycode == KEY_LEFT:
+		player_says_accept = false  # REJECT
+		append_text("[color=red]REJECTED[/color]")
+	elif event.keycode == KEY_RIGHT:
+		player_says_accept = true   # ACCEPT  
+		append_text("[color=green]ACCEPTED[/color]")
+	else:
+		return
+	
+	_can_input = false
+	newline()
+	
+	# Send classification to GameManager
+	var was_correct = await GameManager.classify_alien(player_says_accept)
+	
+	if was_correct:
+		append_text("[color=green]✓ CORRECT CLASSIFICATION[/color]")
+	else:
+		append_text("[color=red]✗ INCORRECT CLASSIFICATION[/color]")
+	
+	newline()
+	append_text("[color=yellow]Processing next specimen...[/color]")
+	
+	# Brief delay before showing next alien
+	await get_tree().create_timer(2.0).timeout
+	show_alien_info()
 	match event.as_text():
 		"Left":
 			_evaluate_input(false)

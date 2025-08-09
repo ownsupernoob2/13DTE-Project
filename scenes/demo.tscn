@@ -1,4 +1,4 @@
-[gd_scene load_steps=74 format=4 uid="uid://db2h3t17k37pe"]
+[gd_scene load_steps=75 format=4 uid="uid://db2h3t17k37pe"]
 
 [ext_resource type="Texture2D" uid="uid://ba314xal47nff" path="res://assets/disks/Disks_floppy_disc_2.png" id="3_dg67p"]
 [ext_resource type="PackedScene" uid="uid://bm2ujr6udikc4" path="res://scenes/components/computer.tscn" id="6_x0xbu"]
@@ -30,6 +30,7 @@
 [ext_resource type="Texture2D" uid="uid://b8m0js3o6inm7" path="res://assets/disks/Disks_floppy_disc_4.png" id="32_ssbcb"]
 [ext_resource type="PackedScene" uid="uid://culqv6vf0jevi" path="res://Untitled.glb" id="34_ijaeb"]
 [ext_resource type="PackedScene" uid="uid://u7lnosmcdssa" path="res://scenes/components/monitor.tscn" id="35_ssbcb"]
+[ext_resource type="PackedScene" uid="uid://c8r451f728vgq" path="res://scenes/medical_scanner.tscn" id="36_scanner"]
 [ext_resource type="PackedScene" uid="uid://dectaforclt20" path="res://SarcoPodMap10Export (2).glb" id="38_keb61"]
 [ext_resource type="Shader" uid="uid://ceqkphohw8enu" path="res://scenes/demo.gdshader" id="39_n3amx"]
 
@@ -564,6 +565,9 @@ transform = Transform3D(0.0238457, 0, -0.76519, 0, 0.708985, 0, 0.71318, 0, 0.02
 [node name="MonitorCamera" type="Camera3D" parent="Monitor"]
 transform = Transform3D(1.40139, 0, -1.49012e-07, 0, 1.41047, 0, 0, 0, 1.30614, -0.00705321, 0.548354, 0.576901)
 
+[node name="MedicalScanner" parent="." instance=ExtResource("36_scanner")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.7192, 141.858, -13.1827)
+
 [node name="SarcoPodMap10Export (2)" parent="." instance=ExtResource("38_keb61")]
 transform = Transform3D(0.719625, 0, 0, 0, 0.719625, 0, 0, 0, 0.719625, 3.158, 38.48, 2.55)
 
@@ -580,6 +584,9 @@ transform = Transform3D(10, 0, 0, 0, -0.369062, 0, 0, 0, 10, -55.3872, 142.525, 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SarcoPodMap10Export (2)/Platform/StaticBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.232483, 0.445496, -0.0147477)
 shape = SubResource("BoxShape3D_keb61")
+
+[node name="Tower" parent="SarcoPodMap10Export (2)" index="3"]
+transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, -0.0234947, 140.642, -20.7295)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="SarcoPodMap10Export (2)/Tower" index="0"]
 

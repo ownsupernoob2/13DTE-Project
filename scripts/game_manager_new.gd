@@ -8,9 +8,6 @@ signal machine_speed_increased(speed_level: int)
 signal game_over(reason: String)
 signal stage_completed(stage: int)
 
-# Failure Manager reference
-var failure_manager: Node = null
-
 # Core progression system - 5 stages total
 var current_stage: int = 1  # 1=Tutorial, 2=Easy, 3=Easy, 4=Medium, 5=Hard
 var aliens_processed_this_stage: int = 0
@@ -32,17 +29,7 @@ var stage_descriptions: Array = [
 # Current alien and game state
 var current_alien: Dictionary = {}
 var game_active: bool = false
-var current_stage_completed: bool = false
-
-# Pod integrity system (for medium/hard stages)
-var pod_integrity: float = 100.0
-var pod_breaking_active: bool = false
-var caulk_available: bool = false
-var caulk_fuel: float = 100.0  # Caulk has limited fuel
-
-signal pod_integrity_changed(integrity: float)
-signal pod_repaired()
-signal caulk_depleted()
+var stage_completed: bool = false
 
 # Game balance settings
 const MAX_SPEED_LEVEL: int = 10
@@ -75,38 +62,13 @@ var alien_species_data: Dictionary = {
 
 func _ready() -> void:
 	print("GameManager initialized - Starting Stage 1: TUTORIAL")
-	
-	# Initialize failure manager
-	_setup_failure_manager()
-	
 	start_new_stage()
-
-func _setup_failure_manager() -> void:
-	# Create failure manager if it doesn't exist
-	failure_manager = get_node_or_null("/root/FailureManager")
-	if not failure_manager:
-		# Create and add failure manager
-		var failure_script = preload("res://scripts/failure_manager.gd")
-		failure_manager = Node.new()
-		failure_manager.set_script(failure_script)
-		failure_manager.name = "FailureManager"
-		get_tree().current_scene.add_child(failure_manager)
-		print("🚨 FailureManager created and initialized")
-	else:
-		print("🚨 FailureManager found and connected")
 
 func start_new_stage() -> void:
 	aliens_processed_this_stage = 0
 	correct_classifications = 0
-	current_stage_completed = false
+	stage_completed = false
 	game_active = true
-	
-	# Initialize pod system for medium+ stages
-	if current_stage >= 4:  # Medium and Hard stages
-		_initialize_pod_system()
-	else:
-		pod_breaking_active = false
-		pod_integrity = 100.0
 	
 	print("=== STAGE ", current_stage, ": ", stage_names[current_stage - 1], " ===")
 	print("Target: ", aliens_required_per_stage[current_stage - 1], " aliens")
@@ -115,98 +77,8 @@ func start_new_stage() -> void:
 	# Generate first alien for this stage
 	generate_new_alien()
 
-func _initialize_pod_system() -> void:
-	pod_integrity = 100.0
-	pod_breaking_active = true
-	caulk_available = true
-	caulk_fuel = 100.0
-	
-	print("⚠️ POD INTEGRITY SYSTEM ACTIVE ⚠️")
-	print("Pod will deteriorate over time - use caulk to repair!")
-	
-	# Spawn caulk item in the scene
-	_spawn_caulk_item()
-	
-	# Start pod degradation timer
-	_start_pod_degradation()
-
-func _spawn_caulk_item() -> void:
-	# Create caulk as a grabbable item
-	var caulk_scene = preload("res://scenes/components/caulk.tscn")  # We'll create this
-	if not caulk_scene:
-		print("Warning: Caulk scene not found - creating placeholder")
-		return
-	
-	var caulk_instance = caulk_scene.instantiate()
-	var main_scene = get_tree().current_scene
-	if main_scene:
-		# Position caulk near the pod
-		caulk_instance.global_position = Vector3(2, 1, -1)  # Adjust position as needed
-		main_scene.add_child(caulk_instance)
-		print("✓ Caulk spawned - grab it to repair the pod!")
-
-func _start_pod_degradation() -> void:
-	# Create timer for pod degradation
-	var degradation_timer = Timer.new()
-	degradation_timer.wait_time = 2.0  # Degrade every 2 seconds
-	degradation_timer.autostart = true
-	degradation_timer.timeout.connect(_degrade_pod)
-	add_child(degradation_timer)
-
-func _degrade_pod() -> void:
-	if not pod_breaking_active or current_stage_completed:
-		return
-	
-	# Degrade pod integrity
-	var degradation_rate = 3.0  # Lose 3% every 2 seconds
-	if current_stage == 5:  # Hard mode - faster degradation
-		degradation_rate = 5.0
-	
-	pod_integrity -= degradation_rate
-	pod_integrity = max(0.0, pod_integrity)
-	
-	pod_integrity_changed.emit(pod_integrity)
-	
-	if pod_integrity <= 0:
-		_pod_critical_failure()
-	elif pod_integrity <= 25:
-		print("🚨 CRITICAL: Pod integrity at ", "%.1f" % pod_integrity, "%!")
-	elif pod_integrity <= 50:
-		print("⚠️ WARNING: Pod integrity at ", "%.1f" % pod_integrity, "%")
-
-func _pod_critical_failure() -> void:
-	print("💥 POD FAILURE - GAME OVER!")
-	game_active = false
-	game_over.emit("Pod integrity failure - containment breached!")
-	
-	# Trigger failure system for pod critical failure
-	if failure_manager and failure_manager.has_method("trigger_failure"):
-		failure_manager.trigger_failure("Pod integrity critical failure - containment breached")
-
-func repair_pod_with_caulk() -> void:
-	if not caulk_available or caulk_fuel <= 0:
-		print("No caulk available or caulk depleted!")
-		return
-	
-	# Repair amount depends on caulk fuel
-	var repair_amount = min(25.0, caulk_fuel * 0.5)  # Up to 25% repair
-	caulk_fuel -= repair_amount * 2  # Caulk fuel depletes
-	caulk_fuel = max(0.0, caulk_fuel)
-	
-	pod_integrity += repair_amount
-	pod_integrity = min(100.0, pod_integrity)
-	
-	print("🔧 Pod repaired! Integrity: ", "%.1f" % pod_integrity, "% | Caulk fuel: ", "%.1f" % caulk_fuel, "%")
-	
-	pod_repaired.emit()
-	
-	if caulk_fuel <= 0:
-		print("🔋 Caulk depleted!")
-		caulk_available = false
-		caulk_depleted.emit()
-
 func generate_new_alien() -> void:
-	if current_stage_completed or not game_active:
+	if stage_completed or not game_active:
 		return
 		
 	# Generate alien based on current stage difficulty
@@ -218,13 +90,9 @@ func generate_new_alien() -> void:
 	print("Eye Color: ", current_alien.eye_color)
 	print("Blood Type: ", current_alien.blood_type)
 	print("Progress: ", aliens_processed_this_stage + 1, "/", aliens_required_per_stage[current_stage - 1])
-	
-	# Show pod status if active
-	if pod_breaking_active:
-		print("Pod Integrity: ", "%.1f" % pod_integrity, "%")
 
 func classify_alien(player_says_accept: bool) -> bool:
-	if not game_active or current_stage_completed:
+	if not game_active or stage_completed:
 		return false
 		
 	var is_correct = _validate_alien_classification(player_says_accept)
@@ -235,14 +103,8 @@ func classify_alien(player_says_accept: bool) -> bool:
 	if is_correct:
 		correct_classifications += 1
 		print("✓ CORRECT classification!")
-		# Trigger success indicator
-		if failure_manager:
-			failure_manager.trigger_success()
 	else:
 		print("✗ INCORRECT classification!")
-		# Trigger failure for incorrect classification
-		if failure_manager:
-			failure_manager.trigger_failure("Incorrect alien classification")
 	
 	# Calculate stage accuracy
 	stage_accuracy = float(correct_classifications) / float(aliens_processed_this_stage) * 100.0
@@ -260,12 +122,7 @@ func classify_alien(player_says_accept: bool) -> bool:
 	return is_correct
 
 func _complete_current_stage() -> void:
-	current_stage_completed = true
-	
-	# Stop pod degradation
-	if pod_breaking_active:
-		pod_breaking_active = false
-		print("🛡️ Pod systems stabilized")
+	stage_completed = true
 	
 	print("\n=== STAGE ", current_stage, " COMPLETED ===")
 	print("Accuracy: ", "%.1f" % stage_accuracy, "%")
@@ -305,15 +162,9 @@ func reset_game() -> void:
 	correct_classifications = 0
 	total_classifications = 0
 	stage_accuracy = 0.0
-	current_stage_completed = false
+	stage_completed = false
 	game_active = false
 	current_alien = {}
-	
-	# Reset pod system
-	pod_integrity = 100.0
-	pod_breaking_active = false
-	caulk_available = false
-	caulk_fuel = 100.0
 	
 	print("Game reset - Returning to Tutorial")
 	start_new_stage()
@@ -412,9 +263,5 @@ func get_current_stage_info() -> Dictionary:
 		"progress": aliens_processed_this_stage,
 		"target": aliens_required_per_stage[current_stage - 1] if current_stage <= 5 else 0,
 		"accuracy": stage_accuracy,
-		"game_active": game_active,
-		"pod_integrity": pod_integrity,
-		"pod_active": pod_breaking_active,
-		"caulk_available": caulk_available,
-		"caulk_fuel": caulk_fuel
+		"game_active": game_active
 	}

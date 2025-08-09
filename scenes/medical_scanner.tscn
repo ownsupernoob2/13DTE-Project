@@ -1,0 +1,53 @@
+[gd_scene load_steps=8 format=3 uid="uid://c8r451f728vgq"]
+
+[ext_resource type="Script" uid="uid://d22fxdq4j12l1" path="res://scripts/medical_scanner.gd" id="1_0h5mk"]
+[ext_resource type="PackedScene" uid="uid://bup2wt6hdf060" path="res://scenes/scanner_ui.tscn" id="2_ui"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_scanner"]
+size = Vector3(2, 1.5, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_scanner"]
+size = Vector3(2, 1.5, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_screen"]
+size = Vector2(1.8, 1.2)
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_1sxvo"]
+viewport_path = NodePath("Scanner/SubViewport")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_screen"]
+resource_local_to_scene = true
+shading_mode = 0
+albedo_texture = SubResource("ViewportTexture_1sxvo")
+
+[node name="MedicalScanner" type="Node3D" groups=["scanner"]]
+script = ExtResource("1_0h5mk")
+
+[node name="ScannerCamera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 1.5, 2)
+
+[node name="Scanner" type="Node3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Scanner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+mesh = SubResource("BoxMesh_scanner")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Scanner" groups=["scanner"]]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Scanner/StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+shape = SubResource("BoxShape3D_scanner")
+
+[node name="SubViewport" type="SubViewport" parent="Scanner"]
+size = Vector2i(600, 450)
+
+[node name="ScannerUI" parent="Scanner/SubViewport" instance=ExtResource("2_ui")]
+
+[node name="Screen" type="MeshInstance3D" parent="Scanner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0.692256)
+mesh = SubResource("QuadMesh_screen")
+surface_material_override/0 = SubResource("StandardMaterial3D_screen")
+
+[node name="AudioPlayer" type="AudioStreamPlayer" parent="."]
+
+[node name="BeepTimer" type="Timer" parent="."]

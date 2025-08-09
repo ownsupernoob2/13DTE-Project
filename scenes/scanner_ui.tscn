@@ -1,0 +1,208 @@
+[gd_scene load_steps=3 format=3 uid="uid://bup2wt6hdf060"]
+
+[ext_resource type="Script" uid="uid://bakfokm7c8wvm" path="res://scripts/scanner_ui.gd" id="1_ui"]
+
+[sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_1"]
+
+[node name="ScannerUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ui")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.05, 0.1, 1)
+
+[node name="MainPanel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -200.0
+offset_right = 300.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TitleLabel" type="Label" parent="MainPanel"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 40.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 16
+text = "MEDICAL SCANNER v2.1"
+horizontal_alignment = 2
+
+[node name="ScanArea" type="ColorRect" parent="MainPanel"]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 50.0
+offset_right = 420.0
+offset_bottom = 350.0
+color = Color(0, 0, 0, 1)
+
+[node name="ScanLineVertical" type="ColorRect" parent="MainPanel/ScanArea"]
+layout_mode = 1
+offset_right = 2.0
+offset_bottom = 300.0
+color = Color(0, 1, 0, 1)
+
+[node name="ScanLineHorizontal" type="ColorRect" parent="MainPanel/ScanArea"]
+visible = false
+layout_mode = 1
+offset_right = 400.0
+offset_bottom = 2.0
+color = Color(0, 1, 1, 1)
+
+[node name="TargetZone" type="ColorRect" parent="MainPanel/ScanArea"]
+layout_mode = 1
+offset_left = 180.0
+offset_top = 130.0
+offset_right = 220.0
+offset_bottom = 170.0
+color = Color(1, 1, 0, 0.3)
+
+[node name="FrequencyPanel" type="Panel" parent="MainPanel"]
+layout_mode = 1
+offset_left = 450.0
+offset_top = 50.0
+offset_right = 580.0
+offset_bottom = 350.0
+
+[node name="FrequencyLabel" type="Label" parent="MainPanel/FrequencyPanel"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -120.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 40.0
+grow_horizontal = 0
+text = "FREQUENCY"
+horizontal_alignment = 1
+
+[node name="FrequencyDisplay" type="Label" parent="MainPanel/FrequencyPanel"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -120.0
+offset_top = 40.0
+offset_right = -10.0
+offset_bottom = 70.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 20
+text = "440 Hz"
+horizontal_alignment = 1
+
+[node name="FrequencySlider" type="VSlider" parent="MainPanel/FrequencyPanel"]
+layout_mode = 1
+offset_left = 50.0
+offset_top = 80.0
+offset_right = 80.0
+offset_bottom = 280.0
+min_value = 200.0
+max_value = 1000.0
+step = 5.0
+value = 440.0
+
+[node name="TargetIndicator" type="Label" parent="MainPanel/FrequencyPanel"]
+layout_mode = 1
+offset_left = 10.0
+offset_top = 250.0
+offset_right = 120.0
+offset_bottom = 280.0
+theme_override_font_sizes/font_size = 12
+text = "Target: 440 Hz"
+horizontal_alignment = 1
+
+[node name="ControlPanel" type="Panel" parent="MainPanel"]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 360.0
+offset_right = 580.0
+offset_bottom = 390.0
+
+[node name="ScanButton" type="Button" parent="MainPanel/ControlPanel"]
+layout_mode = 1
+offset_left = 10.0
+offset_top = 5.0
+offset_right = 110.0
+offset_bottom = 25.0
+disabled = true
+text = "SCAN"
+
+[node name="StatusLabel" type="Label" parent="MainPanel/ControlPanel"]
+layout_mode = 1
+offset_left = 130.0
+offset_top = 5.0
+offset_right = 450.0
+offset_bottom = 25.0
+text = "Hold disk and match frequency to begin scanning..."
+
+[node name="ResultsPanel" type="Panel" parent="MainPanel"]
+visible = false
+layout_mode = 1
+offset_left = 100.0
+offset_top = 120.0
+offset_right = 500.0
+offset_bottom = 280.0
+
+[node name="ResultsTitle" type="Label" parent="MainPanel/ResultsPanel"]
+layout_mode = 1
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 390.0
+offset_bottom = 40.0
+theme_override_font_sizes/font_size = 18
+text = "SCAN RESULTS"
+horizontal_alignment = 1
+
+[node name="EyeColorLabel" type="Label" parent="MainPanel/ResultsPanel"]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 50.0
+offset_right = 380.0
+offset_bottom = 80.0
+theme_override_font_sizes/font_size = 14
+text = "EYE COLOR: Unknown"
+
+[node name="BloodTypeLabel" type="Label" parent="MainPanel/ResultsPanel"]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 90.0
+offset_right = 380.0
+offset_bottom = 120.0
+theme_override_font_sizes/font_size = 14
+text = "BLOOD TYPE: Unknown"
+
+[node name="CloseButton" type="Button" parent="MainPanel/ResultsPanel"]
+layout_mode = 1
+offset_left = 150.0
+offset_top = 130.0
+offset_right = 250.0
+offset_bottom = 150.0
+text = "CLOSE"
+
+[node name="AudioPlayer" type="AudioStreamPlayer" parent="."]
+stream = SubResource("AudioStreamGenerator_1")
+
+[node name="BeepTimer" type="Timer" parent="."]

@@ -1,0 +1,82 @@
+[gd_scene load_steps=3 format=3 uid="uid://di4hx1vp5qn44"]
+
+[ext_resource type="Script" path="res://scripts/main_menu.gd" id="1_q8k2w"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_1"]
+font_size = 32
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_q8k2w")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.15, 0.12, 0.08, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 50.0
+offset_top = -400.0
+offset_right = 450.0
+offset_bottom = -50.0
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "ALIEN CONTAINMENT FACILITY"
+label_settings = SubResource("LabelSettings_1")
+horizontal_alignment = 0
+
+[node name="Spacer1" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 30)
+
+[node name="MenuButtons" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NewGameButton" type="Button" parent="VBoxContainer/MenuButtons"]
+layout_mode = 2
+text = "> NEW GAME"
+flat = true
+
+[node name="ContinueButton" type="Button" parent="VBoxContainer/MenuButtons"]
+layout_mode = 2
+text = "  CONTINUE"
+flat = true
+
+[node name="OptionsButton" type="Button" parent="VBoxContainer/MenuButtons"]
+layout_mode = 2
+text = "  OPTIONS"
+flat = true
+
+[node name="QuitButton" type="Button" parent="VBoxContainer/MenuButtons"]
+layout_mode = 2
+text = "  QUIT"
+flat = true
+
+[node name="AmbientSound" type="AudioStreamPlayer" parent="."]
+
+[node name="Instructions" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -250.0
+offset_top = -80.0
+offset_right = -20.0
+offset_bottom = -20.0
+text = "Use ARROW KEYS to navigate
+Press ENTER to select"
+horizontal_alignment = 2
+vertical_alignment = 2

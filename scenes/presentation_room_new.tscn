@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dr8k5mwpp7qxc"]
 
-[ext_resource type="Script" path="res://scripts/presentation_room.gd" id="1_new_pr"]
+[ext_resource type="Script" uid="uid://cb2gcvh0d8bwq" path="res://scripts/presentation_room.gd" id="1_new_pr"]
 
 [node name="PresentationRoom" type="Node3D"]
 script = ExtResource("1_new_pr")
@@ -42,7 +42,6 @@ offset_bottom = -50.0
 [node name="NarrationText" type="RichTextLabel" parent="UI/TextContainer"]
 layout_mode = 2
 bbcode_enabled = true
-text = ""
 fit_content = true
 
 [node name="Timer" type="Timer" parent="."]

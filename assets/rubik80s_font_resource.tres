@@ -1,0 +1,6 @@
+[gd_resource type="FontFile" load_steps=2 format=3 uid="uid://b8x9r4m5p2w1e"]
+
+[ext_resource type="FontFile" path="res://assets/Rubik80sFade-Regular.ttf" id="1_rubik80s"]
+
+[resource]
+data = ExtResource("1_rubik80s")

@@ -355,6 +355,11 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector3.ZERO
 		return
 	
+	# Simple check for presentation mode - block movement but allow camera
+	if Global.in_presentation:
+		velocity = Vector3.ZERO
+		return
+	
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 

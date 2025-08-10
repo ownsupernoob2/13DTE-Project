@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://bup2wt6hdf060"]
+[gd_scene load_steps=4 format=3 uid="uid://bup2wt6hdf060"]
 
 [ext_resource type="Script" uid="uid://bakfokm7c8wvm" path="res://scripts/scanner_ui.gd" id="1_ui"]
+[ext_resource type="FontFile" path="res://assets/rubik80s_font_resource.tres" id="2_rubik80s"]
 
 [sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_1"]
 
@@ -46,6 +47,8 @@ offset_top = 10.0
 offset_right = -10.0
 offset_bottom = 40.0
 grow_horizontal = 0
+theme_override_fonts/font = ExtResource("2_rubik80s")
+theme_override_fonts/font = ExtResource(" 2_rubik80s\)
 theme_override_font_sizes/font_size = 16
 text = "MEDICAL SCANNER v2.1"
 horizontal_alignment = 2
@@ -96,6 +99,7 @@ offset_top = 10.0
 offset_right = -10.0
 offset_bottom = 40.0
 grow_horizontal = 0
+theme_override_fonts/font = ExtResource("2_rubik80s")
 text = "FREQUENCY"
 horizontal_alignment = 1
 
@@ -109,6 +113,8 @@ offset_top = 40.0
 offset_right = -10.0
 offset_bottom = 70.0
 grow_horizontal = 0
+theme_override_fonts/font = ExtResource("2_rubik80s")
+theme_override_fonts/font = ExtResource(" 2_rubik80s\)
 theme_override_font_sizes/font_size = 20
 text = "440 Hz"
 horizontal_alignment = 1
@@ -130,6 +136,7 @@ offset_left = 10.0
 offset_top = 250.0
 offset_right = 120.0
 offset_bottom = 280.0
+theme_override_fonts/font = ExtResource("2_rubik80s")
 theme_override_font_sizes/font_size = 12
 text = "Target: 440 Hz"
 horizontal_alignment = 1
@@ -156,6 +163,7 @@ offset_left = 130.0
 offset_top = 5.0
 offset_right = 450.0
 offset_bottom = 25.0
+theme_override_fonts/font = ExtResource("2_rubik80s")
 text = "Hold disk and match frequency to begin scanning..."
 
 [node name="ResultsPanel" type="Panel" parent="MainPanel"]
@@ -172,6 +180,7 @@ offset_left = 10.0
 offset_top = 10.0
 offset_right = 390.0
 offset_bottom = 40.0
+theme_override_fonts/font = ExtResource("2_rubik80s")
 theme_override_font_sizes/font_size = 18
 text = "SCAN RESULTS"
 horizontal_alignment = 1
@@ -182,6 +191,7 @@ offset_left = 20.0
 offset_top = 50.0
 offset_right = 380.0
 offset_bottom = 80.0
+theme_override_fonts/font = ExtResource("2_rubik80s")
 theme_override_font_sizes/font_size = 14
 text = "EYE COLOR: Unknown"
 
@@ -191,6 +201,7 @@ offset_left = 20.0
 offset_top = 90.0
 offset_right = 380.0
 offset_bottom = 120.0
+theme_override_fonts/font = ExtResource("2_rubik80s")
 theme_override_font_sizes/font_size = 14
 text = "BLOOD TYPE: Unknown"
 
@@ -200,6 +211,7 @@ offset_left = 150.0
 offset_top = 130.0
 offset_right = 250.0
 offset_bottom = 150.0
+theme_override_fonts/font = ExtResource("2_rubik80s")
 text = "CLOSE"
 
 [node name="AudioPlayer" type="AudioStreamPlayer" parent="."]

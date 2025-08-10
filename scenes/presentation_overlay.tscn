@@ -1,12 +1,14 @@
 [gd_scene load_steps=2 format=3 uid="uid://bv5n4k8w2pqsa"]
 
-[ext_resource type="Script" path="res://scripts/presentation_overlay.gd" id="1_overlay"]
+[ext_resource type="Script" uid="uid://d25yip48o3nnd" path="res://scripts/presentation_overlay.gd" id="1_overlay"]
 
 [node name="PresentationOverlay" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_overlay")
 
 [node name="Background" type="ColorRect" parent="."]
@@ -14,6 +16,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(0.1, 0.05, 0.05, 0.9)
 
 [node name="ScreenRect" type="ColorRect" parent="."]
@@ -27,6 +31,8 @@ offset_left = -400.0
 offset_top = -200.0
 offset_right = 400.0
 offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(0.8, 0.1, 0.1, 1)
 
 [node name="TextContainer" type="VBoxContainer" parent="."]
@@ -40,12 +46,13 @@ offset_left = -400.0
 offset_top = -150.0
 offset_right = 400.0
 offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
 
 [node name="NarrationText" type="RichTextLabel" parent="TextContainer"]
 layout_mode = 2
 size_flags_vertical = 8
 bbcode_enabled = true
-text = ""
 fit_content = true
 
 [node name="Timer" type="Timer" parent="."]

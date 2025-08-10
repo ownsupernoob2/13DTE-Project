@@ -1,7 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://bqk8m9n7p4rx2"]
+[gd_scene load_steps=8 format=3 uid="uid://bqk8nan7p4rx2"]
 
-[ext_resource type="PackedScene" uid="uid://b4nxahxnhyamx" path="res://scenes/components/player.tscn" id="1_player"]
-[ext_resource type="Script" path="res://scripts/presentation_scene.gd" id="2_script"]
+[ext_resource type="PackedScene" uid="uid://c8canob25lyi" path="res://scenes/components/player.tscn" id="1_player"]
+[ext_resource type="Script" uid="uid://cp2h20olguw7e" path="res://scripts/presentation_scene.gd" id="2_script"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
@@ -20,23 +20,7 @@ albedo_color = Color(0.2, 0.2, 0.25, 1)
 size = Vector3(20, 0.2, 20)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_trigger"]
-size = Vector3(4, 2, 4)eps=6 format=3 uid="uid://bqk8nan7p4rx2"]
-
-[ext_resource type="PackedScene" uid="uid://b4nxahxnhyamx" path="res://scenes/components/player.tscn" id="1_player"]
-[ext_resource type="Script" path="res://scripts/presentation_scene.gd" id="2_script"]
-
-[sub_resource type="Environment" id="Environment_1"]
-background_mode = 1
-background_color = Color(0.05, 0.05, 0.1, 1)
-ambient_light_source = 2
-ambient_light_color = Color(0.3, 0.1, 0.1, 1)
-ambient_light_energy = 0.3
-
-[sub_resource type="BoxMesh" id="BoxMesh_floor"]
-size = Vector3(20, 0.2, 20)
-
-[sub_resource type="StandardMaterial3D" id="Material_floor"]
-albedo_color = Color(0.2, 0.2, 0.25, 1)
+size = Vector3(4, 2, 4)
 
 [node name="PresentationScene" type="Node3D"]
 script = ExtResource("2_script")
@@ -61,7 +45,7 @@ surface_material_override/0 = SubResource("Material_floor")
 shape = SubResource("BoxShape3D_floor")
 
 [node name="PresentationScreen" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -8)
+transform = Transform3D(1, -0.000242397, -0.000799096, -0.000793549, 0.0220596, -0.999756, 0.000259981, 0.999757, 0.0220594, 0, 3, -8)
 mesh = SubResource("BoxMesh_floor")
 
 [node name="ScreenLight" type="OmniLight3D" parent="PresentationScreen"]
@@ -100,6 +84,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="TextBackground" type="ColorRect" parent="UI/PresentationUI"]
 layout_mode = 1
@@ -112,6 +98,8 @@ offset_left = -400.0
 offset_top = -150.0
 offset_right = 400.0
 offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
 color = Color(0, 0, 0, 0.7)
 
 [node name="NarrationText" type="RichTextLabel" parent="UI/PresentationUI/TextBackground"]
@@ -123,8 +111,9 @@ offset_left = 10.0
 offset_top = 10.0
 offset_right = -10.0
 offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
 bbcode_enabled = true
-text = ""
 fit_content = true
 
 [node name="Timer" type="Timer" parent="."]

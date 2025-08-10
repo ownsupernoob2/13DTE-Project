@@ -19,7 +19,7 @@ var current_message_index: int = 0
 var current_char_index: int = 0
 var current_message: String = ""
 var is_typing: bool = false
-var typing_speed: float = 0.08  # Slower for more dramatic effect
+var typing_speed: float = 0.1  # Slower for more dramatic effect
 var presentation_active: bool = false
 var can_exit: bool = false
 
@@ -29,10 +29,11 @@ func _ready() -> void:
 	_start_presentation_sequence()
 
 func _setup_scene() -> void:
-	# Disable player movement initially but keep camera active
-	if player:
-		player.set_physics_process(false)
-		# Don't disable input - let camera work
+	# Set global flag for presentation mode
+	Global.in_presentation = true
+	
+	# Ensure mouse is captured for camera movement
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	
 	# Set up screen lighting effect
 	if screen_light:
@@ -77,6 +78,9 @@ func _start_presentation() -> void:
 	print("🎬 Starting corporate presentation...")
 	presentation_active = true
 	presentation_ui.visible = true
+	
+	# Ensure the UI doesn't block mouse input for camera movement
+	presentation_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
 	current_message_index = 0
 	await get_tree().create_timer(1.0).timeout
@@ -134,12 +138,8 @@ func _end_presentation() -> void:
 	presentation_active = false
 	can_exit = true
 	
-	# Re-enable player movement and ensure camera is working
-	if player:
-		player.set_physics_process(true)
-		# Make sure input is enabled
-		player.set_process_input(true)
-		player.set_process_unhandled_input(true)
+	# Clear global presentation flag
+	Global.in_presentation = false
 	
 	# Clear presentation UI
 	presentation_ui.visible = false
@@ -188,7 +188,10 @@ func _start_exit_sequence() -> void:
 		print("✅ Tutorial loaded successfully")
 
 func _input(event: InputEvent) -> void:
+	# Only handle keyboard input for skipping, don't interfere with mouse
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_SPACE or event.keycode == KEY_ENTER:
 			if presentation_active and is_typing:
 				_skip_current_message()
+				# Make sure we don't consume the event for other systems
+				get_viewport().set_input_as_handled()

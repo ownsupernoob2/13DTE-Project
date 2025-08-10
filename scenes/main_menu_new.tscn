@@ -1,9 +1,19 @@
-[gd_scene load_steps=3 format=3 uid="uid://di4hx1vp5qn44"]
+[gd_scene load_steps=6 format=3 uid="uid://di4hx1vp5qn44"]
 
 [ext_resource type="Script" path="res://scripts/main_menu.gd" id="1_q8k2w"]
+[ext_resource type="FontFile" path="res://assets/rubik80s_font_resource.tres" id="2_rubik80s"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_1"]
+font = ExtResource("2_rubik80s")
 font_size = 32
+
+[sub_resource type="LabelSettings" id="LabelSettings_2"]
+font = ExtResource("2_rubik80s")
+font_size = 20
+
+[sub_resource type="Theme" id="Theme_1"]
+Button/fonts/font = ExtResource("2_rubik80s")
+Button/font_sizes/font_size = 18
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -41,6 +51,7 @@ custom_minimum_size = Vector2(0, 30)
 
 [node name="MenuButtons" type="VBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
+theme = SubResource("Theme_1")
 theme_override_constants/separation = 8
 
 [node name="NewGameButton" type="Button" parent="VBoxContainer/MenuButtons"]
@@ -78,5 +89,6 @@ offset_right = -20.0
 offset_bottom = -20.0
 text = "Use ARROW KEYS to navigate
 Press ENTER to select"
+label_settings = SubResource("LabelSettings_2")
 horizontal_alignment = 2
 vertical_alignment = 2

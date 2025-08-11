@@ -585,7 +585,7 @@ sky = SubResource("Sky_wosnj")
 ambient_light_source = 3
 glow_enabled = true
 
-[node name="Node3D" type="Node3D" groups=["computer"]]
+[node name="Node3D2" type="Node3D" groups=["computer"]]
 transform = Transform3D(0.713579, 0, 0, 0, 0.708985, 0, 0, 0, 0.765617, 0, 0, 0)
 
 [node name="Computer" type="Node3D" parent="." groups=["computer"]]

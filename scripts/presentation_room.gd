@@ -134,6 +134,10 @@ func _end_presentation() -> void:
 func _transition_to_game() -> void:
 	print("🚀 Transitioning to game...")
 	print("About to load: res://scenes/stage_1_tutorial.tscn")
+
+	# Hide the UI layer to prevent it from covering the next scene
+	if $UI:
+		$UI.visible = false
 	
 	# Make sure mouse is captured for gameplay
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)

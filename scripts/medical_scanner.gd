@@ -107,6 +107,9 @@ func _on_scan_completed(results: Dictionary) -> void:
 	
 	# The scanner stays active until the player closes the results
 	# This allows them to review the data
+	await get_tree().create_timer(2.0).timeout
+	emit_signal("scan_finished_and_exit")
+	stop_scan()
 
 func _on_scan_failed() -> void:
 	print("Scan failed - try adjusting frequency and timing")

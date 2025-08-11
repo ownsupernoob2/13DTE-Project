@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://chxib34mk8a4e"]
 
-[ext_resource type="Script" path="res://scripts/medical_scanner.gd" id="1_0h5mk"]
+[ext_resource type="Script" uid="uid://d22fxdq4j12l1" path="res://scripts/medical_scanner.gd" id="1_0h5mk"]
 [ext_resource type="PackedScene" uid="uid://dmabfd4ku0oss" path="res://scenes/scanner_ui.tscn" id="2_ui"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_scanner"]

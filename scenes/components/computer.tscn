@@ -1,7 +1,7 @@
 [gd_scene load_steps=45 format=4 uid="uid://bm2ujr6udikc4"]
 
 [ext_resource type="Script" uid="uid://d2vkfxd0ifcqn" path="res://scripts/computer.gd" id="1_okq71"]
-[ext_resource type="FontFile" uid="uid://b8yar4m5p2w1e" path="res://assets/rubik80s_font_resource.tres" id="2_rubik80s"]
+[ext_resource type="FontFile" uid="uid://vknkslnfdd7v" path="res://assets/rubik80s_font_resource.tres" id="2_rubik80s"]
 [ext_resource type="Shader" uid="uid://dcvr6r1j1k4vq" path="res://resources/shaders/crt_shader.gdshader" id="3_wosnj"]
 [ext_resource type="PackedScene" uid="uid://blo2e5ll5uait" path="res://assets/bunker/GLB/computer_1.glb" id="4_815cu"]
 [ext_resource type="PackedScene" uid="uid://divngw0b3efrf" path="res://addons/essence_console/Console.tscn" id="4_pmsea"]

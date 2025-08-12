@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://bj35ebugm48ul"
-path="res://.godot/imported/Rubik80sFade-Regular.ttf-ab7554eb9b1155e31a75c20f7fec2aee.fontdata"
+uid="uid://bcqcr64u2io3t"
+path="res://.godot/imported/Rubik80sFade-Regular.ttf-275d15874d66f5b057e7e476abd6b067.fontdata"
 
 [deps]
 
-source_file="res://assets/Rubik80sFade-Regular.ttf"
-dest_files=["res://.godot/imported/Rubik80sFade-Regular.ttf-ab7554eb9b1155e31a75c20f7fec2aee.fontdata"]
+source_file="res://assets/fonts/Rubik80sFade-Regular.ttf"
+dest_files=["res://.godot/imported/Rubik80sFade-Regular.ttf-275d15874d66f5b057e7e476abd6b067.fontdata"]
 
 [params]
 

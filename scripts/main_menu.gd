@@ -17,8 +17,9 @@ extends Control
 var dark_brown = Color(0.15, 0.12, 0.08)
 var gold = Color(0.9, 0.7, 0.3)
 var red = Color(0.7, 0.2, 0.1)
-var disabled_color = Color(0.4, 0.4, 0.4)
-var selected_color = Color(1.0, 0.9, 0.5)
+var disabled_color = Color(0.5, 0.5, 0.5)  # Updated to lighter grey
+var selected_color = Color(1.0, 1.0, 1.0)  # Pure white for selected
+var normal_color = Color(0.85, 0.85, 0.85)  # Light grey for normal buttons
 
 # Menu navigation
 var current_button_index: int = 0
@@ -28,17 +29,21 @@ func _ready() -> void:
 	# Make sure mouse is visible for menu navigation
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	
-	_setup_horror_style()
 	_setup_button_array()
+	_setup_button_styles()
 	_check_continue_availability()
 	_connect_buttons()
 	_start_ambient_effects()
 	_update_button_selection()
 	
-	print("🎮 Main Menu initialized")
 
 func _setup_button_array() -> void:
 	menu_buttons = [new_game_button, continue_button, options_button, quit_button]
+
+func _setup_button_styles() -> void:
+	# Apply bold, bigger text styling to all buttons
+	for button in menu_buttons:
+		_style_horror_button(button)
 
 func _navigate_menu(direction: int) -> void:
 	# Find next valid button
@@ -75,7 +80,7 @@ func _update_button_selection() -> void:
 			button.add_theme_color_override("font_color", disabled_color)
 			button.text = "  " + base_text
 		else:
-			button.add_theme_color_override("font_color", gold)
+			button.add_theme_color_override("font_color", normal_color)
 			button.text = "  " + base_text
 		
 		button.scale = Vector2(1.0, 1.0)
@@ -103,35 +108,22 @@ func _activate_current_button() -> void:
 	# Dark background
 	background.color = dark_brown
 	
-	# Title styling
-	if title_label:
-		title_label.text = "ALIEN CONTAINMENT FACILITY"
-		title_label.add_theme_color_override("font_color", gold)
-func _setup_horror_style() -> void:
-	# Dark background
-	background.color = dark_brown
-	
-	# Title styling
-	if title_label:
-		title_label.text = "ALIEN CONTAINMENT FACILITY"
-		title_label.add_theme_color_override("font_color", gold)
-		
-		# Create glow effect
-		var title_shadow = title_label.duplicate()
-		title_shadow.add_theme_color_override("font_color", red)
-		title_shadow.position.x += 2
-		title_shadow.position.y += 2
-		title_label.get_parent().add_child(title_shadow)
-		title_label.get_parent().move_child(title_shadow, 0)  # Put shadow behind
-	
-	# Button styling - remove hover events since we use arrow keys
-	for menu_btn in [continue_button, new_game_button, options_button, quit_button]:
-		if menu_btn:
-			_style_horror_button(menu_btn)
+
+
 
 func _style_horror_button(button: Button) -> void:
-	# Horror-style button appearance
-	button.add_theme_color_override("font_color", gold)
+	# Horror-style button appearance with bold, bigger text
+	button.add_theme_color_override("font_color", normal_color)
+	button.add_theme_font_size_override("font_size", 24)  # Bigger text
+	
+	# Create a bold font theme if possible
+	var theme = button.get_theme()
+	if theme == null:
+		theme = Theme.new()
+		button.theme = theme
+	
+	# Try to set bold font (you may need to load a bold font resource)
+	# For now, we'll increase the font size and use theme overrides
 	button.flat = true  # Remove button background
 	
 	# Remove mouse interaction
@@ -156,6 +148,21 @@ func _connect_buttons() -> void:
 		quit_button.pressed.connect(_on_quit_pressed)
 
 func _start_ambient_effects() -> void:
+	# Set up ambient sound pitch animation from 0.6 to 0.8 after 3 seconds
+	if ambient_sound:
+		ambient_sound.pitch_scale = 0.6
+		
+		# Wait 3 seconds before starting the pitch animation
+		var delay_timer = get_tree().create_timer(3.0)
+		delay_timer.timeout.connect(_start_pitch_animation)
+		
+func _start_pitch_animation() -> void:
+	if ambient_sound:
+		var pitch_tween = create_tween()
+		pitch_tween.set_loops()
+		pitch_tween.tween_property(ambient_sound, "pitch_scale", 0.8, 8.0)
+		pitch_tween.tween_property(ambient_sound, "pitch_scale", 0.6, 6.0)
+	
 	# Add flickering effect to title
 	if title_label:
 		var flicker_tween = create_tween()
@@ -163,28 +170,13 @@ func _start_ambient_effects() -> void:
 		flicker_tween.tween_property(title_label, "modulate:a", 0.7, 3.0)
 		flicker_tween.tween_property(title_label, "modulate:a", 1.0, 2.0)
 
-func _remove_old_functions():
-	# Remove old mouse-based functions
-	pass
 
-func _on_button_hover(_button: Button) -> void:
-	# Removed - using arrow key navigation only
-	pass
-
-func _on_button_unhover(_button: Button) -> void:
-	# Removed - using arrow key navigation only  
-	pass
-
-func _random_button_glow() -> void:
-	# Removed - cleaner aesthetic
-	pass
 
 func _on_continue_pressed() -> void:
 	if SaveSystem.can_continue():
 		var stage = SaveSystem.get_highest_stage()
 		print("📁 Loading stage ", stage)
 		
-		# Load the appropriate stage
 		var stage_scenes = [
 			"res://scenes/stage_1_tutorial.tscn",
 			"res://scenes/stage_2_easy.tscn", 
@@ -266,16 +258,16 @@ func _show_new_game_confirmation() -> void:
 	var yes_button = Label.new()
 	yes_button.name = "YesButton"
 	yes_button.text = "  YES"
-	yes_button.add_theme_font_size_override("font_size", 16)
-	yes_button.add_theme_color_override("font_color", gold)
+	yes_button.add_theme_font_size_override("font_size", 18)  # Bigger text
+	yes_button.add_theme_color_override("font_color", normal_color)
 	button_container.add_child(yes_button)
 	
 	# No button
 	var no_button = Label.new()
 	no_button.name = "NoButton"
 	no_button.text = "  NO"
-	no_button.add_theme_font_size_override("font_size", 16)
-	no_button.add_theme_color_override("font_color", gold)
+	no_button.add_theme_font_size_override("font_size", 18)  # Bigger text
+	no_button.add_theme_color_override("font_color", normal_color)
 	button_container.add_child(no_button)
 	
 	# Set up confirmation dialog state
@@ -302,7 +294,7 @@ func _update_confirmation_selection(overlay: ColorRect) -> void:
 			else:
 				button.text = "> NO"
 		else:
-			button.add_theme_color_override("font_color", gold)
+			button.add_theme_color_override("font_color", normal_color)
 			button.scale = Vector2(1.0, 1.0)
 			# Remove arrow
 			if i == 0:
@@ -378,25 +370,13 @@ func _start_new_game() -> void:
 			print("✅ Successfully loaded: ", scene_path)
 			scene_loaded = true
 			break
-		else:
-			print("❌ Failed to load ", scene_path, " - Error code: ", result)
-			print("❌ Error meanings: 0=OK, 19=FILE_CANT_OPEN, 22=FILE_NOT_FOUND")
-	
-	# If no presentation scene worked, go directly to tutorial
 	if not scene_loaded:
-		print("🔄 All presentation scenes failed, loading tutorial directly...")
 		var fallback_result = get_tree().change_scene_to_file("res://scenes/stage_1_tutorial.tscn")
 		if fallback_result != OK:
-			print("❌ Tutorial fallback also failed - Error code: ", fallback_result)
-			print("🔄 Loading demo as final fallback...")
 			get_tree().change_scene_to_file("res://scenes/demo.tscn")
-		else:
-			print("✅ Tutorial fallback successful")
 
 func _on_options_pressed() -> void:
-	print("⚙️ Options menu - TODO: Implement options")
-	# TODO: Create options menu
+	print("ok")
 
 func _on_quit_pressed() -> void:
-	print("👋 Quitting game")
 	get_tree().quit()

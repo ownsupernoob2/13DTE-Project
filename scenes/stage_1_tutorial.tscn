@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bxw7fg8vn0qh0"]
 
-[ext_resource type="PackedScene" uid="uid://cjbqgw3lqohjw" path="res://scenes/demo.tscn" id="1_demo"]
+[ext_resource type="PackedScene" uid="uid://db2h3t17k37pe" path="res://scenes/demo.tscn" id="1_demo"]
 
 [node name="Stage1Tutorial" instance=ExtResource("1_demo")]
 
@@ -15,3 +15,12 @@ offset_top = -50.0
 offset_right = 300.0
 offset_bottom = -20.0
 text = "STAGE 1 - TUTORIAL"
+
+[editable path="Table"]
+[editable path="SarcoPodMap10Export (2)"]
+[editable path="Scaffolding/beam_62"]
+[editable path="Scaffolding/beam_63"]
+[editable path="Scaffolding/beam_64"]
+[editable path="Scaffolding/beam_65"]
+[editable path="Scaffolding/beam_72"]
+[editable path="Scaffolding/beam_73"]

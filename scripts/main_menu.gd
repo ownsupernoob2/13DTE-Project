@@ -9,6 +9,7 @@ extends Control
 @onready var quit_button: Button = $VBoxContainer/MenuButtons/QuitButton
 @onready var background: ColorRect = $Background
 @onready var ambient_sound: AudioStreamPlayer = $AmbientSound
+@onready var selection_indicator: Label = $VBoxContainer/SelectionIndicator
 
 # Presentation overlay - no longer needed with 3D presentation scene
 # var presentation_overlay: Control = null
@@ -26,15 +27,22 @@ var current_button_index: int = 0
 var menu_buttons: Array[Button] = []
 
 func _ready() -> void:
-	# Make sure mouse is visible for menu navigation
-	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	# Hide mouse cursor for keyboard-only navigation
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	
+	# Ensure we always start on NEW GAME
+	current_button_index = 0
 	
 	_setup_button_array()
 	_setup_button_styles()
 	_check_continue_availability()
 	_connect_buttons()
 	_start_ambient_effects()
-	_update_button_selection()
+	
+	# Defer the initial selection update until after the UI layout is complete
+	call_deferred("_update_button_selection")
+	# Add a small additional delay to ensure proper positioning
+	get_tree().create_timer(0.1).timeout.connect(_update_selection_indicator)
 	
 
 func _setup_button_array() -> void:
@@ -87,31 +95,47 @@ func _update_button_selection() -> void:
 		else:
 			button.add_theme_color_override("font_color", normal_color)
 		
+		# Keep all buttons at normal scale
 		button.scale = Vector2(1.0, 1.0)
 	
-	# Highlight selected button (but don't change its text)
+	# Highlight selected button (but don't scale it)
 	var selected_button = menu_buttons[current_button_index]
 	if not selected_button.disabled:
 		selected_button.add_theme_color_override("font_color", selected_color)
-		selected_button.scale = Vector2(1.05, 1.05)
 	
 	# Update selection indicator if it exists
 	_update_selection_indicator()
 
 func _update_selection_indicator() -> void:
-	# Try to find the selection indicator (may not exist yet)
-	var selection_indicator = get_node_or_null("VBoxContainer/SelectionIndicator")
+	# Update the selection indicator position and visibility
 	if selection_indicator and current_button_index < menu_buttons.size():
 		var selected_button = menu_buttons[current_button_index]
 		
 		# Set the indicator text
 		selection_indicator.text = ">"
 		
-		# Position the indicator next to the selected button
-		var button_position = selected_button.position
-		selection_indicator.position.y = button_position.y + (selected_button.size.y / 2) - (selection_indicator.size.y / 2)
+		# The SelectionIndicator is in the main VBoxContainer, but we need to align it
+		# with buttons in the MenuButtons sub-container
+		var menu_buttons_container = selected_button.get_parent()
 		
-		# Make sure indicator is visible only for non-disabled buttons
+		# Get the actual button size and position
+		var button_height = selected_button.size.y if selected_button.size.y > 0 else 40
+		var separator_height = 8  # From theme_override_constants/separation in MenuButtons
+		
+		# Calculate the position within the MenuButtons container
+		var button_offset_in_menu_container = current_button_index * (button_height + separator_height)
+		
+		# The SelectionIndicator needs to account for:
+		# 1. The MenuButtons container position relative to the main VBoxContainer
+		# 2. The selected button position within MenuButtons
+		var menu_buttons_position = menu_buttons_container.position.y
+		var target_y = menu_buttons_position + button_offset_in_menu_container + (button_height / 2) - (selection_indicator.size.y / 2)
+		
+		# Position the indicator
+		selection_indicator.position.y = target_y
+		selection_indicator.position.x = -30  # Offset to the left of the buttons
+		
+		# Always show the indicator for enabled buttons
 		selection_indicator.visible = not selected_button.disabled
 
 func _activate_current_button() -> void:
@@ -170,7 +194,7 @@ func _start_ambient_effects() -> void:
 		
 		# Now create the pitch increase tween
 		var pitch_tween = create_tween()
-		pitch_tween.tween_property(ambient_sound, "pitch_scale", 0.87, 4.5)  # Increase over 2 seconds
+		pitch_tween.tween_property(ambient_sound, "pitch_scale", 0.9, 3.5)  # Increase over 2 seconds
 		# No looping - pitch will stay at 0.9 after this completes
 		
 	# Start the flickering effect immediately
@@ -390,7 +414,14 @@ func _start_new_game() -> void:
 			get_tree().change_scene_to_file("res://scenes/demo.tscn")
 
 func _on_options_pressed() -> void:
-	print("ok")
+	# Fade out ambient sound
+	if ambient_sound:
+		var tween = create_tween()
+		tween.tween_property(ambient_sound, "volume_db", -80.0, 0.5)
+		tween.tween_callback(ambient_sound.stop)
+	
+	# Navigate to options menu
+	get_tree().change_scene_to_file("res://scenes/options_menu.tscn")
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()

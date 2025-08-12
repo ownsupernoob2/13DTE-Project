@@ -6,6 +6,10 @@ const SPRINT_SPEED: float = 5.0  # Reduced from 8.0
 const JUMP_VELOCITY: float = 4.8
 const SENSITIVITY: float = 0.004
 
+# Get the current mouse sensitivity from Global settings
+func get_current_sensitivity() -> float:
+	return SENSITIVITY * Global.mouse_sensitivity
+
 const BOB_FREQ: float = 2.4
 const BOB_AMP: float = 0.08
 var t_bob: float = 0.0
@@ -256,13 +260,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			
 			# Camera rotation - ONLY vertical movement (no horizontal when holding lever)
 			# Reduced vertical sensitivity to match lever movement speed better
-			camera.rotate_x(-event.relative.y * SENSITIVITY * 0.3)  # Reduced from 0.6 to 0.15 for closer sync with lever
+			var current_sensitivity = get_current_sensitivity()
+			camera.rotate_x(-event.relative.y * current_sensitivity * 0.3)  # Reduced from 0.6 to 0.15 for closer sync with lever
 			camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-70), deg_to_rad(60))
 			
 		elif can_rotate_camera:
 			# Full normal camera rotation when not using computer/monitor and not holding lever
-			head.rotate_y(-event.relative.x * SENSITIVITY)
-			camera.rotate_x(-event.relative.y * SENSITIVITY)
+			var current_sensitivity = get_current_sensitivity()
+			head.rotate_y(-event.relative.x * current_sensitivity)
+			camera.rotate_x(-event.relative.y * current_sensitivity)
 			camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-70), deg_to_rad(60))
 			
 		else:

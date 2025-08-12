@@ -1,4 +1,4 @@
-[gd_scene load_steps=75 format=4 uid="uid://db2h3t17k37pe"]
+[gd_scene load_steps=76 format=4 uid="uid://db2h3t17k37pe"]
 
 [ext_resource type="Texture2D" uid="uid://ba314xal47nff" path="res://assets/disks/Disks_floppy_disc_2.png" id="3_dg67p"]
 [ext_resource type="PackedScene" uid="uid://bm2ujr6udikc4" path="res://scenes/components/computer.tscn" id="6_x0xbu"]
@@ -29,8 +29,9 @@
 [ext_resource type="PackedScene" uid="uid://dxfunwodw2xu3" path="res://scenes/components/lever.tscn" id="32_18vu0"]
 [ext_resource type="Texture2D" uid="uid://b8m0js3o6inm7" path="res://assets/disks/Disks_floppy_disc_4.png" id="32_ssbcb"]
 [ext_resource type="PackedScene" uid="uid://culqv6vf0jevi" path="res://Untitled.glb" id="34_ijaeb"]
+[ext_resource type="PackedScene" uid="uid://bvj8x3n7q4k8c" path="res://scenes/components/caulk.tscn" id="34_ssbcb"]
 [ext_resource type="PackedScene" uid="uid://u7lnosmcdssa" path="res://scenes/components/monitor.tscn" id="35_ssbcb"]
-[ext_resource type="PackedScene" uid="uid://c8r451f728vgq" path="res://scenes/medical_scanner.tscn" id="36_scanner"]
+[ext_resource type="PackedScene" uid="uid://chxib34mk8a4e" path="res://scenes/medical_scanner.tscn" id="36_scanner"]
 [ext_resource type="PackedScene" uid="uid://dectaforclt20" path="res://SarcoPodMap10Export (2).glb" id="38_keb61"]
 [ext_resource type="Shader" uid="uid://ceqkphohw8enu" path="res://scenes/demo.gdshader" id="39_n3amx"]
 
@@ -713,6 +714,9 @@ skeleton = NodePath("")
 
 [node name="LeverGutentagPosition" parent="." groups=["interactable", "lever"] instance=ExtResource("32_18vu0")]
 transform = Transform3D(0.596678, 0, 0, 0, 0.596678, 0, 0, 0, 0.596678, -33.1702, 142.356, -10.0309)
+
+[node name="Caulk" parent="." instance=ExtResource("34_ssbcb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.9151, 141.48, -11.5452)
 
 [connection signal="body_entered" from="GrabArea" to="Player" method="_on_grab_area_body_entered"]
 [connection signal="body_exited" from="GrabArea" to="Player" method="_on_grab_area_body_exited"]

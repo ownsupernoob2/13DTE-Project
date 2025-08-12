@@ -97,18 +97,18 @@ func _ready() -> void:
 		# print("Warning: Could not load custom font, using system font")
 	
 	# Set font sizes using add_theme_font_size_override (more direct method)
-	add_theme_font_size_override("normal_font_size", 35)
-	add_theme_font_size_override("bold_font_size", 35)
-	add_theme_font_size_override("italics_font_size", 35)
-	add_theme_font_size_override("bold_italics_font_size", 35)
-	add_theme_font_size_override("mono_font_size", 35)
+	add_theme_font_size_override("normal_font_size", 25)
+	add_theme_font_size_override("bold_font_size", 25)
+	add_theme_font_size_override("italics_font_size", 25)
+	add_theme_font_size_override("bold_italics_font_size", 25)
+	add_theme_font_size_override("mono_font_size", 25)
 	
 	# Also set in theme as backup
-	theme.set_font_size("normal_font_size", "RichTextLabel", 35)
-	theme.set_font_size("bold_font_size", "RichTextLabel", 35)
-	theme.set_font_size("italics_font_size", "RichTextLabel", 35)
-	theme.set_font_size("bold_italics_font_size", "RichTextLabel", 35)
-	theme.set_font_size("mono_font_size", "RichTextLabel", 35)
+	theme.set_font_size("normal_font_size", "RichTextLabel", 25)
+	theme.set_font_size("bold_font_size", "RichTextLabel", 25)
+	theme.set_font_size("italics_font_size", "RichTextLabel", 25)
+	theme.set_font_size("bold_italics_font_size", "RichTextLabel", 25)
+	theme.set_font_size("mono_font_size", "RichTextLabel", 25)
 	
 	_built_in_command_init()
 	add_child(_flash_timer)

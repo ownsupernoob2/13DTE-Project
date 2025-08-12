@@ -1,0 +1,268 @@
+[gd_scene load_steps=14 format=3 uid="uid://b7yqhhp8u0tjc"]
+
+[ext_resource type="Script" uid="uid://2g3jv22f0lb7" path="res://scripts/main_menu.gd" id="1_q8k2w"]
+[ext_resource type="Shader" uid="uid://q7f1yqvt3i2" path="res://scenes/TextShader.gdshader" id="2_jtcav"]
+[ext_resource type="FontFile" uid="uid://vknkslnfdd7v" path="res://assets/rubik80s_font_resource.tres" id="2_rubik80s"]
+[ext_resource type="FontFile" uid="uid://bcqcr64u2io3t" path="res://assets/fonts/Rubik80sFade-Regular.ttf" id="3_awe4b"]
+[ext_resource type="AudioStream" uid="uid://xbfu738neosw" path="res://assets/music/menu.mp3" id="6_1qu8f"]
+[ext_resource type="Theme" uid="uid://cje7d0m3sdccr" path="res://assets/options.tres" id="6_kgbel"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mr8eq"]
+shader = ExtResource("2_jtcav")
+shader_parameter/glitch_strength = 0.375
+shader_parameter/glitch_frequency = 0.332
+shader_parameter/glitch_speed = 0.641
+shader_parameter/enable_rgb_split = false
+shader_parameter/rgb_split_intensity = 0.058
+shader_parameter/rgb_split_angle = 180.0
+shader_parameter/rgb_split_random_direction = false
+shader_parameter/enable_horizontal_glitch = true
+shader_parameter/h_glitch_intensity = 0.1
+shader_parameter/h_glitch_block_size = 0.02
+shader_parameter/h_glitch_threshold = 0.8
+shader_parameter/enable_vertical_glitch = false
+shader_parameter/v_glitch_intensity = 0.05
+shader_parameter/v_glitch_block_size = 0.01
+shader_parameter/v_glitch_threshold = 0.9
+shader_parameter/enable_digital_noise = true
+shader_parameter/noise_intensity = 0.3
+shader_parameter/noise_size = 10.0
+shader_parameter/noise_color = Color(1, 1, 1, 1)
+shader_parameter/enable_scanlines = true
+shader_parameter/scanline_intensity = 0.3
+shader_parameter/scanline_frequency = 10.0
+shader_parameter/scanline_speed = 2.0
+shader_parameter/enable_interlacing = false
+shader_parameter/interlace_intensity = 0.5
+shader_parameter/interlace_frequency = 4.0
+shader_parameter/enable_data_corruption = false
+shader_parameter/corruption_intensity = 0.761
+shader_parameter/corruption_block_size = 0.047
+shader_parameter/corruption_threshold = 0.95
+shader_parameter/enable_color_shift = false
+shader_parameter/color_shift_intensity = 0.3
+shader_parameter/hue_shift_speed = 1.0
+shader_parameter/enable_posterize = false
+shader_parameter/posterize_levels = 8
+shader_parameter/use_pulse_mode = false
+shader_parameter/pulse_frequency = 1.0
+shader_parameter/pulse_width = 0.3
+shader_parameter/random_glitch_timing = true
+shader_parameter/enable_mask = false
+shader_parameter/invert_mask = false
+
+[sub_resource type="LabelSettings" id="LabelSettings_dds1x"]
+font = ExtResource("3_awe4b")
+font_size = 170
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ccguo"]
+shader = ExtResource("2_jtcav")
+shader_parameter/glitch_strength = 0.096
+shader_parameter/glitch_frequency = 3.224
+shader_parameter/glitch_speed = 0.725
+shader_parameter/enable_rgb_split = true
+shader_parameter/rgb_split_intensity = 0.01
+shader_parameter/rgb_split_angle = 0.0
+shader_parameter/rgb_split_random_direction = false
+shader_parameter/enable_horizontal_glitch = true
+shader_parameter/h_glitch_intensity = 0.1
+shader_parameter/h_glitch_block_size = 0.02
+shader_parameter/h_glitch_threshold = 0.8
+shader_parameter/enable_vertical_glitch = true
+shader_parameter/v_glitch_intensity = 0.05
+shader_parameter/v_glitch_block_size = 0.01
+shader_parameter/v_glitch_threshold = 0.9
+shader_parameter/enable_digital_noise = true
+shader_parameter/noise_intensity = 0.3
+shader_parameter/noise_size = 10.0
+shader_parameter/noise_color = Color(1, 1, 1, 1)
+shader_parameter/enable_scanlines = true
+shader_parameter/scanline_intensity = 0.581
+shader_parameter/scanline_frequency = 10.0
+shader_parameter/scanline_speed = 0.652
+shader_parameter/enable_interlacing = false
+shader_parameter/interlace_intensity = 0.5
+shader_parameter/interlace_frequency = 4.0
+shader_parameter/enable_data_corruption = true
+shader_parameter/corruption_intensity = 0.2
+shader_parameter/corruption_block_size = 0.01
+shader_parameter/corruption_threshold = 0.95
+shader_parameter/enable_color_shift = false
+shader_parameter/color_shift_intensity = 0.3
+shader_parameter/hue_shift_speed = 1.0
+shader_parameter/enable_posterize = false
+shader_parameter/posterize_levels = 8
+shader_parameter/use_pulse_mode = true
+shader_parameter/pulse_frequency = 1.0
+shader_parameter/pulse_width = 0.3
+shader_parameter/random_glitch_timing = true
+shader_parameter/enable_mask = false
+shader_parameter/invert_mask = false
+
+[sub_resource type="LabelSettings" id="LabelSettings_1"]
+font = ExtResource("3_awe4b")
+font_size = 60
+font_color = Color(0.753984, 0.753984, 0.753984, 1)
+
+[sub_resource type="Theme" id="Theme_1"]
+Button/font_sizes/font_size = 18
+Button/fonts/font = ExtResource("2_rubik80s")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jtcav"]
+shader = ExtResource("2_jtcav")
+shader_parameter/glitch_strength = 0.0
+shader_parameter/glitch_frequency = 2.0
+shader_parameter/glitch_speed = 1.0
+shader_parameter/enable_rgb_split = true
+shader_parameter/rgb_split_intensity = 0.01
+shader_parameter/rgb_split_angle = 0.0
+shader_parameter/rgb_split_random_direction = false
+shader_parameter/enable_horizontal_glitch = true
+shader_parameter/h_glitch_intensity = 0.1
+shader_parameter/h_glitch_block_size = 0.02
+shader_parameter/h_glitch_threshold = 0.8
+shader_parameter/enable_vertical_glitch = false
+shader_parameter/v_glitch_intensity = 0.05
+shader_parameter/v_glitch_block_size = 0.01
+shader_parameter/v_glitch_threshold = 0.9
+shader_parameter/enable_digital_noise = true
+shader_parameter/noise_intensity = 0.3
+shader_parameter/noise_size = 10.0
+shader_parameter/noise_color = Color(1, 1, 1, 1)
+shader_parameter/enable_scanlines = true
+shader_parameter/scanline_intensity = 0.202
+shader_parameter/scanline_frequency = 65.618
+shader_parameter/scanline_speed = 0.0
+shader_parameter/enable_interlacing = false
+shader_parameter/interlace_intensity = 0.5
+shader_parameter/interlace_frequency = 4.0
+shader_parameter/enable_data_corruption = false
+shader_parameter/corruption_intensity = 0.2
+shader_parameter/corruption_block_size = 0.01
+shader_parameter/corruption_threshold = 0.95
+shader_parameter/enable_color_shift = false
+shader_parameter/color_shift_intensity = 0.3
+shader_parameter/hue_shift_speed = 1.0
+shader_parameter/enable_posterize = false
+shader_parameter/posterize_levels = 8
+shader_parameter/use_pulse_mode = false
+shader_parameter/pulse_frequency = 1.0
+shader_parameter/pulse_width = 0.3
+shader_parameter/random_glitch_timing = true
+shader_parameter/enable_mask = false
+shader_parameter/invert_mask = false
+
+[sub_resource type="LabelSettings" id="LabelSettings_2"]
+font = ExtResource("2_rubik80s")
+font_size = 20
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_q8k2w")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="SARCO POD" type="Label" parent="."]
+material = SubResource("ShaderMaterial_mr8eq")
+layout_mode = 2
+offset_left = 94.0
+offset_top = 271.0
+offset_right = 1114.0
+offset_bottom = 473.0
+text = "SARCO POD"
+label_settings = SubResource("LabelSettings_dds1x")
+
+[node name="TitleLabel" type="Label" parent="."]
+material = SubResource("ShaderMaterial_ccguo")
+layout_mode = 2
+offset_left = 111.0
+offset_top = 401.0
+offset_right = 1068.0
+offset_bottom = 473.0
+text = "ALIEN CONTAINMENT FACILITY"
+label_settings = SubResource("LabelSettings_1")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 169.0
+offset_top = -599.0
+offset_right = 540.0
+offset_bottom = -297.0
+grow_vertical = 0
+
+[node name="Spacer1" type="Control" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="MenuButtons" type="VBoxContainer" parent="VBoxContainer"]
+layout_direction = 2
+layout_mode = 2
+size_flags_horizontal = 0
+theme = SubResource("Theme_1")
+theme_override_constants/separation = 8
+
+[node name="NewGameButton" type="Button" parent="VBoxContainer/MenuButtons"]
+material = SubResource("ShaderMaterial_jtcav")
+layout_mode = 2
+theme = ExtResource("6_kgbel")
+text = "> NEW GAME"
+flat = true
+
+[node name="ContinueButton" type="Button" parent="VBoxContainer/MenuButtons"]
+layout_mode = 2
+theme = ExtResource("6_kgbel")
+text = "  CONTINUE"
+flat = true
+
+[node name="OptionsButton" type="Button" parent="VBoxContainer/MenuButtons"]
+layout_mode = 2
+theme = ExtResource("6_kgbel")
+text = "  OPTIONS"
+flat = true
+
+[node name="QuitButton" type="Button" parent="VBoxContainer/MenuButtons"]
+layout_mode = 2
+theme = ExtResource("6_kgbel")
+text = "  QUIT"
+flat = true
+
+[node name="AmbientSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_1qu8f")
+volume_db = -10.0
+pitch_scale = 0.88
+autoplay = true
+parameters/looping = true
+
+[node name="Instructions" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -290.0
+offset_top = -87.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "Use ARROW KEYS to navigate
+Press ENTER to select"
+label_settings = SubResource("LabelSettings_2")
+horizontal_alignment = 2
+vertical_alignment = 2

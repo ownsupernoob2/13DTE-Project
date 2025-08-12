@@ -64,42 +64,55 @@ func _navigate_menu(direction: int) -> void:
 	_update_button_selection()
 
 func _update_button_selection() -> void:
-	# Reset all buttons to default style
+	# Keep button text consistent - no arrows or prefixes
 	for i in range(menu_buttons.size()):
 		var button = menu_buttons[i]
 		var base_text = ""
 		
-		# Get base text without arrow
+		# Get base text without any prefixes
 		match i:
 			0: base_text = "NEW GAME"
 			1: base_text = "CONTINUE"
 			2: base_text = "OPTIONS"
 			3: base_text = "QUIT"
 		
+		# Set clean text without any arrows or spaces
+		button.text = base_text
+		
+		# Ensure left alignment
+		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		
 		if button.disabled:
 			button.add_theme_color_override("font_color", disabled_color)
-			button.text = "  " + base_text
 		else:
 			button.add_theme_color_override("font_color", normal_color)
-			button.text = "  " + base_text
 		
 		button.scale = Vector2(1.0, 1.0)
 	
-	# Highlight selected button
+	# Highlight selected button (but don't change its text)
 	var selected_button = menu_buttons[current_button_index]
 	if not selected_button.disabled:
 		selected_button.add_theme_color_override("font_color", selected_color)
 		selected_button.scale = Vector2(1.05, 1.05)
+	
+	# Update selection indicator if it exists
+	_update_selection_indicator()
+
+func _update_selection_indicator() -> void:
+	# Try to find the selection indicator (may not exist yet)
+	var selection_indicator = get_node_or_null("VBoxContainer/SelectionIndicator")
+	if selection_indicator and current_button_index < menu_buttons.size():
+		var selected_button = menu_buttons[current_button_index]
 		
-		# Add selection arrow
-		var base_text = ""
-		match current_button_index:
-			0: base_text = "NEW GAME"
-			1: base_text = "CONTINUE"
-			2: base_text = "OPTIONS"
-			3: base_text = "QUIT"
+		# Set the indicator text
+		selection_indicator.text = ">"
 		
-		selected_button.text = "> " + base_text
+		# Position the indicator next to the selected button
+		var button_position = selected_button.position
+		selection_indicator.position.y = button_position.y + (selected_button.size.y / 2) - (selection_indicator.size.y / 2)
+		
+		# Make sure indicator is visible only for non-disabled buttons
+		selection_indicator.visible = not selected_button.disabled
 
 func _activate_current_button() -> void:
 	var button = menu_buttons[current_button_index]
@@ -114,7 +127,7 @@ func _activate_current_button() -> void:
 func _style_horror_button(button: Button) -> void:
 	# Horror-style button appearance with bold, bigger text
 	button.add_theme_color_override("font_color", normal_color)
-	button.add_theme_font_size_override("font_size", 24)  # Bigger text
+	button.add_theme_font_size_override("font_size", 54)  # Bigger text
 	
 	# Create a bold font theme if possible
 	var theme = button.get_theme()
@@ -148,22 +161,23 @@ func _connect_buttons() -> void:
 		quit_button.pressed.connect(_on_quit_pressed)
 
 func _start_ambient_effects() -> void:
-	# Set up ambient sound pitch animation from 0.6 to 0.8 after 3 seconds
+	# Set up ambient sound pitch to stay at 0.6 for 4 seconds, then increase over 2 seconds
 	if ambient_sound:
 		ambient_sound.pitch_scale = 0.6
 		
-		# Wait 3 seconds before starting the pitch animation
-		var delay_timer = get_tree().create_timer(3.0)
-		delay_timer.timeout.connect(_start_pitch_animation)
+		# Wait 4 seconds, then start a 2-second pitch increase
+		await get_tree().create_timer(4.0).timeout  # Stay at 0.6 for 4 seconds
 		
-func _start_pitch_animation() -> void:
-	if ambient_sound:
+		# Now create the pitch increase tween
 		var pitch_tween = create_tween()
-		pitch_tween.set_loops()
-		pitch_tween.tween_property(ambient_sound, "pitch_scale", 0.8, 8.0)
-		pitch_tween.tween_property(ambient_sound, "pitch_scale", 0.6, 6.0)
-	
-	# Add flickering effect to title
+		pitch_tween.tween_property(ambient_sound, "pitch_scale", 0.87, 4.5)  # Increase over 2 seconds
+		# No looping - pitch will stay at 0.9 after this completes
+		
+	# Start the flickering effect immediately
+	_start_flickering_effect()
+		
+func _start_flickering_effect() -> void:
+	# Renamed function to be more specific - handles title flickering
 	if title_label:
 		var flicker_tween = create_tween()
 		flicker_tween.set_loops()

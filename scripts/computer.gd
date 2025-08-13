@@ -25,6 +25,30 @@ func _ready():
 	node_area.mouse_entered.connect(_mouse_entered_area)
 	node_area.mouse_exited.connect(_mouse_exited_area)
 	node_area.input_event.connect(_mouse_input_event)
+	# Call audio setup after a brief delay to ensure console is ready
+	call_deferred("setup_console_audio")
+
+func setup_console_audio():
+	# Set up the audio players for the console
+	var terminal = node_viewport.get_node_or_null("Control/Console")
+	if terminal:
+		# Get the audio players from the root node
+		var audio_press = get_parent().get_node_or_null("Press")
+		var audio_enter = get_parent().get_node_or_null("Enter")
+		var audio_space = get_parent().get_node_or_null("Space")
+		
+		# Set the audio players in the console
+		if audio_press:
+			terminal.audio_press = audio_press
+		if audio_enter:
+			terminal.audio_enter = audio_enter
+		if audio_space:
+			terminal.audio_space = audio_space
+		
+		print("Console audio setup complete")
+		# Test the audio setup
+		if terminal.has_method("test_audio_setup"):
+			terminal.test_audio_setup()
 
 
 func _mouse_entered_area():

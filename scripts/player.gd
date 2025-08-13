@@ -4,7 +4,7 @@ var speed: float
 const WALK_SPEED: float = 3.0  # Reduced from 5.0
 const SPRINT_SPEED: float = 5.0  # Reduced from 8.0
 const JUMP_VELOCITY: float = 4.8
-const SENSITIVITY: float = 0.004
+const SENSITIVITY: float = 0.001
 
 # Get the current mouse sensitivity from Global settings
 func get_current_sensitivity() -> float:

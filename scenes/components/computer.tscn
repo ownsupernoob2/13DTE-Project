@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=4 uid="uid://bm2ujr6udikc4"]
+[gd_scene load_steps=48 format=4 uid="uid://bm2ujr6udikc4"]
 
 [ext_resource type="Script" uid="uid://d2vkfxd0ifcqn" path="res://scripts/computer.gd" id="1_okq71"]
 [ext_resource type="FontFile" uid="uid://vknkslnfdd7v" path="res://assets/rubik80s_font_resource.tres" id="2_rubik80s"]
@@ -10,6 +10,9 @@
 [ext_resource type="Texture2D" uid="uid://cqgbryt3ssabg" path="res://assets/disks/Disks_held_floppy_disc_3.png" id="6_dg0wh"]
 [ext_resource type="Texture2D" uid="uid://cef4xo4bfd7a6" path="res://assets/disks/Disks_held_floppy_disc_1.png" id="7_y58gg"]
 [ext_resource type="Texture2D" uid="uid://r2orbluhbm0s" path="res://assets/disks/Disks_held_floppy_disc_4.png" id="8_hubia"]
+[ext_resource type="AudioStream" uid="uid://cy0h3yedpyw4u" path="res://assets/music/sfx/enter.mp3" id="11_udk46"]
+[ext_resource type="AudioStream" uid="uid://b2evbd2hbleio" path="res://assets/music/sfx/press.mp3" id="12_bp7ym"]
+[ext_resource type="AudioStream" uid="uid://d34kkgrpfvwwn" path="res://assets/music/sfx/space.mp3" id="13_eregc"]
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_815cu"]
 viewport_path = NodePath("Computer/SubViewport")
@@ -691,5 +694,14 @@ autoplay = "insert"
 environment = SubResource("Environment_t3l2h")
 
 [node name="computer_12" parent="." instance=ExtResource("4_815cu")]
+
+[node name="Enter" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("11_udk46")
+
+[node name="Press" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("12_bp7ym")
+
+[node name="Space" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("13_eregc")
 
 [editable path="computer_12"]

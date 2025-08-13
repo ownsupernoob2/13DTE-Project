@@ -68,6 +68,11 @@ var _just_save: String = ""
 
 @export var SetLocaleToEng: bool = false
 
+# Audio players (will be set from computer scene)
+var audio_press: AudioStreamPlayer
+var audio_enter: AudioStreamPlayer
+var audio_space: AudioStreamPlayer
+
 var has_permission: bool = false
 var inserted_disk: String = ""
 var inserted_disk_node: Node = null
@@ -142,6 +147,39 @@ func _process(delta: float) -> void:
 			append_current_input_string()
 			_flash_timer.start()
 
+# Audio functions
+func play_press_sound():
+	if audio_press:
+		audio_press.pitch_scale = randf_range(0.9, 1.2)
+		audio_press.play()
+	else:
+		print("Warning: audio_press not set")
+
+func play_enter_sound():
+	if audio_enter:
+		audio_enter.play()
+	else:
+		print("Warning: audio_enter not set")
+
+func play_space_sound():
+	if audio_space:
+		audio_space.play()
+	else:
+		print("Warning: audio_space not set")
+
+# Test function to verify audio setup
+func test_audio_setup():
+	print("Testing audio setup...")
+	print("audio_press: ", audio_press)
+	print("audio_enter: ", audio_enter)
+	print("audio_space: ", audio_space)
+	if audio_press:
+		print("Press audio player is ready")
+	if audio_enter:
+		print("Enter audio player is ready")
+	if audio_space:
+		print("Space audio player is ready")
+
 func _unhandled_key_input(event: InputEvent) -> void:
 	if !Global.is_using_computer:
 		return
@@ -151,51 +189,121 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			"H","I","J","K","L","M","N",\
 			"O","P","Q","R","S","T","U",\
 			"V","W","X","Y","Z":
+				play_press_sound()
 				insert_character(event.as_text().to_lower())
 			"Shift+A","Shift+B","Shift+C","Shift+D","Shift+E","Shift+F","Shift+G",\
 			"Shift+H","Shift+I","Shift+J","Shift+K","Shift+L","Shift+M","Shift+N",\
 			"Shift+O","Shift+P","Shift+Q","Shift+R","Shift+S","Shift+T","Shift+U",\
 			"Shift+V","Shift+W","Shift+X","Shift+Y","Shift+Z",\
 			"Kp 1","Kp 2","Kp 3","Kp 4","Kp 5","Kp 6","Kp 7","Kp 8","Kp 9","Kp 0":
+				play_press_sound()
 				insert_character(event.as_text()[-1])
 			"0","1","2","3","4","5","6","7","8","9":
+				play_press_sound()
 				insert_character(event.as_text())
-			"Space","Shift_Space": insert_character(" ")
-			"BracketLeft": insert_character("[")
-			"BracketRight": insert_character("]")
-			"Slash","Kp Divide": insert_character("/")
-			"QuoteLeft": insert_character("`")
-			"Shift+QuoteLeft": insert_character("~")
-			"Shift+1": insert_character("!")
-			"Shift+2": insert_character("@")
-			"Shift+3": insert_character("#")
-			"Shift+4": insert_character("$")
-			"Shift+5": insert_character("%")
-			"Shift+6": insert_character("^")
-			"Shift+7": insert_character("&")
-			"Shift+8","Kp Multiply": insert_character("*")
-			"Shift+9": insert_character("(")
-			"Shift+0": insert_character(")")
-			"Minus","Kp Subtract": insert_character("-")
-			"Shift+Minus": insert_character("_")
-			"Equal": insert_character("=")
-			"Shift+Equal","Kp Add": insert_character("+")
-			"Shift+BracketLeft": insert_character("{")
-			"Shift+BracketRight": insert_character("}")
-			"BackSlash": insert_character("\\")
-			"Shift+BackSlash": insert_character("|")
-			"Semicolon": insert_character(";")
-			"Shift+Semicolon": insert_character(":")
-			"Apostrophe": insert_character("'")
-			"Shift+Apostrophe": insert_character("\"")
-			"Comma": insert_character(",")
-			"Shift+Comma": insert_character("<")
-			"Period","Kp Period": insert_character(".")
-			"Shift+Period": insert_character(">")
-			"Shift+Slash": insert_character("?")
+			"Space","Shift_Space": 
+				play_space_sound()
+				insert_character(" ")
+			"BracketLeft": 
+				play_press_sound()
+				insert_character("[")
+			"BracketRight": 
+				play_press_sound()
+				insert_character("]")
+			"Slash","Kp Divide": 
+				play_press_sound()
+				insert_character("/")
+			"QuoteLeft": 
+				play_press_sound()
+				insert_character("`")
+			"Shift+QuoteLeft": 
+				play_press_sound()
+				insert_character("~")
+			"Shift+1": 
+				play_press_sound()
+				insert_character("!")
+			"Shift+2": 
+				play_press_sound()
+				insert_character("@")
+			"Shift+3": 
+				play_press_sound()
+				insert_character("#")
+			"Shift+4": 
+				play_press_sound()
+				insert_character("$")
+			"Shift+5": 
+				play_press_sound()
+				insert_character("%")
+			"Shift+6": 
+				play_press_sound()
+				insert_character("^")
+			"Shift+7": 
+				play_press_sound()
+				insert_character("&")
+			"Shift+8","Kp Multiply": 
+				play_press_sound()
+				insert_character("*")
+			"Shift+9": 
+				play_press_sound()
+				insert_character("(")
+			"Shift+0": 
+				play_press_sound()
+				insert_character(")")
+			"Minus","Kp Subtract": 
+				play_press_sound()
+				insert_character("-")
+			"Shift+Minus": 
+				play_press_sound()
+				insert_character("_")
+			"Equal": 
+				play_press_sound()
+				insert_character("=")
+			"Shift+Equal","Kp Add": 
+				play_press_sound()
+				insert_character("+")
+			"Shift+BracketLeft": 
+				play_press_sound()
+				insert_character("{")
+			"Shift+BracketRight": 
+				play_press_sound()
+				insert_character("}")
+			"BackSlash": 
+				play_press_sound()
+				insert_character("\\")
+			"Shift+BackSlash": 
+				play_press_sound()
+				insert_character("|")
+			"Semicolon": 
+				play_press_sound()
+				insert_character(";")
+			"Shift+Semicolon": 
+				play_press_sound()
+				insert_character(":")
+			"Apostrophe": 
+				play_press_sound()
+				insert_character("'")
+			"Shift+Apostrophe": 
+				play_press_sound()
+				insert_character("\"")
+			"Comma": 
+				play_press_sound()
+				insert_character(",")
+			"Shift+Comma": 
+				play_press_sound()
+				insert_character("<")
+			"Period","Kp Period": 
+				play_press_sound()
+				insert_character(".")
+			"Shift+Period": 
+				play_press_sound()
+				insert_character(">")
+			"Shift+Slash": 
+				play_press_sound()
+				insert_character("?")
 			"Shift":
 				pass
 			"Backspace","Shift+Backspace":
+				play_press_sound()
 				scroll_to_line(get_line_count())
 				_current_line = 0
 				if _current_cursor_pos == 0:
@@ -207,6 +315,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 						remove_paragraph(get_paragraph_count()-1)
 					CurrentInputString = CurrentInputString.erase(CurrentInputString.length() -_current_cursor_pos - 1)
 			"Enter","Kp Enter":
+				play_enter_sound()
 				match CurrentMode:
 					"","Default":
 						append_current_input_string(true)
@@ -529,11 +638,11 @@ func generate_csv_content(disk_name: String, filename: String) -> String:
 	return "CSV_ERROR: Unable to generate table for " + disk_name + " " + filename
 
 func display_disk_info(disk_name: String, disk_data: Dictionary) -> void:
-	append_text("[color=CYAN]" + repeat_string("=", 60) + "[/color]")
+	append_text("[color=CYAN]" + repeat_string("=", 80) + "[/color]")
 	newline()
 	append_text("[color=CYAN]              ALIEN CLASSIFICATION DATA DISK INSERTED[/color]")
 	newline()
-	append_text("[color=CYAN]" + repeat_string("=", 60) + "[/color]")
+	append_text("[color=CYAN]" + repeat_string("=", 80) + "[/color]")
 	newline()
 	
 	append_text("[color=YELLOW]Disk:[/color] " + disk_name)
@@ -542,11 +651,11 @@ func display_disk_info(disk_name: String, disk_data: Dictionary) -> void:
 	
 	append_text("[color=GREEN]COMMANDS TO GET STARTED:[/color]")
 	newline()
-	append_text("  [color=WHITE]table weight_classes.csv[/color] - View weight/liquid ratio data")
-	newline()
 	append_text("  [color=WHITE]ls[/color]                        - List all files on disk")
 	newline()
-	append_text("  [color=WHITE]cat filename[/color]              - Read file contents")
+	append_text("  [color=WHITE]cd folder_name[/color]            - Enter directory folder")
+	newline()
+	append_text("  [color=WHITE]table weight_classes.csv[/color] - View weight/liquid ratio data")
 	newline()
 	append_text("  [color=WHITE]eject[/color]                     - Remove this disk")
 	newline()
@@ -560,13 +669,11 @@ func display_disk_info(disk_name: String, disk_data: Dictionary) -> void:
 	newline()
 	append_text("3. Set lever values to match liquid ratios")
 	newline()
-	append_text("4. Press SEDATE button to inject")
-	newline()
 	append_text("5. Accept/Reject alien classification")
 	newline()
 	newline()
 	
-	append_text("[color=CYAN]" + repeat_string("=", 60) + "[/color]")
+	append_text("[color=CYAN]" + repeat_string("=", 80) + "[/color]")
 	newline()
 		
 func check_permission() -> bool:
@@ -605,7 +712,7 @@ func process(command: String) -> void:
 	
 	if cmd in ["mkdir", "touch", "rm", "mv", "cp", "nano"] and not check_permission():
 		push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
-		append_text("[color=RED]Insufficient permissions. Use 'auth' to gain access.[/color]")
+		append_text("[color=RED]Insufficient permissions.[/color]")
 		pop()
 		newline()
 		# Auto-scroll after permission error
@@ -724,11 +831,11 @@ func _built_in_command_init():
 	add_command(
 		"help",
 		func():
-			append_text("[color=CYAN]" + repeat_string("═", 79) + "[/color]")
+			append_text("[color=CYAN]" + repeat_string("═", 90) + "[/color]")
 			newline()
 			append_text("[color=CYAN]                    ALIEN CLASSIFICATION TERMINAL - COMMAND REFERENCE[/color]")
 			newline()
-			append_text("[color=CYAN]" + repeat_string("═", 79) + "[/color]")
+			append_text("[color=CYAN]" + repeat_string("═", 90) + "[/color]")
 			newline()
 			newline()
 			append_text("[color=YELLOW]NAVIGATION COMMANDS:[/color]")
@@ -752,15 +859,6 @@ func _built_in_command_init():
 			append_text("  [color=WHITE]eject[/color]      - Remove currently inserted disk")
 			newline()
 			newline()
-			append_text("[color=YELLOW]CLASSIFICATION:[/color]")
-			newline()
-			append_text("  [color=WHITE]classify[/color]   - Classify alien specimen")
-			newline()
-			append_text("             Usage: classify <class> <weight> <blood> <eye_color>")
-			newline()
-			append_text("             Example: classify 'Class 1' 145 'X-Positive' 'Yellow'")
-			newline()
-			newline()
 			append_text("[color=YELLOW]UTILITY:[/color]")
 			newline()
 			append_text("  [color=WHITE]clear[/color]      - Clear the terminal screen")
@@ -768,7 +866,7 @@ func _built_in_command_init():
 			append_text("  [color=WHITE]help[/color]       - Show this command reference")
 			newline()
 			newline()
-			append_text("[color=CYAN]" + repeat_string("═", 79) + "[/color]")
+			append_text("[color=CYAN]" + repeat_string("═", 90) + "[/color]")
 			newline()
 			append_text("[color=GRAY]Insert a data disk and use these commands to analyze alien specimens[/color]")
 			newline(),
@@ -1114,77 +1212,6 @@ func _built_in_command_init():
 		"View CSV tables",
 		"Display CSV files in table format. Usage: table [filename.csv]"
 	)
-	add_command(
-		"classify",
-		func(species: String, weight: String, blood: String, eye: String):
-			if not GameManager:
-				append_text("[color=RED]Error: GameManager not available.[/color]")
-				newline()
-				return
-			
-			# Check if there's a current alien
-			if not GameManager.current_alien or GameManager.current_alien.is_empty():
-				append_text("[color=RED]Error: No alien currently being processed.[/color]")
-				newline()
-				return
-			
-			# Convert weight to int
-			var weight_int = weight.to_int()
-			if weight_int <= 0:
-				append_text("[color=RED]Error: Invalid weight. Please enter a positive number.[/color]")
-				newline()
-				return
-			
-			# Check if provided data matches current alien
-			var current_alien = GameManager.current_alien
-			var matches_species = current_alien.species == species
-			var matches_weight = current_alien.weight == weight_int
-			var matches_blood = current_alien.blood_type == blood
-			var matches_eye = current_alien.eye_color == eye
-			
-			var all_match = matches_species and matches_weight and matches_blood and matches_eye
-			
-			# If all data matches, we're saying "ACCEPT", otherwise "REJECT"
-			var is_correct = await GameManager.classify_alien(all_match)
-			
-			if is_correct:
-				append_text("[color=GREEN]CLASSIFICATION CORRECT![/color]")
-				newline()
-				if all_match:
-					append_text("The alien data matches - ACCEPTED.")
-				else:
-					append_text("The alien data doesn't match - REJECTED.")
-				newline()
-			else:
-				append_text("[color=RED]CLASSIFICATION INCORRECT![/color]")
-				newline()
-				if all_match:
-					append_text("You accepted the alien but should have rejected!")
-				else:
-					append_text("You rejected the alien but should have accepted!")
-				newline()
-				append_text("[color=YELLOW]Warning: Machine speed may have increased.[/color]")
-				newline()
-			
-			# Show current game stats
-			var stats = GameManager.get_classification_stats()
-			append_text("[color=CYAN]Current Stats:[/color]")
-			newline()
-			append_text("Total Classifications: " + str(stats["total_classifications"]))
-			newline()
-			append_text("Correct: " + str(stats["correct_classifications"]))
-			newline()
-			append_text("Incorrect: " + str(stats["incorrect_classifications"]))
-			newline()
-			append_text("Machine Speed Level: " + str(stats["machine_speed_level"]))
-			newline()
-			append_text("Accuracy: " + str(stats["accuracy"]).substr(0, 5) + "%")
-			newline(),
-		self,
-		"Classify an alien species",
-		"Usage: classify <class> <weight> <blood_type> <eye_color>\nExample: classify 'Class 1' 145 'X-Positive' 'Yellow'"
-	)
-	# Other commands unchanged
 
 func return_path_string(path: String) -> String:
 	if current_path == "/home":
@@ -1296,7 +1323,7 @@ func show_csv_table(filename: String) -> void:
 	_hide_terminal_ui()
 	
 	# Table title with full width border-to-border
-	var title_width = int(console_size.x)
+	var title_width = 64
 	append_text("[color=CYAN]" + repeat_string("═", title_width) + "[/color]")
 	newline()
 	append_text("[color=CYAN]" + pad_string_center("ALIEN SPECIES CLASSIFICATION DATA TABLE", title_width) + "[/color]")

@@ -567,7 +567,7 @@ transform = Transform3D(0.0238457, 0, -0.76519, 0, 0.708985, 0, 0.71318, 0, 0.02
 transform = Transform3D(1.40139, 0, -1.49012e-07, 0, 1.41047, 0, 0, 0, 1.30614, -0.00705321, 0.548354, 0.576901)
 
 [node name="MedicalScanner" parent="." instance=ExtResource("36_scanner")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.7192, 141.858, -13.1827)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.7192, 141.387, -14.5413)
 
 [node name="SarcoPodMap10Export (2)" parent="." instance=ExtResource("38_keb61")]
 transform = Transform3D(0.719625, 0, 0, 0, 0.719625, 0, 0, 0, 0.719625, 3.158, 38.48, 2.55)
@@ -716,7 +716,7 @@ skeleton = NodePath("")
 transform = Transform3D(0.596678, 0, 0, 0, 0.596678, 0, 0, 0, 0.596678, -33.1702, 142.356, -10.0309)
 
 [node name="Caulk" parent="." instance=ExtResource("34_ssbcb")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.9151, 141.48, -11.5452)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.4413, 141.48, -8.01508)
 
 [connection signal="body_entered" from="GrabArea" to="Player" method="_on_grab_area_body_entered"]
 [connection signal="body_exited" from="GrabArea" to="Player" method="_on_grab_area_body_exited"]

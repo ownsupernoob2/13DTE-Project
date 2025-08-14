@@ -28,6 +28,7 @@ size = Vector2(0.4, 0.3)
 script = ExtResource("1_k2q3r")
 
 [node name="CSGMesh3D" type="CSGMesh3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.798, 0, 0, 0)
 visible = false
 mesh = SubResource("BoxMesh_beb27")
 

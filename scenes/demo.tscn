@@ -38,17 +38,6 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_s3vvr"]
 render_priority = 0
 shader = ExtResource("39_n3amx")
-shader_parameter/enable_fog = true
-shader_parameter/fog_color = Color(0.219393, 0.131903, 0.0662079, 1)
-shader_parameter/noise_color = Color(0, 0, 0, 1)
-shader_parameter/fog_distance = 150.0
-shader_parameter/fog_fade_range = 10.0
-shader_parameter/enable_noise = true
-shader_parameter/noise_time_fac = 4.0
-shader_parameter/enable_color_limitation = true
-shader_parameter/color_levels = 32
-shader_parameter/enable_dithering = true
-shader_parameter/dither_strength = 0.3
 
 [sub_resource type="BoxMesh" id="BoxMesh_6cg1f"]
 material = SubResource("ShaderMaterial_s3vvr")
@@ -408,7 +397,6 @@ rings = 128
 
 [node name="shader" type="MeshInstance3D" parent="."]
 transform = Transform3D(6.19595, 0, 0, 0, 1.16996, 0, 0, 0, 1, 0, 0, 0)
-visible = false
 mesh = SubResource("BoxMesh_6cg1f")
 skeleton = NodePath("../Computer")
 
@@ -713,7 +701,7 @@ mesh = SubResource("SphereMesh_ssbcb")
 skeleton = NodePath("")
 
 [node name="LeverGutentagPosition" parent="." groups=["interactable", "lever"] instance=ExtResource("32_18vu0")]
-transform = Transform3D(0.596678, 0, 0, 0, 0.596678, 0, 0, 0, 0.596678, -33.1702, 142.356, -10.0309)
+transform = Transform3D(0.055468, 0, -0.594094, 0, 0.596678, 0, 0.594094, 0, 0.055468, -32.8522, 142.352, -8.688)
 
 [node name="Caulk" parent="." instance=ExtResource("34_ssbcb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.4413, 141.48, -8.01508)

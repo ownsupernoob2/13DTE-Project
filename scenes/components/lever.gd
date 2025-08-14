@@ -17,6 +17,15 @@ var is_holding_lever1: bool = false
 var is_holding_lever2: bool = false
 var is_holding_lever3: bool = false
 
+# Sedation system
+var is_sedated: bool = false
+var sedation_button_pressed: bool = false
+
+# Visual indicators
+@onready var sedation_indicator: Node3D = null  # Will be set up for visual feedback
+@onready var button_animation_player: AnimationPlayer = null
+@onready var button_audio_player: AudioStreamPlayer3D = null
+
 # Value limit (0-100)
 const MAX_VALUE: int = 100
 
@@ -45,6 +54,11 @@ func _ready() -> void:
 	screen.bbcode_enabled = true
 	screen2.bbcode_enabled = true
 	screen3.bbcode_enabled = true
+	
+	# Try to get optional animation and audio players
+	button_animation_player = get_node_or_null("SedateButton/ButtonAnimationPlayer")
+	button_audio_player = get_node_or_null("SedateButton/ButtonAudioPlayer")
+	
 	# Verify node references
 	if !screen or !screen2 or !screen3:
 		push_error("One or more screen nodes are not found!")
@@ -163,3 +177,105 @@ func reset_levers() -> void:
 	set_lever_value(1, 0)
 	set_lever_value(2, 0)
 	set_lever_value(3, 0)
+	is_sedated = false
+	sedation_button_pressed = false
+
+# Handle sedation button press
+func press_sedation_button() -> void:
+	if sedation_button_pressed:
+		print("Sedation already administered!")
+		return
+	
+	sedation_button_pressed = true
+	print("💉 Sedation button pressed - administering sedation...")
+	
+	# Play button sound
+	if button_audio_player:
+		button_audio_player.play()
+	
+	# Play button press animation
+	_animate_button_press()
+	
+	# Show visual indication that sedation is working
+	_show_sedation_success()
+	
+	# Mark as sedated
+	is_sedated = true
+	print("✓ Sedation system activated!")
+	print("✓ The player should now check if the combination is correct by looking at the monitor.")
+	print("✓ If correct, success feedback will be shown. If wrong, the game will restart.")
+
+# Animate the button press
+func _animate_button_press() -> void:
+	if button_animation_player:
+		print("🎬 Playing button press animation")
+		button_animation_player.play("ButtonPress")
+	else:
+		print("⚠️ Button animation player not found - using fallback tween")
+		# Fallback to tween if AnimationPlayer not available
+		var button_node = get_node_or_null("SedateButton/button")
+		if not button_node:
+			print("Button node not found for animation!")
+			return
+		
+		# Create button press animation using tween
+		var tween = create_tween()
+		var original_position = button_node.position
+		var pressed_position = original_position + Vector3(0, -0.02, 0)  # Move down 2cm
+		
+		# Press down
+		tween.tween_property(button_node, "position", pressed_position, 0.1)
+		# Hold briefly
+		tween.tween_interval(0.1)
+		# Release back up
+		tween.tween_property(button_node, "position", original_position, 0.1)
+
+# Show visual indication of successful sedation
+func _show_sedation_success() -> void:
+	print("💚 Sedation administered - awaiting validation...")
+	
+	# Flash all screens blue briefly to indicate sedation in progress
+	for screen_node in [screen, screen2, screen3]:
+		if screen_node:
+			var original_color = screen_node.get_theme_color("default_color")
+			screen_node.add_theme_color_override("default_color", Color.CYAN)
+			
+			# Create timer to restore original color
+			var timer = Timer.new()
+			timer.wait_time = 2.0
+			timer.one_shot = true
+			add_child(timer)
+			timer.timeout.connect(func(): 
+				if is_instance_valid(screen_node):
+					screen_node.add_theme_color_override("default_color", original_color)
+				if is_instance_valid(timer):
+					timer.queue_free()
+			)
+			timer.start()
+
+# Show success when sedation is validated as correct
+func show_sedation_validated() -> void:
+	print("💚 SEDATION SUCCESSFUL! Alien is properly sedated.")
+	
+	# Flash all screens green to indicate success
+	for screen_node in [screen, screen2, screen3]:
+		if screen_node:
+			var original_color = screen_node.get_theme_color("default_color")
+			screen_node.add_theme_color_override("default_color", Color.GREEN)
+			
+			# Create timer to restore original color
+			var timer = Timer.new()
+			timer.wait_time = 3.0
+			timer.one_shot = true
+			add_child(timer)
+			timer.timeout.connect(func(): 
+				if is_instance_valid(screen_node):
+					screen_node.add_theme_color_override("default_color", original_color)
+				if is_instance_valid(timer):
+					timer.queue_free()
+			)
+			timer.start()
+
+# Check if sedation has been administered
+func is_alien_sedated() -> bool:
+	return is_sedated

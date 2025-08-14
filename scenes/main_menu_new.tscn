@@ -1793,20 +1793,20 @@ color = Color(0, 0, 0, 1)
 [node name="SARCO POD" type="Label" parent="."]
 material = SubResource("ShaderMaterial_mr8eq")
 layout_mode = 2
-offset_left = 115.0
-offset_top = 129.0
-offset_right = 1135.0
-offset_bottom = 331.0
+offset_left = 142.0
+offset_top = 135.0
+offset_right = 1162.0
+offset_bottom = 337.0
 text = "SARCO POD"
 label_settings = SubResource("LabelSettings_dds1x")
 
 [node name="TitleLabel" type="Label" parent="."]
 material = SubResource("ShaderMaterial_ccguo")
 layout_mode = 2
-offset_left = 129.0
-offset_top = 234.0
-offset_right = 1086.0
-offset_bottom = 306.0
+offset_left = 142.0
+offset_top = 261.0
+offset_right = 1099.0
+offset_bottom = 333.0
 text = "CONTAINMENT FACILITY"
 label_settings = SubResource("LabelSettings_1")
 

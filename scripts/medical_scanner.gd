@@ -11,10 +11,17 @@ var is_active: bool = false
 var current_scan_data: Dictionary = {}
 
 func _ready() -> void:
-	# Setup viewport
+	# Setup viewport with forced rendering to prevent magenta screen
 	if scanner_viewport:
-		scanner_viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
+		scanner_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 		scanner_viewport.size = Vector2i(600, 450)
+		
+		# Force multiple frame updates to ensure proper initialization
+		await get_tree().process_frame
+		await get_tree().process_frame
+		await get_tree().process_frame
+		
+		print("Medical scanner viewport initialized")
 	
 	if scanner_ui:
 		# Connect to UI signals
@@ -94,6 +101,12 @@ func start_scan(scan_data: Dictionary) -> void:
 	
 	current_scan_data = scan_data
 	is_active = true
+	
+	# Force viewport updates when starting scan to prevent rendering issues
+	if scanner_viewport:
+		scanner_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		await get_tree().process_frame
+		await get_tree().process_frame
 	
 	print("Medical scan initiated with data:", scan_data)
 	

@@ -29,7 +29,7 @@ transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 1.5, 2)
 [node name="Scanner" type="Node3D" parent="."]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Scanner"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+transform = Transform3D(1, 0, 0, 0, 1.00823, 0, 0, 0, 1, 0, 0.75, 0)
 mesh = SubResource("BoxMesh_scanner")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Scanner" groups=["scanner"]]

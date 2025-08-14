@@ -703,6 +703,10 @@ func _inject_fluids() -> void:
 		print("Lever system not found!")
 		return
 	
+	# Trigger the button press animation and visual feedback
+	if lever_system.has_method("press_sedation_button"):
+		lever_system.press_sedation_button()
+	
 	# Get the current alien's liquid ratios from monitor FIRST for debug
 	var monitor_system = get_node_or_null("../Monitor/Monitor/SubViewport/Control/Console")
 	if monitor_system and monitor_system.has_method("get_current_liquid_ratios"):
@@ -760,19 +764,37 @@ func _inject_fluids() -> void:
 			have_lever_values_changed = true
 			# Reset initial values for next alien
 			initial_lever_values = [0, 0, 0]
+			
+			# Show success feedback on lever system
+			if lever_system.has_method("show_sedation_validated"):
+				lever_system.show_sedation_validated()
+			
+			# Trigger success notification
+			var failure_manager = get_node_or_null("/root/FailureManager")
+			if not failure_manager:
+				failure_manager = get_tree().current_scene.get_node_or_null("FailureManager")
+			if failure_manager and failure_manager.has_method("trigger_success"):
+				failure_manager.trigger_success()
+			
 			# Enable accept/reject buttons on monitor
 			if monitor_system.has_method("enable_classification"):
 				monitor_system.enable_classification()
+			
+			# Show success message to player
+			print("✅ SEDATION SUCCESSFUL! The alien is now safely sedated. You may now use the medical scanner.")
 		else:
 			print("FAILURE! Wrong sedation ratios. Expected: ", correct_ratios, " Got: ", combination)
 			print("FAILURE! Tolerance: ", tolerance, " points")
+			
+			# Show failure message to player
+			print("❌ SEDATION FAILED! Incorrect chemical combination. This will restart the game.")
 			
 			# Trigger failure system for incorrect sedation
 			var failure_manager = get_node_or_null("/root/FailureManager")
 			if not failure_manager:
 				failure_manager = get_tree().current_scene.get_node_or_null("FailureManager")
-			if failure_manager and failure_manager.has_method("trigger_failure"):
-				failure_manager.trigger_failure("Incorrect sedation ratios")
+			if failure_manager and failure_manager.has_method("on_sedation_failure"):
+				failure_manager.on_sedation_failure()
 			else:
 				# Fallback: Reset levers for another attempt
 				lever_system.reset_levers()
@@ -782,6 +804,30 @@ func _inject_fluids() -> void:
 	else:
 		print("Monitor system not found or missing method!")
 
+# Check if current sedation levels are correct
+func is_sedation_correct() -> bool:
+	var lever_system = get_node_or_null("../LeverGutentagPosition")
+	var monitor_system = get_node_or_null("../SarcoPodMap10Export (2)/Monitor")
+	
+	if not lever_system or not monitor_system:
+		print("Cannot check sedation - systems not found!")
+		return false
+	
+	if not monitor_system.has_method("get_current_liquid_ratios"):
+		print("Cannot check sedation - monitor missing required method!")
+		return false
+	
+	var correct_ratios = monitor_system.get_current_liquid_ratios()
+	var combination = lever_system.get_combination()
+	var tolerance = 3  # Allow 3 point tolerance for precision
+	
+	# Check if player's values are within tolerance of correct ratios
+	var liquid_a_correct = abs(combination[0] - correct_ratios[0]) <= tolerance
+	var liquid_b_correct = abs(combination[1] - correct_ratios[1]) <= tolerance
+	var liquid_c_correct = abs(combination[2] - correct_ratios[2]) <= tolerance
+	
+	return liquid_a_correct and liquid_b_correct and liquid_c_correct
+
 func _use_medical_scanner() -> void:
 	# Find the medical scanner
 	var scanner_node = get_node_or_null("../MedicalScanner")
@@ -789,17 +835,40 @@ func _use_medical_scanner() -> void:
 		print("Medical scanner not found!")
 		return
 	
-	# TEMPORARY: Skip sedation requirement for testing
-	print("Activating medical scanner (TESTING MODE - NO SEDATION REQUIRED)")
+	# Check if alien has been properly sedated
+	var lever_system = get_node_or_null("../LeverGutentagPosition")
+	if not lever_system:
+		print("Cannot scan - lever system not found!")
+		# Trigger failure for trying to use scanner without lever system
+		var failure_manager = get_node_or_null("/root/FailureManager")
+		if not failure_manager:
+			failure_manager = get_tree().current_scene.get_node_or_null("FailureManager")
+		if failure_manager and failure_manager.has_method("on_scanner_failure"):
+			failure_manager.on_scanner_failure()
+		return
 	
-	# TODO: Re-enable sedation check later:
-	# var lever_system = get_node_or_null("../LeverGutentagPosition")
-	# if not lever_system:
-	#     print("Cannot scan - lever system not found!")
-	#     return
-	# if not have_lever_values_changed:
-	#     print("Cannot scan - alien must be sedated first! Use the lever system to sedate the alien.")
-	#     return
+	if not have_lever_values_changed:
+		print("❌ SCANNER BLOCKED: Alien must be sedated first! Use the lever system to sedate the alien.")
+		# Trigger failure for trying to scan without sedation
+		var failure_manager = get_node_or_null("/root/FailureManager")
+		if not failure_manager:
+			failure_manager = get_tree().current_scene.get_node_or_null("FailureManager")
+		if failure_manager and failure_manager.has_method("on_scanner_failure"):
+			failure_manager.on_scanner_failure()
+		return
+	
+	# Check if the sedation combination is correct
+	if not is_sedation_correct():
+		print("❌ SCANNER BLOCKED: Incorrect sedation! The alien is not properly sedated.")
+		# Trigger failure for trying to scan with wrong sedation
+		var failure_manager = get_node_or_null("/root/FailureManager")
+		if not failure_manager:
+			failure_manager = get_tree().current_scene.get_node_or_null("FailureManager")
+		if failure_manager and failure_manager.has_method("on_scanner_failure"):
+			failure_manager.on_scanner_failure()
+		return
+	
+	print("✅ Alien properly sedated - Activating medical scanner")
 	
 	# Get current alien data from game manager
 	var scanner_data = {}
@@ -818,12 +887,23 @@ func _use_medical_scanner() -> void:
 		scanner_data["AUDIO_FREQUENCY"] = 440.0
 		scanner_data["SCAN_SPEED"] = 1.0
 	
+	print("Scanner data prepared: ", scanner_data)
+	
 	# Switch to scanner camera mode
 	enter_scanner_mode()
 	
 	# Start the scanning process
 	if scanner_node.has_method("start_scan"):
 		scanner_node.start_scan(scanner_data)
+		print("✅ Medical scanner activated successfully!")
+	else:
+		print("❌ Scanner node missing start_scan method!")
+		# Trigger failure for scanner malfunction
+		var failure_manager = get_node_or_null("/root/FailureManager")
+		if not failure_manager:
+			failure_manager = get_tree().current_scene.get_node_or_null("FailureManager")
+		if failure_manager and failure_manager.has_method("on_scanner_failure"):
+			failure_manager.on_scanner_failure()
 
 func enter_scanner_mode() -> void:
 	if using_computer and not Global.is_using_computer and not Global.is_using_monitor:

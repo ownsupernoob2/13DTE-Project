@@ -7,6 +7,7 @@ extends Node3D
 @onready var screen_light: OmniLight3D = $PresentationScreen/ScreenLight
 @onready var player: CharacterBody3D = $Player
 @onready var fade_overlay: ColorRect = $UI/FadeOverlay
+@onready var trigger_area: Area3D = $TriggerArea
 
 var presentation_texts: Array[String] = [
 	"Welcome to Site-47 Processing Division.",
@@ -24,6 +25,7 @@ var presentation_active: bool = false
 var can_exit: bool = false
 
 func _ready() -> void:
+	_cleanup_overlays()  # Clean up any leftover overlays from previous scenes
 	_setup_scene()
 	_connect_signals()
 	_start_presentation_sequence()
@@ -52,6 +54,8 @@ func _setup_scene() -> void:
 func _connect_signals() -> void:
 	if timer:
 		timer.timeout.connect(_on_timer_timeout)
+	if trigger_area:
+		trigger_area.body_entered.connect(_on_trigger_area_entered)
 
 func _start_presentation_sequence() -> void:
 	# Start with black screen, then fade in
@@ -66,8 +70,8 @@ func _start_presentation_sequence() -> void:
 	fade_in_tween.tween_property(fade_overlay, "modulate:a", 0.0, 3.0)
 	await fade_in_tween.finished
 	
-	# Completely hide and disable the fade overlay
-	fade_overlay.visible = false
+	# Keep the overlay but make it transparent and invisible for later reuse
+	# Don't hide it completely to avoid flicker when we need it again
 	fade_overlay.modulate.a = 0.0
 	
 	# Wait another moment for atmosphere, then start presentation
@@ -148,35 +152,50 @@ func _end_presentation() -> void:
 	instruction_label.visible = true
 	instruction_label.text = "Walk to the exit to begin your assignment"
 	
-	# Wait for player to move away, then transition
-	await get_tree().create_timer(2.0).timeout
-	_start_exit_sequence()
+	# Player can now trigger the exit by walking to the trigger area
+	# No automatic timer - wait for player to actually walk to exit
 
 func _start_exit_sequence() -> void:
 	print("🎬 Starting exit sequence...")
 	
-	# Ensure our scene's fade overlay is completely hidden
+	# Clear global presentation flag immediately
+	Global.in_presentation = false
+	
+	# Reuse the existing fade overlay instead of creating a new one
 	if fade_overlay:
-		fade_overlay.visible = false
-		fade_overlay.modulate.a = 0.0
-	
-	# Create a fresh fade overlay for exit
-	var exit_overlay = ColorRect.new()
-	exit_overlay.name = "ExitFadeOverlay"
-	exit_overlay.color = Color.BLACK
-	exit_overlay.modulate.a = 0.0
-	exit_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	exit_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE  # Don't block input
-	get_tree().root.add_child(exit_overlay)
-	
-	# Fade to black
-	var fade_out_tween = create_tween()
-	fade_out_tween.tween_property(exit_overlay, "modulate:a", 1.0, 2.0)
-	await fade_out_tween.finished
+		fade_overlay.visible = true
+		fade_overlay.color = Color.BLACK
+		fade_overlay.z_index = 1000  # Ensure it's on top
+		fade_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		
+		# Fade to black using the existing overlay
+		var fade_out_tween = create_tween()
+		fade_out_tween.tween_property(fade_overlay, "modulate:a", 1.0, 2.0)
+		await fade_out_tween.finished
+	else:
+		# Fallback if fade_overlay doesn't exist
+		var exit_overlay = ColorRect.new()
+		exit_overlay.name = "ExitFadeOverlay"
+		exit_overlay.color = Color.BLACK
+		exit_overlay.modulate.a = 0.0
+		exit_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		exit_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		exit_overlay.z_index = 1000
+		get_tree().root.add_child(exit_overlay)
+		
+		var fade_out_tween = create_tween()
+		fade_out_tween.tween_property(exit_overlay, "modulate:a", 1.0, 2.0)
+		await fade_out_tween.finished
 	
 	print("🎬 Fade complete, loading scene...")
 	
-	# Transition to game - scene change will clean up this overlay automatically
+	# Small delay to ensure fade is complete
+	await get_tree().process_frame
+	
+	# Final cleanup before transition
+	_cleanup_overlays()
+	
+	# Transition to game
 	var result = get_tree().change_scene_to_file("res://scenes/stage_1_tutorial.tscn")
 	if result != OK:
 		print("❌ Failed to load tutorial - Error code: ", result)
@@ -184,8 +203,24 @@ func _start_exit_sequence() -> void:
 		result = get_tree().change_scene_to_file("res://scenes/demo.tscn")
 		if result != OK:
 			print("❌ Failed to load demo - Error code: ", result)
+			# If both fail, keep the overlay visible to show error state
+			print("❌ Scene transition failed completely")
 	else:
 		print("✅ Tutorial loaded successfully")
+
+# Cleanup function to ensure no overlay remains
+func _cleanup_overlays() -> void:
+	# Clean up any remaining overlays in the root
+	for child in get_tree().root.get_children():
+		if child.name.contains("FadeOverlay") or child.name.contains("ExitFadeOverlay"):
+			print("🧹 Cleaning up remaining overlay: ", child.name)
+			child.queue_free()
+
+func _on_trigger_area_entered(body: Node3D) -> void:
+	# Check if it's the player and if they can exit
+	if body == player and can_exit:
+		print("🎬 Player reached exit trigger - starting transition...")
+		_start_exit_sequence()
 
 func _input(event: InputEvent) -> void:
 	# Only handle keyboard input for skipping, don't interfere with mouse

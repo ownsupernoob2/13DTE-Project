@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=4 uid="uid://bq6sbgu8kp78w"]
+[gd_scene load_steps=30 format=4 uid="uid://bq6sbgu8kp78w"]
 
 [ext_resource type="Script" uid="uid://2g3jv22f0lb7" path="res://scripts/main_menu.gd" id="1_q8k2w"]
 [ext_resource type="Shader" uid="uid://q7f1yqvt3i2" path="res://scenes/TextShader.gdshader" id="2_jtcav"]
@@ -6,6 +6,50 @@
 [ext_resource type="FontFile" uid="uid://bcqcr64u2io3t" path="res://assets/fonts/Rubik80sFade-Regular.ttf" id="3_awe4b"]
 [ext_resource type="AudioStream" uid="uid://j6voo1v00aog" path="res://assets/music/menu (Remix).mp3" id="6_awe4b"]
 [ext_resource type="Theme" uid="uid://cje7d0m3sdccr" path="res://assets/options.tres" id="6_kgbel"]
+[ext_resource type="PackedScene" uid="uid://bpigsocwrxqni" path="res://pod_11.tscn" id="7_pod11"]
+[ext_resource type="Script" uid="uid://tjffus60xea8" path="res://scripts/menu_pod_camera.gd" id="8_pod_script"]
+[ext_resource type="Shader" uid="uid://cdnvj0qcjjg0w" path="res://shaders/menu_fog.gdshader" id="9_fog_shader"]
+
+[sub_resource type="Gradient" id="Gradient_1qu8f"]
+interpolation_mode = 2
+offsets = PackedFloat32Array(0.0070922, 1)
+colors = PackedColorArray(0, 0, 0, 0.0941176, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_mr8eq"]
+gradient = SubResource("Gradient_1qu8f")
+fill = 1
+fill_from = Vector2(0.390244, 0.360976)
+fill_to = Vector2(0.819512, 0.75122)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fog"]
+render_priority = 1
+shader = ExtResource("9_fog_shader")
+shader_parameter/fog_density = 0.6
+shader_parameter/fog_speed = 0.4
+shader_parameter/fog_scale = 1.5
+shader_parameter/fog_color = Color(0.1, 0.1, 0.2, 1)
+shader_parameter/animation_strength = 0.7
+
+[sub_resource type="SphereMesh" id="SphereMesh_fog"]
+material = SubResource("ShaderMaterial_fog")
+radius = 3.0
+height = 6.0
+radial_segments = 32
+rings = 16
+
+[sub_resource type="Environment" id="Environment_menu"]
+background_mode = 1
+background_color = Color(0.05, 0.05, 0.1, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.2, 0.3, 0.5, 1)
+ambient_light_energy = 0.3
+fog_enabled = true
+fog_light_color = Color(0.1, 0.1, 0.2, 1)
+fog_light_energy = 0.5
+fog_sun_scatter = 0.8
+fog_density = 0.02
+fog_aerial_perspective = 0.5
+fog_sky_affect = 0.3
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_mr8eq"]
 shader = ExtResource("2_jtcav")
@@ -1789,6 +1833,88 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
+
+[node name="PodViewport" type="SubViewport" parent="."]
+size = Vector2i(800, 600)
+render_target_update_mode = 0
+
+[node name="PodViewportContainer" type="SubViewportContainer" parent="."]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 457.0
+offset_right = 1910.0
+offset_bottom = 23.0
+grow_vertical = 2
+scale = Vector2(1.00286, 0.978887)
+stretch = true
+
+[node name="PodViewport3D" type="SubViewport" parent="PodViewportContainer"]
+handle_input_locally = false
+size = Vector2i(1452, 1103)
+render_target_update_mode = 4
+
+[node name="PodScene" type="Node3D" parent="PodViewportContainer/PodViewport3D"]
+script = ExtResource("8_pod_script")
+
+[node name="TextureRect" type="TextureRect" parent="PodViewportContainer/PodViewport3D/PodScene"]
+offset_right = 1459.0
+offset_bottom = 1103.0
+texture = SubResource("GradientTexture2D_mr8eq")
+
+[node name="Pod" parent="PodViewportContainer/PodViewport3D/PodScene" instance=ExtResource("7_pod11")]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0, -1, 0)
+
+[node name="CinematicCamera" type="Camera3D" parent="PodViewportContainer/PodViewport3D/PodScene"]
+transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, 3.21446, 5.22132, 5.49629)
+fov = 50.0
+
+[node name="CameraAnimationPlayer" type="AnimationPlayer" parent="PodViewportContainer/PodViewport3D/PodScene"]
+autoplay = "camera_movement"
+
+[node name="FogSphere1" type="MeshInstance3D" parent="PodViewportContainer/PodViewport3D/PodScene"]
+transform = Transform3D(1.5, 0, 0, 0, 1.2, 0, 0, 0, 1.5, -2, 0, 2)
+mesh = SubResource("SphereMesh_fog")
+skeleton = NodePath("")
+
+[node name="FogSphere2" type="MeshInstance3D" parent="PodViewportContainer/PodViewport3D/PodScene"]
+transform = Transform3D(2, 0, 0, 0, 1.8, 0, 0, 0, 2, 3, -1, 1)
+mesh = SubResource("SphereMesh_fog")
+skeleton = NodePath("")
+
+[node name="FogSphere3" type="MeshInstance3D" parent="PodViewportContainer/PodViewport3D/PodScene"]
+transform = Transform3D(1.2, 0, 0, 0, 1, 0, 0, 0, 1.2, 1, 1, -2)
+mesh = SubResource("SphereMesh_fog")
+skeleton = NodePath("")
+
+[node name="FogSphere4" type="MeshInstance3D" parent="PodViewportContainer/PodViewport3D/PodScene"]
+transform = Transform3D(1.8, 0, 0, 0, 1.5, 0, 0, 0, 1.8, -1, 2, -1)
+mesh = SubResource("SphereMesh_fog")
+skeleton = NodePath("")
+
+[node name="Environment" type="Node3D" parent="PodViewportContainer/PodViewport3D/PodScene"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="PodViewportContainer/PodViewport3D/PodScene/Environment"]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 5, 0)
+light_color = Color(0.7, 0.8, 1, 1)
+light_energy = 0.3
+shadow_enabled = true
+
+[node name="OmniLight3D" type="OmniLight3D" parent="PodViewportContainer/PodViewport3D/PodScene/Environment"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 3, 3)
+light_color = Color(0.5, 0.7, 1, 1)
+light_energy = 0.5
+omni_range = 8.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="PodViewportContainer/PodViewport3D/PodScene/Environment"]
+environment = SubResource("Environment_menu")
+
+[node name="AtmosphereParticles" type="GPUParticles3D" parent="PodViewportContainer/PodViewport3D/PodScene"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+amount = 200
+lifetime = 8.0
+randomness = 0.5
+draw_order = 1
 
 [node name="SARCO POD" type="Label" parent="."]
 material = SubResource("ShaderMaterial_mr8eq")

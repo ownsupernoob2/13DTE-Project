@@ -8,10 +8,10 @@ extends Node3D
 @onready var fog_spheres: Array[Node3D] = []
 
 # Camera movement parameters
-var camera_orbit_radius: float = 6.0
-var camera_height: float = 2.0
-var orbit_speed: float = 0.3
-var height_oscillation: float = 0.5
+var camera_orbit_radius: float = 7.0
+var camera_height: float = 9.0
+var orbit_speed: float = 0.03
+var height_oscillation: float = 0
 var height_speed: float = 0.8
 
 # Time tracking

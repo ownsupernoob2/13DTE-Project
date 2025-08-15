@@ -18,15 +18,15 @@ colors = PackedColorArray(0, 0, 0, 0.0941176, 0, 0, 0, 1)
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_mr8eq"]
 gradient = SubResource("Gradient_1qu8f")
 fill = 1
-fill_from = Vector2(0.390244, 0.360976)
-fill_to = Vector2(0.819512, 0.75122)
+fill_from = Vector2(0.495413, 0.513761)
+fill_to = Vector2(0.926606, 0.59633)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fog"]
 render_priority = 1
 shader = ExtResource("9_fog_shader")
-shader_parameter/fog_density = 0.6
+shader_parameter/fog_density = 0.406
 shader_parameter/fog_speed = 0.4
-shader_parameter/fog_scale = 1.5
+shader_parameter/fog_scale = 2.0
 shader_parameter/fog_color = Color(0.1, 0.1, 0.2, 1)
 shader_parameter/animation_strength = 0.7
 
@@ -1842,24 +1842,27 @@ render_target_update_mode = 0
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_left = 457.0
-offset_right = 1910.0
-offset_bottom = 23.0
+offset_left = 499.0
+offset_top = 3.99998
+offset_right = 2425.0
+offset_bottom = 131.0
 grow_vertical = 2
 scale = Vector2(1.00286, 0.978887)
 stretch = true
 
 [node name="PodViewport3D" type="SubViewport" parent="PodViewportContainer"]
 handle_input_locally = false
-size = Vector2i(1452, 1103)
+size = Vector2i(1926, 1207)
 render_target_update_mode = 4
 
 [node name="PodScene" type="Node3D" parent="PodViewportContainer/PodViewport3D"]
 script = ExtResource("8_pod_script")
 
 [node name="TextureRect" type="TextureRect" parent="PodViewportContainer/PodViewport3D/PodScene"]
-offset_right = 1459.0
-offset_bottom = 1103.0
+offset_left = -147.578
+offset_top = -96.0274
+offset_right = 1951.42
+offset_bottom = 1402.97
 texture = SubResource("GradientTexture2D_mr8eq")
 
 [node name="Pod" parent="PodViewportContainer/PodViewport3D/PodScene" instance=ExtResource("7_pod11")]

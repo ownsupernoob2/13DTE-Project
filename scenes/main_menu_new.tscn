@@ -18,8 +18,8 @@ colors = PackedColorArray(0, 0, 0, 0.0941176, 0, 0, 0, 1)
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_mr8eq"]
 gradient = SubResource("Gradient_1qu8f")
 fill = 1
-fill_from = Vector2(0.390244, 0.360976)
-fill_to = Vector2(0.819512, 0.75122)
+fill_from = Vector2(0.478049, 0.307317)
+fill_to = Vector2(0.819512, 0.64878)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fog"]
 render_priority = 1
@@ -27,7 +27,7 @@ shader = ExtResource("9_fog_shader")
 shader_parameter/fog_density = 0.6
 shader_parameter/fog_speed = 0.4
 shader_parameter/fog_scale = 1.5
-shader_parameter/fog_color = Color(0.1, 0.1, 0.2, 1)
+shader_parameter/fog_color = Color(0, 0, 0, 1)
 shader_parameter/animation_strength = 0.7
 
 [sub_resource type="SphereMesh" id="SphereMesh_fog"]
@@ -1832,7 +1832,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 1)
+color = Color(0.0235294, 0.0235294, 0.027451, 1)
 
 [node name="PodViewport" type="SubViewport" parent="."]
 size = Vector2i(800, 600)
@@ -1842,24 +1842,26 @@ render_target_update_mode = 0
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_left = 457.0
-offset_right = 1910.0
-offset_bottom = 23.0
+offset_left = 976.0
+offset_top = 34.0
+offset_right = 2494.0
+offset_bottom = 212.0
 grow_vertical = 2
 scale = Vector2(1.00286, 0.978887)
 stretch = true
 
 [node name="PodViewport3D" type="SubViewport" parent="PodViewportContainer"]
 handle_input_locally = false
-size = Vector2i(1452, 1103)
+size = Vector2i(1518, 1258)
 render_target_update_mode = 4
 
 [node name="PodScene" type="Node3D" parent="PodViewportContainer/PodViewport3D"]
 script = ExtResource("8_pod_script")
 
 [node name="TextureRect" type="TextureRect" parent="PodViewportContainer/PodViewport3D/PodScene"]
+offset_left = -299.0
 offset_right = 1459.0
-offset_bottom = 1103.0
+offset_bottom = 1293.0
 texture = SubResource("GradientTexture2D_mr8eq")
 
 [node name="Pod" parent="PodViewportContainer/PodViewport3D/PodScene" instance=ExtResource("7_pod11")]
@@ -1916,23 +1918,30 @@ lifetime = 8.0
 randomness = 0.5
 draw_order = 1
 
+[node name="SpotLight3D" type="SpotLight3D" parent="PodViewportContainer/PodViewport3D/PodScene"]
+transform = Transform3D(0.792994, -0.0997654, 0.601005, -0.166024, 0.913775, 0.370745, -0.58617, -0.39378, 0.708055, 2.5143, 4.3045, 6.87174)
+light_energy = 16.0
+light_indirect_energy = 0.0
+spot_range = 9.436
+spot_angle = 33.6222
+
 [node name="SARCO POD" type="Label" parent="."]
 material = SubResource("ShaderMaterial_mr8eq")
 layout_mode = 2
-offset_left = 142.0
-offset_top = 135.0
-offset_right = 1162.0
-offset_bottom = 337.0
+offset_left = 122.0
+offset_top = 152.0
+offset_right = 1142.0
+offset_bottom = 354.0
 text = "SARCO POD"
 label_settings = SubResource("LabelSettings_dds1x")
 
 [node name="TitleLabel" type="Label" parent="."]
 material = SubResource("ShaderMaterial_ccguo")
 layout_mode = 2
-offset_left = 142.0
-offset_top = 261.0
-offset_right = 1099.0
-offset_bottom = 333.0
+offset_left = 147.0
+offset_top = 276.0
+offset_right = 1104.0
+offset_bottom = 348.0
 text = "CONTAINMENT FACILITY"
 label_settings = SubResource("LabelSettings_1")
 

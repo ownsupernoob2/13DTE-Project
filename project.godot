@@ -34,6 +34,16 @@ window/stretch/aspect="expand"
 
 enabled=PackedStringArray("res://addons/essence_console/plugin.cfg")
 
+[file_customization]
+
+folder_colors={
+"res://assets/": "teal",
+"res://pod/": "gray",
+"res://scenes/": "red",
+"res://scripts/": "orange",
+"res://shaders/": "blue"
+}
+
 [filesystem]
 
 import/blender/enabled=false
@@ -47,6 +57,8 @@ player=""
 monitor=""
 interactable=""
 lever=""
+manual=""
+booklet=""
 
 [input]
 

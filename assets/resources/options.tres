@@ -1,0 +1,7 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://cje7d0m3sdccr"]
+
+[ext_resource type="FontFile" uid="uid://14yh4ql5w4yf" path="res://scripts/ui/fonts/OCR-A Regular.otf" id="1_vrv46"]
+
+[resource]
+default_font = ExtResource("1_vrv46")
+default_font_size = 50

@@ -5,7 +5,6 @@ const WALK_SPEED: float = 3.0  # Reduced from 5.0
 const SPRINT_SPEED: float = 5.0  # Reduced from 8.0
 const JUMP_VELOCITY: float = 4.8
 const SENSITIVITY: float = 0.001
-
 # Get the current mouse sensitivity from Global settings
 func get_current_sensitivity() -> float:
 	return SENSITIVITY * Global.mouse_sensitivity
@@ -300,6 +299,8 @@ func _unhandled_input(event: InputEvent) -> void:
 					enter_monitor_mode()
 				elif using_computer.is_in_group("computer") and not held_object:
 					enter_computer_mode()
+				elif using_computer.is_in_group("manual") or using_computer.is_in_group("booklet"):
+					_use_manual()
 				elif held_object and held_object.is_in_group("disk"):
 					insert_disk()
 				elif using_computer.name == "UpButton" or using_computer.name == "DownButton":
@@ -357,7 +358,7 @@ func exit_computer_mode() -> void:
 			cursor2.visible = can_interact
 
 func _physics_process(delta: float) -> void:
-	if Global.is_using_computer or Global.is_using_monitor:
+	if Global.is_using_computer or Global.is_using_monitor or is_manual_open():
 		velocity = Vector3.ZERO
 		return
 	
@@ -682,6 +683,34 @@ func _handle_lever_drag(current_mouse_y: float) -> void:
 	# This function is now deprecated in favor of _handle_lever_drag_motion()
 	# but keeping it for compatibility
 	return
+
+func _use_manual() -> void:
+	if not using_computer:
+		print("No manual selected!")
+		return
+	
+	# Find the main booklet node (could be the collider's parent)
+	var booklet_node = using_computer
+	
+	# If the collider is the StaticBody3D, get its parent (the main booklet node)
+	if using_computer.get_parent() and using_computer.get_parent().has_method("interact"):
+		booklet_node = using_computer.get_parent()
+	
+	# Try to interact with the booklet
+	if booklet_node and booklet_node.has_method("interact"):
+		print("Opening instruction manual...")
+		booklet_node.interact()
+	else:
+		print("Error: Manual node missing interact method!")
+
+# Optional: Add a function to check if any manual is currently open
+func is_manual_open() -> bool:
+	# Find all booklets in the scene
+	var booklets = get_tree().get_nodes_in_group("booklet")
+	for booklet in booklets:
+		if booklet.has_method("is_booklet_open") and booklet.is_booklet_open():
+			return true
+	return false
 
 func _stop_lever_interaction() -> void:
 	if is_holding_lever:

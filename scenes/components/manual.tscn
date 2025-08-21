@@ -1,0 +1,551 @@
+[gd_scene load_steps=8 format=3 uid="uid://bvxqy1k2n8rny"]
+
+[ext_resource type="Script" uid="uid://bf8h66tthey01" path="res://scripts/components/manual.gd" id="1_2k8mj"]
+[ext_resource type="AudioStream" uid="uid://bf8fqk1yqo5fq" path="res://assets/music/sfx/page-flip.mp3" id="2_m2x0t"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_1x3kv"]
+size = Vector3(0.3, 0.02, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1j5k2"]
+albedo_color = Color(0.545098, 0.270588, 0.0745098, 1)
+roughness = 0.8
+
+[sub_resource type="QuadMesh" id="QuadMesh_2m7nx"]
+size = Vector2(0.28, 0.38)
+
+[sub_resource type="QuadMesh" id="QuadMesh_3k9py"]
+size = Vector2(0.28, 0.38)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4l8qw"]
+size = Vector3(0.3, 0.02, 0.4)
+
+[node name="InstructionBooklet" type="Node3D" groups=["booklet", "grabbable", "manual"]]
+script = ExtResource("1_2k8mj")
+
+[node name="BookletMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_1x3kv")
+surface_material_override/0 = SubResource("StandardMaterial3D_1j5k2")
+
+[node name="LeftPageMesh" type="MeshInstance3D" parent="BookletMesh"]
+transform = Transform3D(1, 0, 0, 0, 6.12323e-17, 1, 0, -1, 6.12323e-17, -0.07, 0.011, 0)
+mesh = SubResource("QuadMesh_2m7nx")
+
+[node name="RightPageMesh" type="MeshInstance3D" parent="BookletMesh"]
+transform = Transform3D(1, 0, 0, 0, 6.12323e-17, 1, 0, -1, 6.12323e-17, 0.07, 0.011, 0)
+mesh = SubResource("QuadMesh_3k9py")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("BoxShape3D_4l8qw")
+
+[node name="BookletCamera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 0.5, 0.8)
+fov = 65.0
+near = 0.01
+
+[node name="PageFlipAudio" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("2_m2x0t")
+volume_db = -12.0
+max_distance = 8.0
+
+[node name="PageSystem" type="Node3D" parent="."]
+
+[node name="PageViewport" type="SubViewport" parent="PageSystem"]
+size = Vector2i(512, 640)
+render_target_update_mode = 1
+
+[node name="PageContainer" type="Control" parent="PageSystem/PageViewport"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Page1" type="Control" parent="PageSystem/PageViewport/PageContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="PageSystem/PageViewport/PageContainer/Page1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.95, 0.95, 0.9, 1)
+
+[node name="Title" type="Label" parent="PageSystem/PageViewport/PageContainer/Page1"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -250.0
+offset_right = 200.0
+offset_bottom = -180.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 32
+text = "OPERATIONS MANUAL"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Subtitle" type="Label" parent="PageSystem/PageViewport/PageContainer/Page1"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -150.0
+offset_right = 150.0
+offset_bottom = -100.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 18
+text = "Classification Protocol
+Version 2.1
+
+CONFIDENTIAL"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Page2" type="Control" parent="PageSystem/PageViewport/PageContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="PageSystem/PageViewport/PageContainer/Page2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.95, 0.95, 0.9, 1)
+
+[node name="Title" type="Label" parent="PageSystem/PageViewport/PageContainer/Page2"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 30.0
+offset_right = 200.0
+offset_bottom = 70.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "SAFETY PROTOCOLS"
+horizontal_alignment = 1
+
+[node name="ImageArea" type="TextureRect" parent="PageSystem/PageViewport/PageContainer/Page2"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -120.0
+offset_right = 120.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch_mode = 5
+
+[node name="Content" type="RichTextLabel" parent="PageSystem/PageViewport/PageContainer/Page2"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -200.0
+offset_right = 220.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 16
+bbcode_enabled = true
+text = "[b]MANDATORY PROCEDURES:[/b]
+
+1. Always sedate subject before scanning
+2. Verify chemical ratios precisely  
+3. Use medical scanner only after sedation
+4. Report anomalies immediately
+
+[color=red][b]WARNING:[/b][/color] Failure to follow protocol may result in mission failure."
+fit_content = true
+
+[node name="Page3" type="Control" parent="PageSystem/PageViewport/PageContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="PageSystem/PageViewport/PageContainer/Page3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.95, 0.95, 0.9, 1)
+
+[node name="Title" type="Label" parent="PageSystem/PageViewport/PageContainer/Page3"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 30.0
+offset_right = 200.0
+offset_bottom = 70.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "CLASSIFICATION GUIDE"
+horizontal_alignment = 1
+
+[node name="ImageArea" type="TextureRect" parent="PageSystem/PageViewport/PageContainer/Page3"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -150.0
+offset_right = 120.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch_mode = 5
+
+[node name="Content" type="RichTextLabel" parent="PageSystem/PageViewport/PageContainer/Page3"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -180.0
+offset_right = 220.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 16
+bbcode_enabled = true
+text = "[b]ALIEN CLASSIFICATIONS:[/b]
+
+[color=green][b]Class A:[/b][/color] Green eyes, Type O blood
+[color=blue][b]Class B:[/b][/color] Blue eyes, Type AB blood  
+[color=red][b]Class C:[/b][/color] Red eyes, Type B blood
+
+[b]NOTE:[/b] Refer to monitor display for specific chemical ratios required for each classification."
+fit_content = true
+
+[node name="Page4" type="Control" parent="PageSystem/PageViewport/PageContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="PageSystem/PageViewport/PageContainer/Page4"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.95, 0.95, 0.9, 1)
+
+[node name="Title" type="Label" parent="PageSystem/PageViewport/PageContainer/Page4"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 30.0
+offset_right = 200.0
+offset_bottom = 70.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "SEDATION PROCEDURE"
+horizontal_alignment = 1
+
+[node name="ImageArea" type="TextureRect" parent="PageSystem/PageViewport/PageContainer/Page4"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -150.0
+offset_right = 120.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch_mode = 5
+
+[node name="Content" type="RichTextLabel" parent="PageSystem/PageViewport/PageContainer/Page4"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -180.0
+offset_right = 220.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 16
+bbcode_enabled = true
+text = "[b]STEP-BY-STEP PROCEDURE:[/b]
+
+1. Check alien vitals on monitor
+2. Set chemical ratios using levers:
+   • [color=red]Liquid A[/color] - Red lever
+   • [color=blue]Liquid B[/color] - Blue lever  
+   • [color=green]Liquid C[/color] - Green lever
+3. Press injection button
+4. Wait for confirmation signal
+5. Proceed to medical scanner
+
+[color=orange][b]CAUTION:[/b][/color] Incorrect ratios will cause mission failure."
+fit_content = true
+
+[node name="Page5" type="Control" parent="PageSystem/PageViewport/PageContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="PageSystem/PageViewport/PageContainer/Page5"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.95, 0.95, 0.9, 1)
+
+[node name="Title" type="Label" parent="PageSystem/PageViewport/PageContainer/Page5"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 30.0
+offset_right = 200.0
+offset_bottom = 70.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "MEDICAL SCANNER"
+horizontal_alignment = 1
+
+[node name="ImageArea" type="TextureRect" parent="PageSystem/PageViewport/PageContainer/Page5"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -150.0
+offset_right = 120.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch_mode = 5
+
+[node name="Content" type="RichTextLabel" parent="PageSystem/PageViewport/PageContainer/Page5"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -180.0
+offset_right = 220.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 16
+bbcode_enabled = true
+text = "[b]SCANNER OPERATION:[/b]
+
+• Only use AFTER successful sedation
+• Scanner will analyze:
+  - Blood type
+  - Eye color  
+  - Audio frequency patterns
+  - Internal organ structure
+
+[b]Results will determine:[/b]
+• Accept/Reject classification
+• Quarantine requirements
+• Processing protocols
+
+[color=red][b]WARNING:[/b][/color] Never scan unsedated subjects!"
+fit_content = true
+
+[node name="Page6" type="Control" parent="PageSystem/PageViewport/PageContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="PageSystem/PageViewport/PageContainer/Page6"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.95, 0.95, 0.9, 1)
+
+[node name="Title" type="Label" parent="PageSystem/PageViewport/PageContainer/Page6"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 30.0
+offset_right = 200.0
+offset_bottom = 70.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "EMERGENCY PROCEDURES"
+horizontal_alignment = 1
+
+[node name="Content" type="RichTextLabel" parent="PageSystem/PageViewport/PageContainer/Page6"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -200.0
+offset_right = 220.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 16
+bbcode_enabled = true
+text = "[color=red][b]SYSTEM FAILURE:[/b][/color]
+If any equipment malfunctions:
+1. Do NOT panic
+2. Follow containment protocols
+3. Use emergency caulk if needed
+4. Report to command immediately
+
+[color=orange][b]CONTAINMENT BREACH:[/b][/color]
+If subject escapes containment:
+1. Activate lockdown
+2. Use sedation equipment
+3. Initiate emergency protocols
+
+[color=blue][b]MISSION COMPLETION:[/b][/color]
+Upon successful classification:
+1. Record all data
+2. Secure the subject
+3. Prepare for next assignment
+4. Clean workspace thoroughly
+
+[b]Remember:[/b] Precision saves lives.
+Follow all protocols exactly."
+fit_content = true
+
+[node name="BookletUI" type="CanvasLayer" parent="."]
+
+[node name="PageCounter" type="Label" parent="BookletUI"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -150.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 50.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "Page 1 / 6"
+horizontal_alignment = 2
+
+[node name="CloseHint" type="Label" parent="BookletUI"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -60.0
+offset_right = 100.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.75, 0.75, 0.75, 1)
+theme_override_font_sizes/font_size = 14
+text = "Press ESC or Click to Close"
+horizontal_alignment = 1
+
+[node name="NavHints" type="Label" parent="BookletUI"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -90.0
+offset_right = 150.0
+offset_bottom = -60.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.75, 0.75, 0.75, 1)
+theme_override_font_sizes/font_size = 14
+text = "← → Arrow Keys to Turn Pages"
+horizontal_alignment = 1

@@ -1,0 +1,216 @@
+[gd_scene load_steps=9 format=3 uid="uid://c7b8bj5xfqwqn"]
+
+[ext_resource type="Script" uid="uid://bc6x1r8qs3gh8" path="res://scripts/options_menu.gd" id="1_imaij"]
+[ext_resource type="FontFile" uid="uid://yt614fimbi0" path="res://scripts/ui/fonts/BackgroundNoise-zV63.ttf" id="2_c4822"]
+[ext_resource type="Theme" uid="uid://cje7d0m3sdccr" path="res://assets/resources/options.tres" id="3_0ejsc"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_title"]
+font = ExtResource("2_c4822")
+font_size = 72
+outline_size = 2
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_indicator"]
+font = ExtResource("2_c4822")
+font_size = 32
+outline_size = 1
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_option"]
+font = ExtResource("2_c4822")
+font_size = 32
+font_color = Color(0.85, 0.85, 0.85, 1)
+outline_size = 1
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slider_bg"]
+bg_color = Color(0.2, 0.2, 0.2, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5, 0.5, 0.5, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="LabelSettings" id="LabelSettings_value"]
+font = ExtResource("2_c4822")
+font_size = 28
+outline_size = 1
+outline_color = Color(0, 0, 0, 1)
+
+[node name="OptionsMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_imaij")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -300.0
+offset_right = 400.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "OPTIONS"
+label_settings = SubResource("LabelSettings_title")
+horizontal_alignment = 1
+
+[node name="Spacer1" type="Control" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="SelectionIndicator" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = ">"
+label_settings = SubResource("LabelSettings_indicator")
+vertical_alignment = 1
+
+[node name="OptionsContainer" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="MouseSensitivityContainer" type="HBoxContainer" parent="VBoxContainer/OptionsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="MouseSensitivityLabel" type="Label" parent="VBoxContainer/OptionsContainer/MouseSensitivityContainer"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+text = "MOUSE SENSITIVITY"
+label_settings = SubResource("LabelSettings_option")
+
+[node name="MouseSensitivitySlider" type="HSlider" parent="VBoxContainer/OptionsContainer/MouseSensitivityContainer"]
+custom_minimum_size = Vector2(300, 32)
+layout_mode = 2
+theme_override_styles/slider = SubResource("StyleBoxFlat_slider_bg")
+theme_override_styles/grabber_area = SubResource("StyleBoxFlat_slider_bg")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_slider_bg")
+min_value = 0.1
+max_value = 3.0
+step = 0.01
+value = 1.0
+
+[node name="MouseSensitivityValue" type="Label" parent="VBoxContainer/OptionsContainer/MouseSensitivityContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "1.00"
+label_settings = SubResource("LabelSettings_value")
+horizontal_alignment = 2
+
+[node name="MasterVolumeContainer" type="HBoxContainer" parent="VBoxContainer/OptionsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="MasterVolumeLabel" type="Label" parent="VBoxContainer/OptionsContainer/MasterVolumeContainer"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+text = "MASTER VOLUME"
+label_settings = SubResource("LabelSettings_option")
+
+[node name="MasterVolumeSlider" type="HSlider" parent="VBoxContainer/OptionsContainer/MasterVolumeContainer"]
+custom_minimum_size = Vector2(300, 32)
+layout_mode = 2
+theme_override_styles/slider = SubResource("StyleBoxFlat_slider_bg")
+theme_override_styles/grabber_area = SubResource("StyleBoxFlat_slider_bg")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_slider_bg")
+max_value = 1.0
+step = 0.01
+value = 0.8
+
+[node name="MasterVolumeValue" type="Label" parent="VBoxContainer/OptionsContainer/MasterVolumeContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "80%"
+label_settings = SubResource("LabelSettings_value")
+horizontal_alignment = 2
+
+[node name="MusicVolumeContainer" type="HBoxContainer" parent="VBoxContainer/OptionsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="MusicVolumeLabel" type="Label" parent="VBoxContainer/OptionsContainer/MusicVolumeContainer"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+text = "MUSIC VOLUME"
+label_settings = SubResource("LabelSettings_option")
+
+[node name="MusicVolumeSlider" type="HSlider" parent="VBoxContainer/OptionsContainer/MusicVolumeContainer"]
+custom_minimum_size = Vector2(300, 32)
+layout_mode = 2
+theme_override_styles/slider = SubResource("StyleBoxFlat_slider_bg")
+theme_override_styles/grabber_area = SubResource("StyleBoxFlat_slider_bg")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_slider_bg")
+max_value = 1.0
+step = 0.01
+value = 0.8
+
+[node name="MusicVolumeValue" type="Label" parent="VBoxContainer/OptionsContainer/MusicVolumeContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "80%"
+label_settings = SubResource("LabelSettings_value")
+horizontal_alignment = 2
+
+[node name="SFXVolumeContainer" type="HBoxContainer" parent="VBoxContainer/OptionsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="SFXVolumeLabel" type="Label" parent="VBoxContainer/OptionsContainer/SFXVolumeContainer"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+text = "SFX VOLUME"
+label_settings = SubResource("LabelSettings_option")
+
+[node name="SFXVolumeSlider" type="HSlider" parent="VBoxContainer/OptionsContainer/SFXVolumeContainer"]
+custom_minimum_size = Vector2(300, 32)
+layout_mode = 2
+theme_override_styles/slider = SubResource("StyleBoxFlat_slider_bg")
+theme_override_styles/grabber_area = SubResource("StyleBoxFlat_slider_bg")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_slider_bg")
+max_value = 1.0
+step = 0.01
+value = 0.8
+
+[node name="SFXVolumeValue" type="Label" parent="VBoxContainer/OptionsContainer/SFXVolumeContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "80%"
+label_settings = SubResource("LabelSettings_value")
+horizontal_alignment = 2
+
+[node name="Spacer2" type="Control" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme = ExtResource("3_0ejsc")
+text = "BACK"
+flat = true

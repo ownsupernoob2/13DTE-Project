@@ -1,9 +1,9 @@
 [gd_scene load_steps=36 format=4 uid="uid://dxfunwodw2xu3"]
 
-[ext_resource type="Script" uid="uid://b7gseqs67phyt" path="res://scenes/components/lever.gd" id="1_gl814"]
-[ext_resource type="Texture2D" uid="uid://k0o55iom6axe" path="res://assets/LeverGutentagPosition_metal_6.png" id="1_h80ut"]
-[ext_resource type="Texture2D" uid="uid://b1g0yrdheviq5" path="res://assets/LeverGutentagPosition_metal_hr_2.png" id="2_gl814"]
-[ext_resource type="PackedScene" uid="uid://cu8d2gj0cw37e" path="res://assets/button.glb" id="4_epjk8"]
+[ext_resource type="Script" uid="uid://b7gseqs67phyt" path="res://scripts/lever.gd" id="1_gl814"]
+[ext_resource type="Texture2D" uid="uid://k0o55iom6axe" path="res://assets/materials/LeverGutentagPosition_metal_6.png" id="1_h80ut"]
+[ext_resource type="Texture2D" uid="uid://b1g0yrdheviq5" path="res://assets/materials/LeverGutentagPosition_metal_hr_2.png" id="2_gl814"]
+[ext_resource type="PackedScene" uid="uid://cu8d2gj0cw37e" path="res://assets/meshes/button.glb" id="4_epjk8"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yo7ey"]
 resource_name = "Handle1"

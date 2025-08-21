@@ -1,0 +1,24 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=3 uid="uid://bb77ljlxhyuxg"]
+
+[ext_resource type="Shader" uid="uid://2kd6j84xqgcf" path="res://shaders/new_shader_material.gdshader" id="1_50bgh"]
+[ext_resource type="FastNoiseLite" uid="uid://cnve4sjd8v7w3" path="res://assets/resources/new_fast_noise_lite1.tres" id="2_cabul"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_75itj"]
+invert = true
+in_3d_space = true
+generate_mipmaps = false
+seamless = true
+seamless_blend_skirt = 1.0
+noise = ExtResource("2_cabul")
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_50bgh")
+shader_parameter/noise_scale = 19.504
+shader_parameter/animation_speed = 0.013
+shader_parameter/transparency_strength = 0.897
+shader_parameter/color = Color(2.76752e-07, 0.24841, 0.205981, 1)
+shader_parameter/wobble_strength = 0.028
+shader_parameter/wobble_speed = 0.016
+shader_parameter/wobble_scale = 0.1
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_75itj")

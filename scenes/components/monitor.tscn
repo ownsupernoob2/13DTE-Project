@@ -1,10 +1,10 @@
 [gd_scene load_steps=19 format=4 uid="uid://u7lnosmcdssa"]
 
-[ext_resource type="Script" uid="uid://d2vkfxd0ifcqn" path="res://scripts/computer.gd" id="1_6onhf"]
-[ext_resource type="Shader" uid="uid://dcvr6r1j1k4vq" path="res://resources/shaders/crt_shader.gdshader" id="2_i0b33"]
-[ext_resource type="FontFile" uid="uid://vknkslnfdd7v" path="res://assets/rubik80s_font_resource.tres" id="2_rubik80s"]
-[ext_resource type="PackedScene" uid="uid://divngw0b3efrf" path="res://addons/essence_console/Console.tscn" id="3_an41c"]
-[ext_resource type="Script" uid="uid://dvmlh0yjbj2vd" path="res://addons/essence_console/monitor.gd" id="3_kly2o"]
+[ext_resource type="Script" uid="uid://d2vkfxd0ifcqn" path="res://scripts/components/computer.gd" id="1_6onhf"]
+[ext_resource type="Shader" uid="uid://dcvr6r1j1k4vq" path="res://assets/shaders/shaders/crt_shader.gdshader" id="2_i0b33"]
+[ext_resource type="FontFile" uid="uid://vknkslnfdd7v" path="res://scripts/ui/fonts/rubik80s_font_resource.tres" id="2_rubik80s"]
+[ext_resource type="PackedScene" uid="uid://divngw0b3efrf" path="res://scenes/ui/Console.tscn" id="3_an41c"]
+[ext_resource type="Script" uid="uid://dvmlh0yjbj2vd" path="res://scripts/ui/monitor.gd" id="3_kly2o"]
 [ext_resource type="PackedScene" uid="uid://bxfgaqgxqdrvb" path="res://assets/bunker/GLB/scanner_1.glb" id="5_6onhf"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_4arys"]

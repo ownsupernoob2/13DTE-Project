@@ -10,17 +10,20 @@ extends Node3D
 @onready var trigger_area: Area3D = $TriggerArea
 
 var presentation_texts: Array[String] = [
-	"Welcome to Site-47 Processing Division.",
-	"Your job: Classify each specimen for resource allocation.",
-	"This isn't for the weak, if you can't handle death...",
-	"Leave."
+	"Hello, 54th Divison",
+	"This is the 43th week, heavy news came in",
+	"5 employees have died after attempted escape",
+	"You are required to do your job, work doesn't slow down",
+	"Remember, humanity is at stake",
+	"Your freedom is due soon, be paitent",
+	"You're dismissed"
 ]
 
 var current_message_index: int = 0
 var current_char_index: int = 0
 var current_message: String = ""
 var is_typing: bool = false
-var typing_speed: float = 0.1  # Slower for more dramatic effect
+var typing_speed: float = 0.04  # Faster typing effect
 var presentation_active: bool = false
 var can_exit: bool = false
 
@@ -34,11 +37,12 @@ func _setup_scene() -> void:
 	# Set global flag for presentation mode
 	Global.in_presentation = true
 	
-	# Ensure mouse is captured for camera movement
+	## Ensure mouse is captured for camera movement
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	
 	# Set up screen lighting effect
 	if screen_light:
+		fade_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var tween = create_tween()
 		tween.set_loops()
 		tween.tween_property(screen_light, "light_energy", 3.0, 3.0)
@@ -59,13 +63,14 @@ func _connect_signals() -> void:
 
 func _start_presentation_sequence() -> void:
 	# Start with black screen, then fade in
+	fade_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	fade_overlay.color = Color.BLACK
 	fade_overlay.modulate.a = 1.0  # Ensure it starts fully opaque
 	fade_overlay.visible = true
 	
 	# Wait a moment, then fade in
 	await get_tree().create_timer(1.0).timeout
-	
+	fade_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var fade_in_tween = create_tween()
 	fade_in_tween.tween_property(fade_overlay, "modulate:a", 0.0, 3.0)
 	await fade_in_tween.finished
@@ -83,8 +88,7 @@ func _start_presentation() -> void:
 	presentation_active = true
 	presentation_ui.visible = true
 	
-	# Ensure the UI doesn't block mouse input for camera movement
-	presentation_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 	
 	current_message_index = 0
 	await get_tree().create_timer(1.0).timeout
@@ -103,7 +107,7 @@ func _show_next_message() -> void:
 	narration_text.text = ""
 	timer.wait_time = typing_speed
 	timer.start()
-	
+	fade_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	print("📝 Displaying message: ", current_message)
 
 func _on_timer_timeout() -> void:
@@ -141,26 +145,17 @@ func _end_presentation() -> void:
 	print("🎬 Presentation complete - enabling player exit...")
 	presentation_active = false
 	can_exit = true
-	
-	# Clear global presentation flag
 	Global.in_presentation = false
-	
-	# Clear presentation UI
 	presentation_ui.visible = false
-	
-	# Show exit instruction
 	instruction_label.visible = true
-	instruction_label.text = "Walk to the exit to begin your assignment"
+	instruction_label.text = "Walk to exit"
 	
-	# Player can now trigger the exit by walking to the trigger area
-	# No automatic timer - wait for player to actually walk to exit
 
 func _start_exit_sequence() -> void:
 	print("🎬 Starting exit sequence...")
 	
 	# Clear global presentation flag immediately
 	Global.in_presentation = false
-	
 	# Reuse the existing fade overlay instead of creating a new one
 	if fade_overlay:
 		fade_overlay.visible = true
@@ -173,7 +168,6 @@ func _start_exit_sequence() -> void:
 		fade_out_tween.tween_property(fade_overlay, "modulate:a", 1.0, 2.0)
 		await fade_out_tween.finished
 	else:
-		# Fallback if fade_overlay doesn't exist
 		var exit_overlay = ColorRect.new()
 		exit_overlay.name = "ExitFadeOverlay"
 		exit_overlay.color = Color.BLACK

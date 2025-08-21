@@ -1,6 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://bvj8x3n7q4k8c"]
 
-[ext_resource type="Script" path="res://scripts/caulk.gd" id="1_caulk"]
+[ext_resource type="Script" uid="uid://blsemvgsidoqm" path="res://scripts/components/caulk.gd" id="1_caulk"]
+
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_caulk"]
 top_radius = 0.05

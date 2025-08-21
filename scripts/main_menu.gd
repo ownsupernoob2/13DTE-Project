@@ -190,11 +190,11 @@ func _start_ambient_effects() -> void:
 		ambient_sound.pitch_scale = 0.6
 		
 		# Wait 4 seconds, then start a 2-second pitch increase
-		await get_tree().create_timer(4.0).timeout  # Stay at 0.6 for 4 seconds
+		await get_tree().create_timer(4).timeout  # Stay at 0.6 for 4 seconds
 		
 		# Now create the pitch increase tween
 		var pitch_tween = create_tween()
-		pitch_tween.tween_property(ambient_sound, "pitch_scale", 0.9, 3.5)  # Increase over 2 seconds
+		pitch_tween.tween_property(ambient_sound, "pitch_scale", 0.8, 3)  # Increase over 2 seconds
 		# No looping - pitch will stay at 0.9 after this completes
 		
 	# Start the flickering effect immediately
@@ -216,18 +216,18 @@ func _on_continue_pressed() -> void:
 		print("📁 Loading stage ", stage)
 		
 		var stage_scenes = [
-			"res://scenes/stage_1_tutorial.tscn",
-			"res://scenes/stage_2_easy.tscn", 
-			"res://scenes/stage_3_easy.tscn",
-			"res://scenes/stage_4_medium.tscn",
-			"res://scenes/stage_5_hard.tscn"
+			"res://scenes/days/stage_1_tutorial.tscn",
+			"res://scenes/days/stage_2_easy.tscn", 
+			"res://scenes/days/stage_3_easy.tscn",
+			"res://scenes/days/stage_4_medium.tscn",
+			"res://scenes/days/stage_5_hard.tscn"
 		]
-		
-		if stage <= stage_scenes.size():
-			get_tree().change_scene_to_file(stage_scenes[stage - 1])
-		else:
-			# Fallback to demo scene
-			get_tree().change_scene_to_file("res://scenes/demo.tscn")
+		get_tree().change_scene_to_file("res://scenes/demo.tscn")
+		#if stage <= stage_scenes.size():
+			#get_tree().change_scene_to_file(stage_scenes[stage - 1])
+		#else:
+			## Fallback to demo scene
+			#get_tree().change_scene_to_file("res://scenes/demo.tscn")
 
 func _on_new_game_pressed() -> void:
 	print("🆕 Starting new game")
@@ -395,8 +395,7 @@ func _start_new_game() -> void:
 	
 	# First try the fixed scene, then fallback to original
 	var scene_paths = [
-		"res://scenes/presentation_scene_fixed.tscn",
-		"res://scenes/presentation_scene.tscn"
+		"res://scenes/environments/presentation_scene.tscn"
 	]
 	
 	var scene_loaded = false

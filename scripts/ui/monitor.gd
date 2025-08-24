@@ -46,7 +46,9 @@ func _ready() -> void:
 	size = Vector2(console_size.x * 32.0, console_size.y * 64.0)  # Much much larger for excellent readability
 	# Increase text size significantly
 	theme = Theme.new()
-	theme.set_font_size("normal_font_size", "RichTextLabel", 64)  # Very large text size for excellent readability
+	theme.set_font_size("normal_font_size", "RichTextLabel", 1004)
+	add_theme_font_size_override("normal_font_size", 60)
+ # Very large text size for excellent readability
 	add_child(_flash_timer)
 	_flash_timer.set_one_shot(false)
 	_flash_timer.start(0.1)  # Initial start
@@ -184,7 +186,7 @@ func _update_display() -> void:
 	clear()
 	# Header
 	push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
-	append_text("[color=DODGER_BLUE]=== Biological Monitor Data ===[/color]")
+	append_text("[color=DODGER_BLUE]----- Creature Data -----[/color]")
 	pop()
 	newline()
 	newline()
@@ -202,15 +204,14 @@ func _update_display() -> void:
 	# Display current entry
 	if _current_entry < _entries.size():
 		var entry = _entries[_current_entry]
-		var status_text = "Status: Sedation Required"
+		var status_text = ""
 		if "sedated" in entry and entry.sedated:
-			status_text = "Status: Ready for Classification"
+			status_text = ""
 		
 		var entry_text = (
 			"[color=WHITE]Species:[/color] %s\n" +
 			"[color=WHITE]Weight:[/color] %.1f kg\n" +
-			"\n[color=YELLOW]%s[/color]\n" +
-			"\n[color=GRAY]Use lever system to sedate before classification[/color]"
+			"\n[color=YELLOW]%s[/color]\n" 
 		) % [entry.species, entry.weight, status_text]
 		
 		# Only show classification options if sedated

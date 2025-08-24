@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://bqk8nan7p4rx2"]
+[gd_scene load_steps=11 format=3 uid="uid://bqk8nan7p4rx2"]
 
 [ext_resource type="PackedScene" uid="uid://c8canob25lyi" path="res://scenes/components/player.tscn" id="1_player"]
 [ext_resource type="Script" uid="uid://cp2h20olguw7e" path="res://scripts/presentation_scene.gd" id="2_script"]
+[ext_resource type="Shader" uid="uid://ceqkphohw8enu" path="res://assets/shaders/shaders/demo.gdshader" id="2_yifm1"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
@@ -15,6 +16,25 @@ size = Vector3(20, 0.2, 20)
 
 [sub_resource type="StandardMaterial3D" id="Material_floor"]
 albedo_color = Color(0.2, 0.2, 0.25, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_s3vvr"]
+render_priority = 0
+shader = ExtResource("2_yifm1")
+shader_parameter/enable_fog = true
+shader_parameter/fog_color = Color(0, 0, 0, 1)
+shader_parameter/noise_color = Color(0, 0, 0, 1)
+shader_parameter/fog_distance = 100.0
+shader_parameter/fog_fade_range = 50.0
+shader_parameter/enable_noise = true
+shader_parameter/noise_time_fac = 4.0
+shader_parameter/enable_color_limitation = true
+shader_parameter/color_levels = 60
+shader_parameter/enable_dithering = true
+shader_parameter/dither_strength = 0.55
+
+[sub_resource type="BoxMesh" id="BoxMesh_y78vi"]
+material = SubResource("ShaderMaterial_s3vvr")
+size = Vector3(500, 500, 500)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(20, 0.2, 20)
@@ -40,6 +60,11 @@ shadow_enabled = true
 [node name="FloorMesh" type="MeshInstance3D" parent="Floor"]
 mesh = SubResource("BoxMesh_floor")
 surface_material_override/0 = SubResource("Material_floor")
+
+[node name="shader" type="MeshInstance3D" parent="Floor/FloorMesh"]
+transform = Transform3D(6.19595, 0, 0, 0, 1.16996, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("BoxMesh_y78vi")
+skeleton = NodePath("")
 
 [node name="FloorCollision" type="CollisionShape3D" parent="Floor"]
 shape = SubResource("BoxShape3D_floor")

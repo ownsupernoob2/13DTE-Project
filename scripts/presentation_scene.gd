@@ -91,7 +91,7 @@ func _start_presentation() -> void:
 
 	
 	current_message_index = 0
-	await get_tree().create_timer(1.0).timeout
+	await get_tree().create_timer(0.3).timeout
 	_show_next_message()
 
 func _show_next_message() -> void:
@@ -123,7 +123,7 @@ func _on_timer_timeout() -> void:
 		# Message complete, pause then next
 		is_typing = false
 		timer.stop()
-		await get_tree().create_timer(3.0).timeout  # Longer pause for dramatic effect
+		await get_tree().create_timer(1.0).timeout  # Longer pause for dramatic effect
 		if presentation_active:  # Check if still active
 			current_message_index += 1
 			_show_next_message()

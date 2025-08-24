@@ -1848,12 +1848,12 @@ render_target_update_mode = 0
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_left = 534.0
-offset_top = 158.0
-offset_right = 2460.0
-offset_bottom = 285.0
+offset_left = 764.0
+offset_top = 87.0
+offset_right = 2690.0
+offset_bottom = 214.0
 grow_vertical = 2
-scale = Vector2(1.00286, 0.978887)
+scale = Vector2(0.92567, 0.856826)
 stretch = true
 
 [node name="PodViewport3D" type="SubViewport" parent="PodViewportContainer"]

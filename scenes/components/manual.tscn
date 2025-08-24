@@ -17,7 +17,7 @@ size = Vector2(0.28, 0.38)
 size = Vector2(0.28, 0.38)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_4l8qw"]
-size = Vector3(0.3, 0.02, 0.4)
+size = Vector3(0.413013, 0.02, 0.4)
 
 [node name="InstructionBooklet" type="Node3D" groups=["booklet", "grabbable", "manual"]]
 script = ExtResource("1_2k8mj")
@@ -27,24 +27,26 @@ mesh = SubResource("BoxMesh_1x3kv")
 surface_material_override/0 = SubResource("StandardMaterial3D_1j5k2")
 
 [node name="LeftPageMesh" type="MeshInstance3D" parent="BookletMesh"]
-transform = Transform3D(1, 0, 0, 0, 6.12323e-17, 1, 0, -1, 6.12323e-17, -0.07, 0.011, 0)
+transform = Transform3D(1, 0, 0, 0, 6.12323e-17, 1, 0, -1, 6.12323e-17, -0.211825, 0.011, 0)
 mesh = SubResource("QuadMesh_2m7nx")
 
 [node name="RightPageMesh" type="MeshInstance3D" parent="BookletMesh"]
-transform = Transform3D(1, 0, 0, 0, 6.12323e-17, 1, 0, -1, 6.12323e-17, 0.07, 0.011, 0)
+transform = Transform3D(1, 0, 0, 0, 6.12323e-17, 1, 0, -1, 6.12323e-17, 0.137135, 0.011, 0)
 mesh = SubResource("QuadMesh_3k9py")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00296631, 0, 0)
 shape = SubResource("BoxShape3D_4l8qw")
 
 [node name="BookletCamera" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 0.5, 0.8)
+transform = Transform3D(1, 0, 0, 0, 0.468238, 0.883602, 0, -0.883602, 0.468238, -0.0429699, 0.38298, 0.200829)
 fov = 65.0
 near = 0.01
 
 [node name="PageFlipAudio" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0738733, 0, 0)
 stream = ExtResource("2_m2x0t")
 volume_db = -12.0
 max_distance = 8.0

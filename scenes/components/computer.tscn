@@ -61,9 +61,9 @@ viewport_path = NodePath("Computer/SubViewport")
 resource_local_to_scene = true
 resource_name = "Material"
 cull_mode = 2
-albedo_color = Color(0.0737424, 0.689595, 1.92523e-07, 0)
 albedo_texture = SubResource("ViewportTexture_wosnj")
-roughness = 0.5
+metallic = 1.0
+metallic_specular = 0.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sfpdp"]
 resource_name = "Material.001"

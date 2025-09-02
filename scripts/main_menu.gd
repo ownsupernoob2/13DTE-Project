@@ -187,17 +187,7 @@ func _connect_buttons() -> void:
 func _start_ambient_effects() -> void:
 	# Set up ambient sound pitch to stay at 0.6 for 4 seconds, then increase over 2 seconds
 	if ambient_sound:
-		ambient_sound.pitch_scale = 0.6
-		
-		# Wait 4 seconds, then start a 2-second pitch increase
-		await get_tree().create_timer(4).timeout  # Stay at 0.6 for 4 seconds
-		
-		# Now create the pitch increase tween
-		var pitch_tween = create_tween()
-		pitch_tween.tween_property(ambient_sound, "pitch_scale", 0.8, 3)  # Increase over 2 seconds
-		# No looping - pitch will stay at 0.9 after this completes
-		
-	# Start the flickering effect immediately
+		ambient_sound.pitch_scale = 0.8
 	_start_flickering_effect()
 		
 func _start_flickering_effect() -> void:

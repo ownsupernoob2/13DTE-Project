@@ -34,6 +34,18 @@ var current_alien: Dictionary = {}
 var game_active: bool = false
 var current_stage_completed: bool = false
 
+# Pod health and degradation system
+var pod_health: float = 100.0
+var pod_health_degradation_active: bool = false
+var banging_timer: Timer = null
+var current_bang_pitch: float = 1.0
+var current_bang_frequency: float = 20.0  # Start with 20 seconds
+var bang_audio_player: AudioStreamPlayer3D = null
+
+signal pod_health_changed(health: float)
+signal pod_critical_health()
+signal pod_destroyed()
+
 # Pod integrity system (for medium/hard stages)
 var pod_integrity: float = 100.0
 var pod_breaking_active: bool = false
@@ -74,10 +86,220 @@ var alien_species_data: Dictionary = {
 }
 
 func _ready() -> void:
-	print("GameManager initialized - Starting Stage 1: TUTORIAL")
+	print("GameManager initialized")
 	
-	# Initialize failure manager
+	# Create demo alien data but don't start the game yet
+	# Wait for pod start button to be pressed
+	_prepare_demo_alien()
+	
+	# Ensure monitors show the correct initial state after a brief delay
+	await get_tree().create_timer(0.2).timeout
+	_update_monitor_initial_state()
+
+func _update_monitor_initial_state() -> void:
+	print("📺 GameManager: Setting monitor to initial state...")
+	
+	# Find the monitor system and ensure it shows start message
+	var monitor = _find_monitor_system()
+	
+	if monitor:
+		if monitor.has_method("show_start_message"):
+			monitor.show_start_message()
+			print("📺 Monitor set to show start message")
+		else:
+			print("⚠️ Monitor found but no start message method available")
+	else:
+		print("❌ Monitor system not found for initial state")
+
+# Start pod game - called from pod system
+func start_pod_game() -> void:
+	print("🏺 GameManager: Starting pod game sequence...")
+	game_active = true
+	
+	# Ensure we have an alien ready
+	if current_alien.is_empty():
+		create_demo_alien()
+	
+	# Update monitor to show alien information
+	_update_monitor_display()
+	
+	# Start pod health degradation system after pod fills (20 seconds)
+	_start_pod_health_system()
+	
+	print("🎮 Pod game started with alien: ", current_alien)
+
+func _update_monitor_display() -> void:
+	print("📺 GameManager: Updating monitor display...")
+	
+	# Find the monitor system
+	var monitor = _find_monitor_system()
+	
+	if monitor:
+		if monitor.has_method("show_alien_information"):
+			monitor.show_alien_information()
+		elif monitor.has_method("start_game_display"):
+			monitor.start_game_display()
+		else:
+			print("⚠️ Monitor found but no display update method available")
+	else:
+		print("❌ Monitor system not found")
+
+func _show_processing_message() -> void:
+	print("📺 GameManager: Showing processing message...")
+	
+	# Find the monitor system
+	var monitor = _find_monitor_system()
+	
+	if monitor:
+		if monitor.has_method("show_processing_message"):
+			monitor.show_processing_message()
+		else:
+			print("⚠️ Monitor found but no processing message method available")
+	else:
+		print("❌ Monitor system not found")
+
+func _find_monitor_system() -> Node:
+	# Search common monitor paths
+	var scene_path = str(get_tree().current_scene.get_path())  # Convert NodePath to String
+	var monitor_paths = [
+		# Search in current scene first
+		scene_path + "/Computer/ComputerCamera/Monitor/Monitor/SubViewport/Control/Console",
+		scene_path + "/Monitor/Monitor/SubViewport/Control/Console", 
+		scene_path + "/Computer/Monitor/SubViewport/Control/Console"
+	]
+	
+	for path in monitor_paths:
+		var monitor = get_node_or_null(path)
+		if monitor:
+			print("✓ Found monitor at: ", path)
+			return monitor
+	
+	# Fallback: search in scene tree
+	return _find_monitor_in_tree(get_tree().current_scene)
+
+func _find_monitor_in_tree(node: Node) -> Node:
+	# Look for RichTextLabel nodes that might be monitors
+	if node is RichTextLabel and node.name.to_lower().contains("console"):
+		return node
+	
+	for child in node.get_children():
+		var result = _find_monitor_in_tree(child)
+		if result:
+			return result
+	return null
+
+func _start_pod_health_system() -> void:
+	print("💀 Starting pod health degradation system...")
+	pod_health = 100.0
+	pod_health_degradation_active = true
+	current_bang_pitch = 1.0
+	current_bang_frequency = 20.0
+	
+	# Create banging timer
+	if banging_timer:
+		banging_timer.queue_free()
+	
+	banging_timer = Timer.new()
+	banging_timer.name = "PodBangingTimer"
+	banging_timer.wait_time = current_bang_frequency
+	banging_timer.timeout.connect(_on_pod_banging)
+	add_child(banging_timer)
+	banging_timer.start()
+	
+	# Create audio player for banging sounds
+	if not bang_audio_player:
+		bang_audio_player = AudioStreamPlayer3D.new()
+		bang_audio_player.name = "PodBangingAudio"
+		add_child(bang_audio_player)
+		
+		# Load banging sound
+		var bang_sound = load("res://assets/music/sfx/bang.mp3") as AudioStream
+		if bang_sound:
+			bang_audio_player.stream = bang_sound
+			print("✓ Banging sound loaded")
+		else:
+			print("❌ Failed to load bang.mp3")
+	
+	print("✅ Pod health system initialized")
+
+func _on_pod_banging() -> void:
+	if not pod_health_degradation_active:
+		return
+	
+	print("💥 Pod banging - health degrading...")
+	
+	# Play banging sound with varying pitch
+	if bang_audio_player and bang_audio_player.stream:
+		bang_audio_player.pitch_scale = current_bang_pitch
+		bang_audio_player.play()
+	
+	# Degrade pod health
+	var health_loss = randf_range(8.0, 15.0)  # Random health loss per bang
+	pod_health -= health_loss
+	pod_health = max(0.0, pod_health)
+	
+	print("🏺 Pod health: ", pod_health, "/100")
+	emit_signal("pod_health_changed", pod_health)
+	
+	# Check if pod is destroyed
+	if pod_health <= 0.0:
+		print("💀 POD DESTROYED! Health reached zero!")
+		_handle_pod_destruction()
+		return
+	
+	# Vary pitch and frequency for next bang
+	current_bang_pitch = randf_range(0.7, 1.4)  # Pitch variation
+	current_bang_frequency = randf_range(15.0, 25.0)  # Frequency variation (not too fast)
+	
+	# Update timer for next bang
+	banging_timer.wait_time = current_bang_frequency
+	banging_timer.start()
+
+func _handle_pod_destruction() -> void:
+	print("💀 Handling pod destruction...")
+	pod_health_degradation_active = false
+	
+	if banging_timer:
+		banging_timer.stop()
+	
+	emit_signal("pod_destroyed")
+	
+	# Use the same failure sequence as incorrect lever combination
+	print("🚨 Pod destroyed - triggering failure sequence...")
+	handle_game_failure()
+
+# Get current alien for monitor display
+func get_current_alien() -> Dictionary:
+	return current_alien
+
+# Prepare demo alien data without starting the game
+func _prepare_demo_alien() -> void:
+	current_alien = {
+		"species": "1",
+		"weight": 150,
+		"eye_color": "Yellow", 
+		"blood_type": "X-Positive"
+	}
+	# Don't set game_active = true yet - wait for pod button press
+	print("Demo alien prepared: ", current_alien)
+	print("Expected liquid ratios should be: [35, 40, 25]")
+	print("🎮 Game ready - press START button on pod to begin!")
+	
+	# Initialize failure manager but don't start stages yet
 	_setup_failure_manager()
+
+# Create a demo alien for testing the sedation system (used when game starts)
+func create_demo_alien() -> void:
+	# If alien data isn't prepared yet, prepare it
+	if current_alien.is_empty():
+		_prepare_demo_alien()
+	
+	# Now actually start the game
+	game_active = true
+	print("🎮 Demo game started with alien: ", current_alien)
+	
+	# Don't update monitor immediately - pod will handle timing
+	# _update_monitor_display()  # Commented out - pod handles timing
 	
 	start_new_stage()
 
@@ -418,3 +640,337 @@ func get_current_stage_info() -> Dictionary:
 		"caulk_available": caulk_available,
 		"caulk_fuel": caulk_fuel
 	}
+
+# ========================
+# SEDATION FAILURE SYSTEM
+# ========================
+
+var is_game_over: bool = false
+var glitch_overlay: ColorRect = null
+
+# Main failure handler - called when incorrect lever combination is used
+func handle_game_failure() -> void:
+	print("🚨 GameManager.handle_game_failure() called!")
+	
+	if is_game_over:
+		print("⚠️ Failure already in progress, ignoring duplicate call")
+		return  # Prevent multiple calls
+	
+	is_game_over = true
+	print("💀 GAME FAILURE: Incorrect lever combination detected")
+	print("🎬 Starting failure sequence execution...")
+	
+	# Start the failure sequence in background (don't await to avoid blocking)
+	_execute_failure_sequence_async()
+
+# Async wrapper to run failure sequence without blocking
+func _execute_failure_sequence_async() -> void:
+	await _execute_failure_sequence()
+
+# Simple immediate failure for testing
+func immediate_failure_test() -> void:
+	print("🧪 IMMEDIATE FAILURE TEST - Resetting scene now!")
+	is_game_over = false  # Reset state
+	var result = get_tree().change_scene_to_file("res://scenes/demo.tscn")
+	if result != OK:
+		print("❌ Immediate scene reset failed: ", result)
+	else:
+		print("✅ Immediate scene reset successful!")
+
+# Main failure sequence: freeze → silence → red flash → blackout → reset
+func _execute_failure_sequence() -> void:
+	print("🔇 Starting failure sequence - stopping all audio...")
+	
+	# Step 1: Stop all audio immediately
+	_stop_all_audio()
+	
+	# Step 2: Freeze camera and player movement for 3 seconds
+	print("🧊 Freezing camera and player movement for 3 seconds...")
+	_freeze_player_and_camera(true)
+	await get_tree().create_timer(3.0).timeout
+	
+	# Step 3: Red flash effect
+	print("📺 Starting red flash effect...")
+	await _create_red_flash_effect()
+	
+	# Step 4: Black out effect
+	print("⚫ Starting blackout effect...")
+	await _create_blackout_effect()
+	
+	# Step 5: Reset the scene
+	print("🔄 Resetting scene...")
+	await _reset_scene()
+
+# Stop all audio in the game
+func _stop_all_audio() -> void:
+	print("🔇 Stopping all audio sources...")
+	
+	# Mute all audio buses
+	var master_bus = AudioServer.get_bus_index("Master")
+	var music_bus = AudioServer.get_bus_index("Music")
+	var sfx_bus = AudioServer.get_bus_index("SFX")
+	
+	if master_bus != -1:
+		AudioServer.set_bus_volume_db(master_bus, -80.0)  # Effectively mute
+		print("🔇 Master bus muted")
+	if music_bus != -1:
+		AudioServer.set_bus_volume_db(music_bus, -80.0)
+		print("🔇 Music bus muted")
+	if sfx_bus != -1:
+		AudioServer.set_bus_volume_db(sfx_bus, -80.0)
+		print("🔇 SFX bus muted")
+	
+	# Stop all audio players in the scene tree
+	_stop_all_audio_players_in_tree(get_tree().root)
+
+# Recursively find and stop all AudioStreamPlayer nodes
+func _stop_all_audio_players_in_tree(node: Node) -> void:
+	# Check current node
+	if node is AudioStreamPlayer or node is AudioStreamPlayer2D or node is AudioStreamPlayer3D:
+		if node.has_method("stop"):
+			node.stop()
+			print("🔇 Stopped audio player: ", node.name)
+	
+	# Check children recursively
+	for child in node.get_children():
+		_stop_all_audio_players_in_tree(child)
+
+# Freeze or unfreeze player and camera movement + ALL INPUT (including mouse)
+func _freeze_player_and_camera(freeze: bool) -> void:
+	print("🧊 Setting complete input freeze state: ", freeze)
+	
+	# Block ALL input processing globally
+	if freeze:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED  # Lock mouse
+		get_tree().paused = false  # Don't pause, just disable input
+	else:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # Restore mouse
+	
+	# Find and freeze the player
+	var player = get_tree().get_first_node_in_group("player")
+	if not player:
+		# Try alternative ways to find player
+		player = get_tree().current_scene.get_node_or_null("Player")
+		if not player:
+			player = get_tree().current_scene.get_node_or_null("FPSController") 
+			if not player:
+				print("🔍 Searching for player in scene tree...")
+				player = _find_player_in_tree(get_tree().current_scene)
+	
+	if player:
+		print("✓ Player found: ", player.name)
+		
+		# Completely disable ALL player processing
+		if freeze:
+			if player.has_method("set_physics_process"):
+				player.set_physics_process(false)
+			if player.has_method("set_process"):
+				player.set_process(false)
+			if player.has_method("set_process_input"):
+				player.set_process_input(false)
+			if player.has_method("set_process_unhandled_input"):
+				player.set_process_unhandled_input(false)
+			if player.has_method("set_process_unhandled_key_input"):
+				player.set_process_unhandled_key_input(false)
+		else:
+			# Re-enable all processing
+			if player.has_method("set_physics_process"):
+				player.set_physics_process(true)
+			if player.has_method("set_process"):
+				player.set_process(true)
+			if player.has_method("set_process_input"):
+				player.set_process_input(true)
+			if player.has_method("set_process_unhandled_input"):
+				player.set_process_unhandled_input(true)
+			if player.has_method("set_process_unhandled_key_input"):
+				player.set_process_unhandled_key_input(true)
+	else:
+		print("❌ Player not found - cannot freeze movement")
+	
+	# Find and freeze camera (including mouse look)
+	var camera = get_tree().get_first_node_in_group("camera")
+	if not camera:
+		# Try to find camera3d nodes
+		camera = _find_camera_in_tree(get_tree().current_scene)
+	
+	if camera:
+		print("✓ Camera found: ", camera.name)
+		# Disable ALL camera input processing (including mouse look)
+		if freeze:
+			if camera.has_method("set_process_input"):
+				camera.set_process_input(false)
+			if camera.has_method("set_process"):
+				camera.set_process(false)
+			if camera.has_method("set_process_unhandled_input"):
+				camera.set_process_unhandled_input(false)
+		else:
+			if camera.has_method("set_process_input"):
+				camera.set_process_input(true)
+			if camera.has_method("set_process"):
+				camera.set_process(true)
+			if camera.has_method("set_process_unhandled_input"):
+				camera.set_process_unhandled_input(true)
+	else:
+		print("❌ Camera not found")
+
+# Helper function to find player in scene tree
+func _find_player_in_tree(node: Node) -> Node:
+	if node.name.to_lower().contains("player") or node.name.to_lower().contains("fps"):
+		if node.has_method("_physics_process") or node.has_method("_process"):
+			return node
+	
+	for child in node.get_children():
+		var result = _find_player_in_tree(child)
+		if result:
+			return result
+	return null
+
+# Helper function to find camera in scene tree  
+func _find_camera_in_tree(node: Node) -> Node:
+	if node is Camera3D:
+		return node
+	
+	for child in node.get_children():
+		var result = _find_camera_in_tree(child)
+		if result:
+			return result
+	return null
+
+# Create red flash effect
+func _create_red_flash_effect() -> void:
+	print("📺 Creating red flash effect...")
+	
+	# Create red flash overlay
+	glitch_overlay = ColorRect.new()
+	glitch_overlay.name = "RedFlashOverlay"
+	glitch_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	glitch_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	glitch_overlay.z_index = 999
+	
+	# Load the failure glitch shader for red tint effect
+	var glitch_shader = load("res://assets/shaders/failure_glitch.gdshader") as Shader
+	var shader_material = ShaderMaterial.new()
+	shader_material.shader = glitch_shader
+	
+	# Set shader parameters for intense red flash
+	shader_material.set_shader_parameter("saturation_intensity", 4.0)
+	shader_material.set_shader_parameter("red_tint", 3.0)
+	shader_material.set_shader_parameter("visibility", 0.0)
+	shader_material.set_shader_parameter("noise_amount", 0.2)
+	shader_material.set_shader_parameter("distortion_strength", 0.05)
+	
+	glitch_overlay.material = shader_material
+	
+	# Add to root so it appears over everything
+	get_tree().root.add_child(glitch_overlay)
+	
+	# Create fast, intense red flash animation
+	var flash_tween = create_tween()
+	
+	# Very quick flash sequence: rapid in → brief hold → rapid out
+	flash_tween.tween_method(_update_flash_visibility, 0.0, 1.0, 0.05)  # Flash in (faster)
+	flash_tween.tween_interval(0.1)  # Brief hold
+	flash_tween.tween_method(_update_flash_visibility, 1.0, 0.0, 0.05)  # Flash out (faster)
+	
+	await flash_tween.finished
+	print("📺 Red flash effect completed")
+
+# Create blackout effect
+func _create_blackout_effect() -> void:
+	print("⚫ Creating blackout effect...")
+	
+	# Remove red flash overlay first
+	if glitch_overlay:
+		glitch_overlay.queue_free()
+		glitch_overlay = null
+	
+	# Create black overlay
+	var blackout_overlay = ColorRect.new()
+	blackout_overlay.name = "BlackoutOverlay"
+	blackout_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	blackout_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	blackout_overlay.z_index = 1000
+	blackout_overlay.color = Color(0, 0, 0, 0)  # Start transparent
+	
+	# Add to root
+	get_tree().root.add_child(blackout_overlay)
+	
+	# Create fast blackout animation
+	var blackout_tween = create_tween()
+	blackout_tween.tween_property(blackout_overlay, "color:a", 1.0, 0.15)  # Faster fade to black
+	blackout_tween.tween_interval(0.2)  # Brief hold black screen
+	
+	await blackout_tween.finished
+	
+	# Clean up
+	blackout_overlay.queue_free()
+	print("⚫ Blackout effect completed")
+
+# Update flash visibility
+func _update_flash_visibility(value: float) -> void:
+	if glitch_overlay and glitch_overlay.material:
+		glitch_overlay.material.set_shader_parameter("visibility", value)
+
+# Play glitch sound effect
+func _play_glitch_sound() -> void:
+	print("🔊 Playing safe glitch sound effect...")
+	
+	# Create audio player for glitch sound
+	var glitch_audio = AudioStreamPlayer.new()
+	get_tree().root.add_child(glitch_audio)
+	
+	# Create a simple sine wave glitch sound (safe, no random noise)
+	var glitch_stream = AudioStreamGenerator.new()
+	glitch_stream.mix_rate = 22050
+	glitch_stream.buffer_length = 0.5
+	glitch_audio.stream = glitch_stream
+	glitch_audio.volume_db = -10.0  # Not too loud
+	
+	# Play the sound
+	glitch_audio.play()
+	
+	# Remove audio player after sound finishes
+	await get_tree().create_timer(0.6).timeout
+	if glitch_audio:
+		glitch_audio.queue_free()
+
+# Reset the current scene
+func _reset_scene() -> void:
+	print("🔄 Resetting demo scene...")
+	
+	# Unfreeze player and camera before scene change
+	_freeze_player_and_camera(false)
+	
+	# Clean up glitch overlay
+	if glitch_overlay:
+		glitch_overlay.queue_free()
+		glitch_overlay = null
+	
+	# Restore audio levels
+	_restore_audio()
+	
+	# Reset game state
+	is_game_over = false
+	
+	# Reload the demo scene
+	var result = get_tree().change_scene_to_file("res://scenes/demo.tscn")
+	if result != OK:
+		print("❌ Failed to reset scene, error: ", result)
+
+# Restore audio levels after failure
+func _restore_audio() -> void:
+	print("🔊 Restoring audio levels...")
+	
+	var master_bus = AudioServer.get_bus_index("Master")
+	var music_bus = AudioServer.get_bus_index("Music")
+	var sfx_bus = AudioServer.get_bus_index("SFX")
+	
+	if master_bus != -1:
+		AudioServer.set_bus_volume_db(master_bus, 0.0)
+		print("🔊 Master bus restored")
+	if music_bus != -1:
+		AudioServer.set_bus_volume_db(music_bus, 0.0)
+		print("🔊 Music bus restored")
+	if sfx_bus != -1:
+		AudioServer.set_bus_volume_db(sfx_bus, 0.0)
+		print("🔊 SFX bus restored")

@@ -131,6 +131,10 @@ func _update_interaction_raycast() -> void:
 		elif result.collider.is_in_group("caulk"):
 			can_interact = true
 			using_computer = result.collider
+		# Check for start button
+		elif result.collider.is_in_group("start_button"):
+			can_interact = true
+			using_computer = result.collider
 
 func insert_disk() -> void:
 	if held_object == null or not can_grab or Global.is_using_computer or Global.is_using_monitor:
@@ -216,6 +220,25 @@ func press_machine_button() -> void:
 		print("Player pressed machine button: ", using_computer.name)
 	else:
 		print("Machine doesn't have handle_button_press method!")
+
+func _press_start_button() -> void:
+	if not using_computer or Global.is_using_computer or Global.is_using_monitor:
+		return
+	
+	print("🚀 Player clicked start button!")
+	
+	# Find the pod that contains this button
+	var pod_node = using_computer.get_parent()
+	if not pod_node:
+		print("❌ Pod node not found!")
+		return
+	
+	# Check if the pod has the button press handler
+	if pod_node.has_method("_on_start_button_pressed"):
+		pod_node._on_start_button_pressed()
+		print("✅ Start button press sent to pod")
+	else:
+		print("❌ Pod doesn't have _on_start_button_pressed method")
 
 func enter_monitor_mode() -> void:
 	if using_computer and not Global.is_using_computer and not Global.is_using_monitor:
@@ -313,6 +336,8 @@ func _unhandled_input(event: InputEvent) -> void:
 					_use_medical_scanner()
 				elif using_computer.is_in_group("caulk"):
 					_use_caulk()
+				elif using_computer.is_in_group("start_button"):
+					_press_start_button()
 			elif held_object == null and can_grab:
 				grab_object()
 			elif held_object and can_grab:
@@ -648,9 +673,9 @@ func _handle_lever_drag_motion() -> void:
 		_stop_lever_interaction()
 		return
 	
-	# Precise motion control for accurate number setting
-	var motion_sensitivity = 3.0  # Higher sensitivity for more precision
-	var motion_deadzone = 2.0  # Minimum motion before registering change
+	# Precise motion control for accurate number setting - INCREASED SENSITIVITY
+	var motion_sensitivity = 1.5  # Reduced from 3.0 to 1.5 for easier movement
+	var motion_deadzone = 1.0  # Reduced from 2.0 to 1.0 for more responsive movement
 	
 	# Only process if motion is above deadzone
 	if abs(lever_accumulated_motion) < motion_deadzone:
@@ -662,9 +687,14 @@ func _handle_lever_drag_motion() -> void:
 	# Apply motion with precise control
 	var new_value = clamp(lever_initial_value + int(motion_value), 0, 100)
 	
-	# Reduced debug output for cleaner experience
-	if abs(lever_accumulated_motion) > 10:  # Only print significant changes
-		print("Precise Lever Control - Value: ", new_value)
+	# Enhanced debug output to track lever movement issues
+	if abs(lever_accumulated_motion) > 5:  # More frequent debug for troubleshooting
+		print("🎚️ Lever Motion Debug:")
+		print("  - Initial Value: ", lever_initial_value)
+		print("  - Accumulated Motion: ", lever_accumulated_motion)
+		print("  - Motion Value: ", motion_value)
+		print("  - Calculated New Value: ", new_value)
+		print("  - Current Lever: ", current_lever_name)
 	
 	# Update the lever
 	var lever_index = 0
@@ -818,13 +848,14 @@ func _inject_fluids() -> void:
 			# Show failure message to player
 			print("❌ SEDATION FAILED! Incorrect chemical combination. This will restart the game.")
 			
-			# Trigger failure system for incorrect sedation
-			var failure_manager = get_node_or_null("/root/FailureManager")
-			if not failure_manager:
-				failure_manager = get_tree().current_scene.get_node_or_null("FailureManager")
-			if failure_manager and failure_manager.has_method("on_sedation_failure"):
-				failure_manager.on_sedation_failure()
+			# Trigger GameManager failure system immediately
+			print("🔍 Calling GameManager.handle_game_failure()...")
+			if GameManager and GameManager.has_method("handle_game_failure"):
+				print("✓ GameManager found, triggering failure sequence...")
+				GameManager.handle_game_failure()
+				print("🚀 GameManager failure sequence called!")
 			else:
+				print("❌ GameManager not found or method missing!")
 				# Fallback: Reset levers for another attempt
 				lever_system.reset_levers()
 				# Reset tracking values since levers were reset

@@ -48,6 +48,66 @@ func _ready() -> void:
 	theme = Theme.new()
 	theme.set_font_size("normal_font_size", "RichTextLabel", 1004)
 	add_theme_font_size_override("normal_font_size", 60)
+	
+	# Force show start message initially - don't wait for GameManager
+	print("📺 Monitor initializing - showing start message")
+	show_start_message()
+	
+	# Also check game state after a brief delay
+	await get_tree().create_timer(0.1).timeout
+	_update_display_based_on_game_state()
+
+func _update_display_based_on_game_state() -> void:
+	# Check if game is active via GameManager
+	if GameManager and GameManager.game_active:
+		print("📺 Game is active - switching to alien information")
+		show_alien_information()
+	else:
+		print("📺 Game not active - showing start message")
+		show_start_message()
+
+# Show the initial start message
+func show_start_message() -> void:
+	print("📺 Showing start message on monitor...")
+	var start_text = "[center][color=green]ALIEN CLASSIFICATION SYSTEM[/color][/center]\n\n"
+	start_text += "[center][color=yellow]PRESS THE BUTTON TO BEGIN[/color][/center]\n\n"
+	start_text += "[center][color=cyan]System Status: READY[/color][/center]"
+	
+	text = start_text
+
+# Show processing message when button is pressed
+func show_processing_message() -> void:
+	print("📺 Showing processing message on monitor...")
+	var processing_text = "[center][color=green]ALIEN CLASSIFICATION SYSTEM[/color][/center]\n\n"
+	processing_text += "[center][color=orange]PROCESSING INFORMATION...[/color][/center]\n\n"
+	processing_text += "[center][color=cyan]Please wait...[/color][/center]"
+	
+	text = processing_text
+
+# Show alien information after game starts
+func show_alien_information() -> void:
+	print("📺 Switching monitor to original display functionality...")
+	
+	# Use the original monitor functionality instead of custom alien display
+	show_alien_info()
+
+# Alternative method name for compatibility
+func start_game_display() -> void:
+	show_alien_information()
+
+func _display_alien_data(alien_data: Dictionary) -> void:
+	var display_text = "[center][color=green]ALIEN SPECIMEN DETECTED[/color][/center]\n\n"
+	
+	display_text += "[color=cyan]Species Classification:[/color] Class " + str(alien_data.get("species", "Unknown")) + "\n\n"
+	display_text += "[color=yellow]Physical Data:[/color]\n"
+	display_text += "  Weight: " + str(alien_data.get("weight", "Unknown")) + " kg\n\n"
+	
+	display_text += "[color=orange]Calculate sedation ratios[/color]\n"
+	display_text += "[color=orange]and apply via control panel[/color]\n\n"
+	display_text += "[center][color=red]CAUTION: Incorrect ratios[/color][/center]\n"
+	display_text += "[center][color=red]will terminate procedure[/color][/center]"
+	
+	text = display_text
  # Very large text size for excellent readability
 	add_child(_flash_timer)
 	_flash_timer.set_one_shot(false)
@@ -91,10 +151,6 @@ func show_alien_info() -> void:
 	append_text("[color=white]Species: " + alien.species + "[/color]")
 	newline()
 	append_text("[color=white]Weight: " + str(alien.weight) + " kg[/color]")
-	newline()
-	append_text("[color=white]Eye Color: " + alien.eye_color + "[/color]")
-	newline()
-	append_text("[color=white]Blood Type: " + alien.blood_type + "[/color]")
 	newline()
 	
 	# Show complications if any
@@ -272,8 +328,17 @@ func get_current_liquid_ratios() -> Array:
 		if "liquid_ratios" in entry:
 			print("DEBUG Monitor: Returning liquid ratios: ", entry.liquid_ratios)
 			return entry.liquid_ratios
-	print("DEBUG Monitor: No current entry or liquid ratios, returning [0,0,0]")
-	return [0, 0, 0]  # Default fallback
+	
+	# If no current entry, check if GameManager has a current alien
+	if GameManager and GameManager.current_alien and not GameManager.current_alien.is_empty():
+		var alien = GameManager.current_alien
+		var ratios = _get_liquid_ratios(alien.species, alien.weight, alien.eye_color)
+		print("DEBUG Monitor: Generated ratios from GameManager alien: ", ratios)
+		return ratios
+	
+	# For demo testing - provide a test combination
+	print("DEBUG Monitor: No entry/alien found, providing demo test ratios: [35, 40, 25]")
+	return [35, 40, 25]  # Test combination for demo
 
 # Function to enable classification after successful sedation
 func enable_classification() -> void:

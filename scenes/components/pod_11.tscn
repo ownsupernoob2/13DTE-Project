@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://bpigsocwrxqni"]
+[gd_scene load_steps=23 format=3 uid="uid://bpigsocwrxqni"]
 
 [ext_resource type="PackedScene" uid="uid://dcl2qgr07bjau" path="res://pod/Pod11.glb" id="1_bqs3a"]
 [ext_resource type="Shader" uid="uid://d0imqq8kwdp2l" path="res://shaders/pod_11.gdshader" id="2_ewli3"]
@@ -114,26 +114,48 @@ material = SubResource("ShaderMaterial_oi6qu")
 radial_segments = 256
 rings = 128
 
+[sub_resource type="BoxMesh" id="BoxMesh_startbutton"]
+size = Vector3(2, 0.5, 1.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_startbutton"]
+albedo_color = Color(0, 1, 0, 1)
+emission_enabled = true
+emission = Color(0.1, 0.4, 0.1, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_startbutton"]
+size = Vector3(2, 0.5, 1.2)
+
+[sub_resource type="QuadMesh" id="QuadMesh_health"]
+size = Vector2(2, 0.5)
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_health"]
+viewport_path = NodePath("PodHealthViewport")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_health"]
+albedo_texture = SubResource("ViewportTexture_health")
+emission_enabled = true
+emission_texture = SubResource("ViewportTexture_health")
+
 [node name="Pod11" instance=ExtResource("1_bqs3a")]
 transform = Transform3D(1.055, 0, 0, 0, 1.088, 0, 0, 0, 1.01486, 0, 0, 0)
 script = ExtResource("2_mqcor")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="0"]
+[node name="Shader" type="MeshInstance3D" parent="." index="0"]
 transform = Transform3D(8.8, 0, 0, 0, 8.8, 0, 0, 0, 8.8, -0.0223885, 2.63746, 0.0129004)
 mesh = SubResource("SphereMesh_pjfdm")
 skeleton = NodePath("")
 
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="." index="1"]
+[node name="ShaderInner" type="MeshInstance3D" parent="." index="1"]
 transform = Transform3D(7.5, 0, 0, 0, 7.5, 0, 0, 0, 7.5, 0, 2.7109, 0)
 mesh = SubResource("SphereMesh_oi6qu")
 skeleton = NodePath("")
 
-[node name="MeshInstance3D3" type="MeshInstance3D" parent="." index="2"]
+[node name="ShaderInnerner" type="MeshInstance3D" parent="." index="2"]
 transform = Transform3D(6.8, 0, 0, 0, 6.8, 0, 0, 0, 6.8, 0, 2.7109, 0)
 mesh = SubResource("SphereMesh_oi6qu")
 skeleton = NodePath("")
 
-[node name="MeshInstance3D4" type="MeshInstance3D" parent="." index="3"]
+[node name="cool" type="MeshInstance3D" parent="." index="3"]
 transform = Transform3D(9, 0, 0, 0, 9, 0, 0, 0, 9, 0, 2.656, 0)
 mesh = SubResource("SphereMesh_4yr0o")
 skeleton = NodePath("")
@@ -147,3 +169,87 @@ stream = ExtResource("6_kpuav")
 pitch_scale = 0.74
 autoplay = true
 parameters/looping = true
+
+[node name="StartButton3D" type="StaticBody3D" parent="." index="66" groups=["start_button"]]
+transform = Transform3D(0.990993, 0, 0.133917, 0, 1, 0, -0.133917, 0, 0.990993, 7.68839, 2, -0.852042)
+
+[node name="ButtonMesh" type="MeshInstance3D" parent="StartButton3D" index="0"]
+mesh = SubResource("BoxMesh_startbutton")
+surface_material_override/0 = SubResource("StandardMaterial3D_startbutton")
+
+[node name="ButtonCollision" type="CollisionShape3D" parent="StartButton3D" index="1"]
+shape = SubResource("BoxShape3D_startbutton")
+
+[node name="ButtonLabel" type="Label3D" parent="StartButton3D" index="2"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0.16, 0)
+text = "START GAME"
+
+[node name="PodHealthViewport" type="SubViewport" parent="." index="67"]
+size = Vector2i(400, 100)
+render_target_update_mode = 4
+
+[node name="PodHealthUI" type="Control" parent="PodHealthViewport" index="0"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HealthBackground" type="ColorRect" parent="PodHealthViewport/PodHealthUI" index="0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.8)
+
+[node name="HealthLabel" type="Label" parent="PodHealthViewport/PodHealthUI" index="1"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -50.0
+offset_right = 50.0
+offset_bottom = 30.0
+grow_horizontal = 2
+text = "POD INTEGRITY"
+horizontal_alignment = 1
+
+[node name="HealthBar" type="ProgressBar" parent="PodHealthViewport/PodHealthUI" index="2"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -10.0
+offset_right = 150.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+value = 100.0
+show_percentage = false
+
+[node name="HealthText" type="Label" parent="PodHealthViewport/PodHealthUI" index="3"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -50.0
+offset_top = -25.0
+offset_right = 50.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "100%"
+horizontal_alignment = 1
+
+[node name="PodHealthDisplay" type="MeshInstance3D" parent="." index="68"]
+transform = Transform3D(0.216633, 0.00322463, 0.976248, 0.0355611, 0.999304, -0.011192, -0.975605, 0.037141, 0.216368, 6.19861, 2.94028, -4.3625)
+cast_shadow = 0
+mesh = SubResource("QuadMesh_health")
+surface_material_override/0 = SubResource("StandardMaterial3D_health")

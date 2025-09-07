@@ -1,6 +1,7 @@
-[gd_scene load_steps=32 format=4 uid="uid://bq6sbgu8kp78w"]
+[gd_scene load_steps=34 format=4 uid="uid://bq6sbgu8kp78w"]
 
 [ext_resource type="Script" uid="uid://2g3jv22f0lb7" path="res://scripts/main_menu.gd" id="1_q85j6"]
+[ext_resource type="FontFile" uid="uid://14yh4ql5w4yf" path="res://scripts/ui/fonts/OCR-A Regular.otf" id="2_7suek"]
 [ext_resource type="Script" uid="uid://tjffus60xea8" path="res://scripts/menu_pod_camera.gd" id="2_8g5eo"]
 [ext_resource type="PackedScene" uid="uid://bpigsocwrxqni" path="res://scenes/components/pod_11.tscn" id="3_7suek"]
 [ext_resource type="Shader" uid="uid://cdnvj0qcjjg0w" path="res://shaders/menu_fog.gdshader" id="4_otr3d"]
@@ -45,7 +46,6 @@ rings = 16
 
 [sub_resource type="Environment" id="Environment_menu"]
 background_mode = 1
-background_color = Color(0.05, 0.05, 0.1, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.2, 0.3, 0.5, 1)
 ambient_light_energy = 0.3
@@ -1822,6 +1822,10 @@ cache/0/25/0/glyphs/65/texture_idx = 0
 font = SubResource("FontFile_mt7mo")
 font_size = 20
 
+[sub_resource type="LabelSettings" id="LabelSettings_warning"]
+font = ExtResource("2_7suek")
+font_size = 32
+
 [node name="MainMenu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -1836,6 +1840,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = 622.0
+offset_bottom = 311.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.00392157, 0, 0, 1)
@@ -1848,10 +1854,10 @@ render_target_update_mode = 0
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_left = 764.0
-offset_top = 87.0
-offset_right = 2690.0
-offset_bottom = 214.0
+offset_left = 724.0
+offset_top = 67.0
+offset_right = 2650.0
+offset_bottom = 194.0
 grow_vertical = 2
 scale = Vector2(0.92567, 0.856826)
 stretch = true
@@ -1865,17 +1871,17 @@ render_target_update_mode = 4
 script = ExtResource("2_8g5eo")
 
 [node name="TextureRect2" type="TextureRect" parent="PodViewportContainer/PodViewport3D/PodScene"]
-offset_left = -500.568
-offset_top = -102.157
-offset_right = 1598.43
-offset_bottom = 1396.84
+offset_left = -441.842
+offset_top = -201.908
+offset_right = 1657.16
+offset_bottom = 1297.09
 texture = SubResource("GradientTexture2D_8g5eo")
 
 [node name="TextureRect" type="TextureRect" parent="PodViewportContainer/PodViewport3D/PodScene"]
-offset_left = -263.247
-offset_top = -80.7039
-offset_right = 1835.75
-offset_bottom = 1418.29
+offset_left = -339.214
+offset_top = -186.736
+offset_right = 1759.78
+offset_bottom = 1312.26
 texture = SubResource("GradientTexture2D_mr8eq")
 
 [node name="Pod" parent="PodViewportContainer/PodViewport3D/PodScene" instance=ExtResource("3_7suek")]
@@ -1890,21 +1896,25 @@ autoplay = "camera_movement"
 
 [node name="FogSphere1" type="MeshInstance3D" parent="PodViewportContainer/PodViewport3D/PodScene"]
 transform = Transform3D(1.5, 0, 0, 0, 1.2, 0, 0, 0, 1.5, -2, 0, 2)
+visible = false
 mesh = SubResource("SphereMesh_fog")
 skeleton = NodePath("")
 
 [node name="FogSphere2" type="MeshInstance3D" parent="PodViewportContainer/PodViewport3D/PodScene"]
 transform = Transform3D(2, 0, 0, 0, 1.8, 0, 0, 0, 2, 3, -1, 1)
+visible = false
 mesh = SubResource("SphereMesh_fog")
 skeleton = NodePath("")
 
 [node name="FogSphere3" type="MeshInstance3D" parent="PodViewportContainer/PodViewport3D/PodScene"]
 transform = Transform3D(1.2, 0, 0, 0, 1, 0, 0, 0, 1.2, 1, 1, -2)
+visible = false
 mesh = SubResource("SphereMesh_fog")
 skeleton = NodePath("")
 
 [node name="FogSphere4" type="MeshInstance3D" parent="PodViewportContainer/PodViewport3D/PodScene"]
 transform = Transform3D(1.8, 0, 0, 0, 1.5, 0, 0, 0, 1.8, -1, 2, -1)
+visible = false
 mesh = SubResource("SphereMesh_fog")
 skeleton = NodePath("")
 
@@ -1998,12 +2008,6 @@ theme = ExtResource("8_ayp64")
 text = "CONTINUE"
 flat = true
 
-[node name="OptionsButton" type="Button" parent="VBoxContainer/MenuButtons"]
-layout_mode = 2
-theme = ExtResource("8_ayp64")
-text = "OPTIONS"
-flat = true
-
 [node name="QuitButton" type="Button" parent="VBoxContainer/MenuButtons"]
 layout_mode = 2
 theme = ExtResource("8_ayp64")
@@ -2013,7 +2017,6 @@ flat = true
 [node name="AmbientSound" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("9_y2j7i")
 pitch_scale = 0.88
-autoplay = true
 parameters/looping = true
 
 [node name="Instructions" type="Label" parent="."]
@@ -2023,10 +2026,10 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -290.0
-offset_top = -87.0
-offset_right = -20.0
-offset_bottom = -20.0
+offset_left = -320.0
+offset_top = -78.0
+offset_right = -23.0
+offset_bottom = -11.0
 grow_horizontal = 0
 grow_vertical = 0
 text = "Use ARROW KEYS to navigate
@@ -2034,3 +2037,44 @@ Press ENTER to select"
 label_settings = SubResource("LabelSettings_2")
 horizontal_alignment = 2
 vertical_alignment = 2
+
+[node name="EpilepsyWarningOverlay" type="Control" parent="."]
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BlackBackground" type="ColorRect" parent="EpilepsyWarningOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="WarningLabel" type="Label" parent="EpilepsyWarningOverlay"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -183.0
+offset_right = 400.0
+offset_bottom = 183.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "WARNING: PHOTOSENSITIVE EPILEPSY
+
+This game contains flashing lights and patterns that may trigger seizures in individuals with photosensitive epilepsy.
+Player discretion is advised.
+
+
+Press SPACE to continue"
+label_settings = SubResource("LabelSettings_warning")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2

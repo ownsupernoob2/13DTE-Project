@@ -5,17 +5,18 @@ extends Control
 @onready var title_label: Label = $VBoxContainer/TitleLabel
 @onready var continue_button: Button = $VBoxContainer/MenuButtons/ContinueButton
 @onready var new_game_button: Button = $VBoxContainer/MenuButtons/NewGameButton
-@onready var options_button: Button = $VBoxContainer/MenuButtons/OptionsButton
 @onready var quit_button: Button = $VBoxContainer/MenuButtons/QuitButton
 @onready var background: ColorRect = $Background
 @onready var ambient_sound: AudioStreamPlayer = $AmbientSound
 @onready var selection_indicator: Label = $VBoxContainer/SelectionIndicator
+@onready var epilepsy_warning_overlay: Control = $EpilepsyWarningOverlay
+@onready var warning_label: Label = $EpilepsyWarningOverlay/WarningLabel
 
 # Presentation overlay - no longer needed with 3D presentation scene
 # var presentation_overlay: Control = null
 
 # Horror-style colors and effects
-var dark_brown = Color(0.15, 0.12, 0.08)
+var dark_brown = Color(0, 0, 0)
 var gold = Color(0.9, 0.7, 0.3)
 var red = Color(0.7, 0.2, 0.1)
 var disabled_color = Color(0.5, 0.5, 0.5)  # Updated to lighter grey
@@ -33,20 +34,61 @@ func _ready() -> void:
 	# Ensure we always start on NEW GAME
 	current_button_index = 0
 	
+	# Initialize menu components - main menu stays visible
 	_setup_button_array()
 	_setup_button_styles()
 	_check_continue_availability()
 	_connect_buttons()
-	_start_ambient_effects()
+	_update_button_selection()
 	
-	# Defer the initial selection update until after the UI layout is complete
-	call_deferred("_update_button_selection")
-	# Add a small additional delay to ensure proper positioning
-	get_tree().create_timer(0.1).timeout.connect(_update_selection_indicator)
+	# Fix indicator positioning after scene is fully loaded
+	await get_tree().process_frame
+	await get_tree().process_frame  # Extra frame to ensure layout is complete
+	_update_selection_indicator()
+	
+	# Show epilepsy warning overlay on top
+	_show_epilepsy_warning()
+
+func _show_epilepsy_warning() -> void:
+	# Start with warning text invisible at normal scale
+	warning_label.scale = Vector2(1.0, 1.0)  # Keep original scale
+	warning_label.modulate.a = 0.0  # Start invisible
+	
+	# Fade in the text over 1.5 seconds
+	var fade_in_tween = create_tween()
+	fade_in_tween.tween_property(warning_label, "modulate:a", 1.0, 1.5)
+	
+	# Text stays visible until player presses a key (handled in _input function)
+
+func _hide_warning_text() -> void:
+	# Hide just the warning text, keep the black background
+	var text_fade_tween = create_tween()
+	text_fade_tween.tween_property(warning_label, "modulate:a", 0.0, 0.8)
+	
+	# Wait 3 seconds with just black screen (longer black screen)
+	await get_tree().create_timer(3.0).timeout
+	_reveal_main_menu()
+
+func _reveal_main_menu() -> void:
+	# Hide the entire warning overlay (including black background) with longer fade
+	var overlay_fade_tween = create_tween()
+	overlay_fade_tween.tween_property(epilepsy_warning_overlay, "modulate:a", 0.0, 2.5)  # Longer fade out
+	overlay_fade_tween.tween_callback(epilepsy_warning_overlay.hide)
+	overlay_fade_tween.tween_callback(_start_ambient_effects)  # Start music when revealed
+
+func _skip_epilepsy_warning() -> void:
+	# When player presses key, proceed to hide text and continue sequence
+	var all_tweens = get_tree().get_nodes_in_group("tween")
+	for tween in all_tweens:
+		if tween is Tween:
+			tween.kill()
+	
+	# Proceed to hide warning text and continue sequence
+	_hide_warning_text()
 	
 
 func _setup_button_array() -> void:
-	menu_buttons = [new_game_button, continue_button, options_button, quit_button]
+	menu_buttons = [new_game_button, continue_button, quit_button]
 
 func _setup_button_styles() -> void:
 	# Apply bold, bigger text styling to all buttons
@@ -81,8 +123,7 @@ func _update_button_selection() -> void:
 		match i:
 			0: base_text = "NEW GAME"
 			1: base_text = "CONTINUE"
-			2: base_text = "OPTIONS"
-			3: base_text = "QUIT"
+			2: base_text = "QUIT"
 		
 		# Set clean text without any arrows or spaces
 		button.text = base_text
@@ -154,10 +195,10 @@ func _style_horror_button(button: Button) -> void:
 	button.add_theme_font_size_override("font_size", 54)  # Bigger text
 	
 	# Create a bold font theme if possible
-	var theme = button.get_theme()
-	if theme == null:
-		theme = Theme.new()
-		button.theme = theme
+	var button_theme = button.get_theme()
+	if button_theme == null:
+		button_theme = Theme.new()
+		button.theme = button_theme
 	
 	# Try to set bold font (you may need to load a bold font resource)
 	# For now, we'll increase the font size and use theme overrides
@@ -179,8 +220,6 @@ func _connect_buttons() -> void:
 		continue_button.pressed.connect(_on_continue_pressed)
 	if new_game_button:
 		new_game_button.pressed.connect(_on_new_game_pressed)
-	if options_button:
-		options_button.pressed.connect(_on_options_pressed)
 	if quit_button:
 		quit_button.pressed.connect(_on_quit_pressed)
 
@@ -188,6 +227,7 @@ func _start_ambient_effects() -> void:
 	# Set up ambient sound pitch to stay at 0.6 for 4 seconds, then increase over 2 seconds
 	if ambient_sound:
 		ambient_sound.pitch_scale = 0.8
+		ambient_sound.play()  # Start playing the music
 	_start_flickering_effect()
 		
 func _start_flickering_effect() -> void:
@@ -205,7 +245,7 @@ func _on_continue_pressed() -> void:
 		var stage = SaveSystem.get_highest_stage()
 		print("📁 Loading stage ", stage)
 		
-		var stage_scenes = [
+		var _stage_scenes = [
 			"res://scenes/days/stage_1_tutorial.tscn",
 			"res://scenes/days/stage_2_easy.tscn", 
 			"res://scenes/days/stage_3_easy.tscn",
@@ -331,6 +371,14 @@ func _update_confirmation_selection(overlay: ColorRect) -> void:
 				button.text = "  NO"
 
 func _input(event: InputEvent) -> void:
+	# Check if epilepsy warning is active (can be skipped)
+	if epilepsy_warning_overlay.visible and epilepsy_warning_overlay.modulate.a > 0.0:
+		if event is InputEventKey and event.pressed:
+			match event.keycode:
+				KEY_ENTER, KEY_SPACE, KEY_ESCAPE:
+					_skip_epilepsy_warning()
+		return
+	
 	# Check if confirmation dialog is active
 	var confirmation_overlay = get_node_or_null("ConfirmationOverlay")
 	if confirmation_overlay:
@@ -401,16 +449,6 @@ func _start_new_game() -> void:
 		var fallback_result = get_tree().change_scene_to_file("res://scenes/stage_1_tutorial.tscn")
 		if fallback_result != OK:
 			get_tree().change_scene_to_file("res://scenes/demo.tscn")
-
-func _on_options_pressed() -> void:
-	# Fade out ambient sound
-	if ambient_sound:
-		var tween = create_tween()
-		tween.tween_property(ambient_sound, "volume_db", -80.0, 0.5)
-		tween.tween_callback(ambient_sound.stop)
-	
-	# Navigate to options menu
-	get_tree().change_scene_to_file("res://scenes/options_menu.tscn")
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()

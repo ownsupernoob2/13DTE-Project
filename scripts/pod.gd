@@ -53,20 +53,43 @@ func _ready() -> void:
 func _initialize_health_display() -> void:
 	print("💗 Initializing pod health display...")
 	
-	# Hide health display initially (only show after game starts)
+	# Debug: Check if health nodes exist
+	print("🔍 Checking health display nodes...")
+	print("  - PodHealthViewport exists: ", has_node("PodHealthViewport"))
+	print("  - HealthBar exists: ", has_node("PodHealthViewport/PodHealthUI/HealthBar"))
+	print("  - HealthText exists: ", has_node("PodHealthViewport/PodHealthUI/HealthText"))
+	print("  - PodHealthDisplay exists: ", has_node("PodHealthDisplay"))
+	
+	# Keep health display always visible
 	if health_display:
-		health_display.visible = false
+		health_display.visible = true
+		print("  - Health display is always visible")
+	else:
+		print("  - Health display node not found!")
 	
 	# Set initial health values
 	if health_bar:
 		health_bar.value = 100.0
+		print("  - Health bar value set to 100")
+	else:
+		print("  - Health bar not found!")
+		
 	if health_text:
 		health_text.text = "100%"
+		print("  - Health text set to 100%")
+	else:
+		print("  - Health text not found!")
 
 # Start pod filling sequence with health degradation system
 
 func _initialize_shaders() -> void:
 	print("🔧 Initializing pod shaders...")
+	
+	# Debug: Check if shader nodes exist
+	print("🔍 Checking shader nodes...")
+	print("  - Shader node exists: ", has_node("Shader"))
+	print("  - ShaderInner node exists: ", has_node("ShaderInner"))
+	print("  - ShaderInnerner node exists: ", has_node("ShaderInnerner"))
 	
 	# Set initial shader states - empty pod
 	if fill_shader_material:
@@ -75,6 +98,12 @@ func _initialize_shaders() -> void:
 		print("✅ Fill shader initialized")
 	else:
 		print("⚠️ Fill shader material not found")
+		# Try to get it manually
+		var shader_node = get_node_or_null("Shader")
+		if shader_node:
+			print("  - Shader node found, but material_override is: ", shader_node.material_override)
+		else:
+			print("  - Shader node not found")
 	
 	if sedation_shader_material:
 		sedation_shader_material.set_shader_parameter("transparency_strength", 1.0)  # Fully transparent
@@ -119,6 +148,9 @@ func _on_start_button_pressed() -> void:
 	# Start the delayed monitor display sequence
 	_start_delayed_monitor_sequence()
 	
+	# Also start the pod filling sequence for visual effects and health display
+	_start_pod_filling_sequence()
+	
 	print("✅ Game started immediately, monitor display will show in a few seconds...")
 	print("💡 Button remains visible but further presses will be ignored")
 
@@ -126,9 +158,12 @@ func _start_delayed_monitor_sequence() -> void:
 	print("🎬 Starting delayed monitor sequence...")
 	
 	# First show "Processing information" message
-	if GameManager:
-		GameManager._show_processing_message()
+	var monitor = _find_monitor_system()
+	if monitor and monitor.has_method("show_processing_message"):
+		monitor.show_processing_message()
 		print("📺 Processing message displayed")
+	else:
+		print("❌ Could not find monitor or processing message method")
 	
 	# Start shader color transition from white to dark green
 	_animate_shader_color_change()
@@ -137,9 +172,42 @@ func _start_delayed_monitor_sequence() -> void:
 	await get_tree().create_timer(3.0).timeout
 	
 	# Now update the monitor with alien information
-	if GameManager:
-		GameManager._update_monitor_display()
+	if monitor and monitor.has_method("show_alien_info"):
+		monitor.show_alien_info()
 		print("📺 Alien information now displayed after processing delay")
+	else:
+		print("❌ Could not find monitor or alien info method")
+
+func _find_monitor_system() -> Node:
+	# Search for the monitor in common locations
+	var scene_root = get_tree().current_scene
+	var monitor_paths = [
+		"Monitor/SubViewport/Control/Console",  # Most likely path based on scene structure
+		"Computer/Monitor/SubViewport/Control/Console",
+		"Computer/ComputerCamera/Monitor/Monitor/SubViewport/Control/Console"
+	]
+	
+	for path in monitor_paths:
+		var monitor = scene_root.get_node_or_null(path)
+		if monitor:
+			print("✓ Found monitor at: ", path)
+			return monitor
+	
+	# Also try searching by script class
+	var all_nodes = _get_all_nodes_in_scene(scene_root)
+	for node in all_nodes:
+		if node.get_script() and node.get_script().get_path().ends_with("monitor.gd"):
+			print("✓ Found monitor by script at: ", node.get_path())
+			return node
+	
+	print("❌ Monitor not found at any expected location")
+	return null
+
+func _get_all_nodes_in_scene(node: Node) -> Array:
+	var nodes = [node]
+	for child in node.get_children():
+		nodes.append_array(_get_all_nodes_in_scene(child))
+	return nodes
 
 func _animate_button_press() -> void:
 	print("🎬 Animating 3D button press...")
@@ -185,10 +253,7 @@ func _start_pod_filling_sequence() -> void:
 	pod_filling = false
 	print("✅ Pod filling completed!")
 	
-	# Show health display after pod is filled
-	if health_display:
-		health_display.visible = true
-		print("💗 Pod health display activated")
+	# Health display is always visible, no need to show it here
 
 func _on_pod_health_changed(health: float) -> void:
 	print("💗 Pod health changed to: ", health)

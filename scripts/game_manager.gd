@@ -103,11 +103,23 @@ func _update_monitor_initial_state() -> void:
 	var monitor = _find_monitor_system()
 	
 	if monitor:
+		# Test if monitor is responsive
+		if monitor.has_method("ping"):
+			var response = monitor.ping()
+			print("📺 Monitor ping response: ", response)
+		
+		# Try to show start message
 		if monitor.has_method("show_start_message"):
 			monitor.show_start_message()
 			print("📺 Monitor set to show start message")
+		elif monitor.has_method("force_start_message"):
+			monitor.force_start_message()
+			print("📺 Monitor forced to show start message")
 		else:
 			print("⚠️ Monitor found but no start message method available")
+			# Try a simple test instead
+			if monitor.has_method("test_display"):
+				monitor.test_display()
 	else:
 		print("❌ Monitor system not found for initial state")
 
@@ -159,23 +171,37 @@ func _show_processing_message() -> void:
 		print("❌ Monitor system not found")
 
 func _find_monitor_system() -> Node:
-	# Search common monitor paths
-	var scene_path = str(get_tree().current_scene.get_path())  # Convert NodePath to String
+	print("🔍 Searching for monitor system...")
+	
+	# First try direct search by script class
+	var all_nodes = _get_all_nodes_in_scene(get_tree().current_scene)
+	for node in all_nodes:
+		if node.get_script() and node.get_script().get_path().ends_with("monitor.gd"):
+			print("✓ Found monitor by script at: ", node.get_path())
+			return node
+	
+	# Fallback: Search common monitor paths
+	var scene_path = str(get_tree().current_scene.get_path())
 	var monitor_paths = [
-		# Search in current scene first
-		scene_path + "/Computer/ComputerCamera/Monitor/Monitor/SubViewport/Control/Console",
-		scene_path + "/Monitor/Monitor/SubViewport/Control/Console", 
-		scene_path + "/Computer/Monitor/SubViewport/Control/Console"
+		scene_path + "/Monitor/SubViewport/Control/Console",  # Most likely path
+		scene_path + "/Computer/Monitor/SubViewport/Control/Console", 
+		scene_path + "/Computer/ComputerCamera/Monitor/Monitor/SubViewport/Control/Console"
 	]
 	
 	for path in monitor_paths:
 		var monitor = get_node_or_null(path)
 		if monitor:
-			print("✓ Found monitor at: ", path)
+			print("✓ Found monitor at path: ", path)
 			return monitor
 	
-	# Fallback: search in scene tree
+	# Final fallback: search in scene tree for RichTextLabel with specific names
 	return _find_monitor_in_tree(get_tree().current_scene)
+
+func _get_all_nodes_in_scene(node: Node) -> Array:
+	var nodes = [node]
+	for child in node.get_children():
+		nodes.append_array(_get_all_nodes_in_scene(child))
+	return nodes
 
 func _find_monitor_in_tree(node: Node) -> Node:
 	# Look for RichTextLabel nodes that might be monitors
@@ -298,8 +324,8 @@ func create_demo_alien() -> void:
 	game_active = true
 	print("🎮 Demo game started with alien: ", current_alien)
 	
-	# Don't update monitor immediately - pod will handle timing
-	# _update_monitor_display()  # Commented out - pod handles timing
+	# Don't update monitor immediately - let Pod system handle the timing
+	# The Pod system will call the monitor update functions at the right time
 	
 	start_new_stage()
 

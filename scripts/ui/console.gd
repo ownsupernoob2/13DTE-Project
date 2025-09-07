@@ -65,6 +65,8 @@ var _last_input: String = ""
 var current_file: String = ""
 var current_file_type: String = "Text"
 var _just_save: String = ""
+# Exit instruction flag
+var _exit_instruction_shown: bool = false
 
 @export var SetLocaleToEng: bool = false
 
@@ -179,6 +181,18 @@ func test_audio_setup():
 		print("Enter audio player is ready")
 	if audio_space:
 		print("Space audio player is ready")
+
+func _input(event: InputEvent) -> void:
+	if !Global.is_using_computer:
+		return
+	
+	# Handle mouse clicks to exit computer
+	if event is InputEventMouseButton:
+		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			var player = get_tree().get_first_node_in_group("player")
+			if player and player.has_method("exit_computer_mode"):
+				player.exit_computer_mode()
+				print("Exited computer mode via mouse click")
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if !Global.is_using_computer:
@@ -365,8 +379,11 @@ func _unhandled_key_input(event: InputEvent) -> void:
 				if _table_mode:
 					_exit_table_mode()
 				else:
-					# Default escape behavior if needed
-					pass
+					# Exit computer mode
+					var player = get_tree().get_first_node_in_group("player")
+					if player and player.has_method("exit_computer_mode"):
+						player.exit_computer_mode()
+						print("Exited computer mode via escape key")
 			_: print(event.as_text())
 		CurrentInputString_escaped = CurrentInputString.replace("[", "[lb]").replace("\n", "\u2B92\n")
 		append_current_input_string()
@@ -385,9 +402,9 @@ func append_current_input_string(enter:bool=false) -> void:
 			if _current_cursor_pos == 0:
 				match _just_save:
 					"Success":
-						append_text(_PrefixText + CurrentInputString_escaped + "[color=LIME_GREEN]\u2581[/color]")
+						append_text(_PrefixText + CurrentInputString_escaped + "[color=GREEN]\u2581[/color]")
 					"Fail":
-						append_text(_PrefixText + CurrentInputString_escaped + "[color=CRIMSON]\u2581[/color]")
+						append_text(_PrefixText + CurrentInputString_escaped + "[color=DARK_GREEN]\u2581[/color]")
 					_:
 						append_text(_PrefixText + CurrentInputString_escaped + "\u2581")
 			elif _current_cursor_pos > 0:
@@ -403,11 +420,11 @@ func append_current_input_string(enter:bool=false) -> void:
 						append_text(cis_left)
 				match _just_save:
 					"Success":
-						push_bgcolor(Color("LIME_GREEN"))
+						push_bgcolor(Color("GREEN"))
 					"Fail":
-						push_bgcolor(Color("CRIMSON"))
+						push_bgcolor(Color("DARK_GREEN"))
 					_:
-						push_bgcolor(Color("WHITE"))
+						push_bgcolor(Color("LIME_GREEN"))
 				push_color(Color("BLACK"))
 				match CurrentInputString[-_current_cursor_pos]:
 					"[":
@@ -494,12 +511,12 @@ func append_history(up:bool = true) -> void:
 func set_prefix() -> void:
 	match CurrentMode:
 		"","Default":
-			_PrefixText = "[bgcolor=DODGER_BLUE]" + USER_Name + "[/bgcolor][bgcolor=WEB_GRAY][color=DODGER_BLUE]\u25E3[/color]"\
-				+ return_path_string(current_path) +"[/bgcolor][color=WEB_GRAY]\u25B6[/color]"
+			_PrefixText = "[bgcolor=GREEN]" + USER_Name + "[/bgcolor][bgcolor=DARK_GREEN][color=GREEN]\u25E3[/color]"\
+				+ return_path_string(current_path) +"[/bgcolor][color=DARK_GREEN]\u25B6[/color]"
 		"Edit":
-			_PrefixText = "[bgcolor=DODGER_BLUE]" + USER_Name + "[/bgcolor][bgcolor=WEB_GRAY][color=DODGER_BLUE]\u25E3[/color]"\
-				+ return_path_string(current_path) +"[/bgcolor][bgcolor=BURLYWOOD][color=WEB_GRAY]\u25B6[/color]"\
-				+ "\U01F4DD" + current_file + "[/bgcolor][color=BURLYWOOD]\u25B6[/color]"
+			_PrefixText = "[bgcolor=GREEN]" + USER_Name + "[/bgcolor][bgcolor=DARK_GREEN][color=GREEN]\u25E3[/color]"\
+				+ return_path_string(current_path) +"[/bgcolor][bgcolor=FOREST_GREEN][color=DARK_GREEN]\u25B6[/color]"\
+				+ "\U01F4DD" + current_file + "[/bgcolor][color=FOREST_GREEN]\u25B6[/color]"
 		_:
 			append_text(tr("error.mode_undefined"))
 			CurrentMode = ""
@@ -530,20 +547,20 @@ func pad_string_center(text: String, width: int) -> String:
 func insert_disk(disk_name: String, disk_node: Node, disk_data: Dictionary = {}) -> void:
 	var valid_disks = ["Disk1", "Disk2", "Disk3", "Disk4"]
 	if not disk_name in valid_disks:
-		append_text("[color=RED]Error: Invalid disk name. Supported: " + str(valid_disks) + "[/color]")
+		append_text("[color=DARK_GREEN]Error: Invalid disk name. Supported: " + str(valid_disks) + "[/color]")
 		newline()
 		return
 
 	if inserted_disk != "":
-		append_text("[color=RED]Error: Computer already has a disk inserted (" + inserted_disk + ").[/color]")
+		append_text("[color=DARK_GREEN]Error: Computer already has a disk inserted (" + inserted_disk + ").[/color]")
 		newline()
-		append_text("[color=YELLOW]Use 'eject' command to remove current disk first.[/color]")
+		append_text("[color=GREEN]Use 'eject' command to remove current disk first.[/color]")
 		newline()
 		return
 
 	var fake_disk = get_node_or_null("../../../" + disk_name)
 	if not fake_disk:
-		append_text("[color=RED]Error: " + disk_name + " node not found.[/color]")
+		append_text("[color=DARK_GREEN]Error: " + disk_name + " node not found.[/color]")
 		newline()
 		return
 
@@ -556,7 +573,7 @@ func insert_disk(disk_name: String, disk_node: Node, disk_data: Dictionary = {})
 		animation_player.play("insert")
 		await animation_player.animation_finished
 	else:
-		append_text("[color=YELLOW]Warning: No insertion animation found, proceeding with insertion.[/color]")
+		append_text("[color=GREEN]Warning: No insertion animation found, proceeding with insertion.[/color]")
 		newline()
 
 	inserted_disk = disk_name
@@ -576,7 +593,7 @@ func insert_disk(disk_name: String, disk_node: Node, disk_data: Dictionary = {})
 		newline()
 		display_disk_info(disk_name, disk_data)
 	else:
-		append_text("[color=YELLOW]Warning: Disk already exists in /home.[/color]")
+		append_text("[color=GREEN]Warning: Disk already exists in /home.[/color]")
 		newline()
 
 	if disk_node is Node3D:
@@ -638,30 +655,30 @@ func generate_csv_content(disk_name: String, filename: String) -> String:
 	return "CSV_ERROR: Unable to generate table for " + disk_name + " " + filename
 
 func display_disk_info(disk_name: String, disk_data: Dictionary) -> void:
-	append_text("[color=CYAN]" + repeat_string("=", 80) + "[/color]")
+	append_text("[color=LIME_GREEN]" + repeat_string("=", 80) + "[/color]")
 	newline()
-	append_text("[color=CYAN]              ALIEN CLASSIFICATION DATA DISK INSERTED[/color]")
+	append_text("[color=LIME_GREEN]              ALIEN CLASSIFICATION DATA DISK INSERTED[/color]")
 	newline()
-	append_text("[color=CYAN]" + repeat_string("=", 80) + "[/color]")
+	append_text("[color=LIME_GREEN]" + repeat_string("=", 80) + "[/color]")
 	newline()
 	
-	append_text("[color=YELLOW]Disk:[/color] " + disk_name)
+	append_text("[color=GREEN]Disk:[/color] " + disk_name)
 	newline()
 	newline()
 	
 	append_text("[color=GREEN]COMMANDS TO GET STARTED:[/color]")
 	newline()
-	append_text("  [color=WHITE]ls[/color]                        - List all files on disk")
+	append_text("  [color=LIME_GREEN]ls[/color]                        - List all files on disk")
 	newline()
-	append_text("  [color=WHITE]cd folder_name[/color]            - Enter directory folder")
+	append_text("  [color=LIME_GREEN]cd folder_name[/color]            - Enter directory folder")
 	newline()
-	append_text("  [color=WHITE]table weight_classes.csv[/color] - View weight/liquid ratio data")
+	append_text("  [color=LIME_GREEN]table weight_classes.csv[/color] - View weight/liquid ratio data")
 	newline()
-	append_text("  [color=WHITE]eject[/color]                     - Remove this disk")
+	append_text("  [color=LIME_GREEN]eject[/color]                     - Remove this disk")
 	newline()
 	newline()
 	
-	append_text("[color=YELLOW]WORKFLOW:[/color]")
+	append_text("[color=GREEN]WORKFLOW:[/color]")
 	newline()
 	append_text("1. Check alien weight on monitor system")
 	newline()
@@ -673,7 +690,7 @@ func display_disk_info(disk_name: String, disk_data: Dictionary) -> void:
 	newline()
 	newline()
 	
-	append_text("[color=CYAN]" + repeat_string("=", 80) + "[/color]")
+	append_text("[color=LIME_GREEN]" + repeat_string("=", 80) + "[/color]")
 	newline()
 		
 func check_permission() -> bool:
@@ -688,7 +705,7 @@ func process(command: String) -> void:
 	
 	if !commands.keys().has(cmd):
 		push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
-		append_text("[color=RED]" + tr("error.command_not_found") + "[/color] " + cmd)
+		append_text("[color=DARK_GREEN]" + tr("error.command_not_found") + "[/color] " + cmd)
 		pop()
 		newline()
 		# Auto-scroll after error message
@@ -701,7 +718,7 @@ func process(command: String) -> void:
 	
 	if expected_arg_count != args.size():
 		push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
-		append_text("[color=RED]" + tr("error.parameter_count_mismatch") + "[/color] " + tr("error.parameter_count_mismatch.expect_got") \
+		append_text("[color=DARK_GREEN]" + tr("error.parameter_count_mismatch") + "[/color] " + tr("error.parameter_count_mismatch.expect_got") \
 						% [str(expected_arg_count), args])
 		pop()
 		newline()
@@ -712,7 +729,7 @@ func process(command: String) -> void:
 	
 	if cmd in ["mkdir", "touch", "rm", "mv", "cp", "nano"] and not check_permission():
 		push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
-		append_text("[color=RED]Insufficient permissions.[/color]")
+		append_text("[color=DARK_GREEN]Insufficient permissions.[/color]")
 		pop()
 		newline()
 		# Auto-scroll after permission error
@@ -741,7 +758,7 @@ func _built_in_command_init():
 			elif commands.keys().has(id):
 				append_text(commands[id].helpDetail)
 			else:
-				append_text("[color=RED]" + tr("error.command_not_found") + "[/color] " + id)
+				append_text("[color=DARK_GREEN]" + tr("error.command_not_found") + "[/color] " + id)
 			newline(),
 		self,
 		tr("help.man"),
@@ -822,7 +839,7 @@ func _built_in_command_init():
 				append_text("Permission granted.")
 			else:
 				has_permission = false
-				append_text("[color=RED]Incorrect password.[/color]")
+				append_text("[color=DARK_GREEN]Incorrect password.[/color]")
 			newline(),
 		self,
 		"Authenticate to gain write permissions",
@@ -831,44 +848,44 @@ func _built_in_command_init():
 	add_command(
 		"help",
 		func():
-			append_text("[color=CYAN]" + repeat_string("═", 90) + "[/color]")
+			append_text("[color=LIME_GREEN]" + repeat_string("═", 90) + "[/color]")
 			newline()
-			append_text("[color=CYAN]                    ALIEN CLASSIFICATION TERMINAL - COMMAND REFERENCE[/color]")
+			append_text("[color=LIME_GREEN]                    ALIEN CLASSIFICATION TERMINAL - COMMAND REFERENCE[/color]")
 			newline()
-			append_text("[color=CYAN]" + repeat_string("═", 90) + "[/color]")
-			newline()
-			newline()
-			append_text("[color=YELLOW]NAVIGATION COMMANDS:[/color]")
-			newline()
-			append_text("  [color=WHITE]ls[/color]         - List contents of current directory")
-			newline()
-			append_text("  [color=WHITE]cd[/color]         - Change to specified directory")
-			newline()
-			append_text("  [color=WHITE]pwd[/color]        - Show current directory path")
+			append_text("[color=LIME_GREEN]" + repeat_string("═", 90) + "[/color]")
 			newline()
 			newline()
-			append_text("[color=YELLOW]FILE OPERATIONS:[/color]")
+			append_text("[color=GREEN]NAVIGATION COMMANDS:[/color]")
 			newline()
-			append_text("  [color=WHITE]cat[/color]        - Display contents of a text file")
+			append_text("  [color=LIME_GREEN]ls[/color]         - List contents of current directory")
 			newline()
-			append_text("  [color=WHITE]table[/color]      - View CSV data in formatted table")
+			append_text("  [color=LIME_GREEN]cd[/color]         - Change to specified directory")
 			newline()
-			newline()
-			append_text("[color=YELLOW]DISK OPERATIONS:[/color]")
-			newline()
-			append_text("  [color=WHITE]eject[/color]      - Remove currently inserted disk")
+			append_text("  [color=LIME_GREEN]pwd[/color]        - Show current directory path")
 			newline()
 			newline()
-			append_text("[color=YELLOW]UTILITY:[/color]")
+			append_text("[color=GREEN]FILE OPERATIONS:[/color]")
 			newline()
-			append_text("  [color=WHITE]clear[/color]      - Clear the terminal screen")
+			append_text("  [color=LIME_GREEN]cat[/color]        - Display contents of a text file")
 			newline()
-			append_text("  [color=WHITE]help[/color]       - Show this command reference")
+			append_text("  [color=LIME_GREEN]table[/color]      - View CSV data in formatted table")
 			newline()
 			newline()
-			append_text("[color=CYAN]" + repeat_string("═", 90) + "[/color]")
+			append_text("[color=GREEN]DISK OPERATIONS:[/color]")
 			newline()
-			append_text("[color=GRAY]Insert a data disk and use these commands to analyze alien specimens[/color]")
+			append_text("  [color=LIME_GREEN]eject[/color]      - Remove currently inserted disk")
+			newline()
+			newline()
+			append_text("[color=GREEN]UTILITY:[/color]")
+			newline()
+			append_text("  [color=LIME_GREEN]clear[/color]      - Clear the terminal screen")
+			newline()
+			append_text("  [color=LIME_GREEN]help[/color]       - Show this command reference")
+			newline()
+			newline()
+			append_text("[color=LIME_GREEN]" + repeat_string("═", 90) + "[/color]")
+			newline()
+			append_text("[color=DARK_GREEN]Insert a data disk and use these commands to analyze alien specimens[/color]")
 			newline(),
 		self,
 		"Show list of commands",
@@ -887,7 +904,7 @@ func _built_in_command_init():
 				else:
 					append_text(path_instance.get(null))
 			else:
-				append_text("[color=RED]" + tr("error.invalid_file_name") + "[/color] [i]" + folder_name + "[/i]")
+				append_text("[color=DARK_GREEN]" + tr("error.invalid_file_name") + "[/color] [i]" + folder_name + "[/i]")
 			newline(),
 		self,
 		tr("help.mkdir"),
@@ -906,7 +923,7 @@ func _built_in_command_init():
 				else:
 					append_text(path_instance.get(null))
 			else:
-				append_text("[color=RED]" + tr("error.invalid_file_name") + "[/color] [i]" + file_name + "[/i]")
+				append_text("[color=DARK_GREEN]" + tr("error.invalid_file_name") + "[/color] [i]" + file_name + "[/i]")
 			newline(),
 		self,
 		tr("help.touch"),
@@ -941,7 +958,7 @@ func _built_in_command_init():
 						else:
 							append_text("[i]" + to_name + "[/i] " + tr("error.already_exist"))
 					else:
-						append_text("[color=RED]" + tr("error.invalid_file_name") + "[/color] [i]" + to_name + "[/i]")
+						append_text("[color=DARK_GREEN]" + tr("error.invalid_file_name") + "[/color] [i]" + to_name + "[/i]")
 				else:
 					append_text("[i]" + file_name + "[/i] " + tr("error.not_exist"))
 			else:
@@ -1038,11 +1055,11 @@ func _built_in_command_init():
 
 		var path_instance = get_path_instance(current_path)
 		if path_instance.has(null):
-			append_text("[color=RED]Error: Cannot access current directory.[/color]")
+			append_text("[color=DARK_GREEN]Error: Cannot access current directory.[/color]")
 			newline()
 			return
 		if not path_instance.has(inserted_disk):
-			append_text("[color=RED]Error: Disk not found in current directory.[/color]")
+			append_text("[color=DARK_GREEN]Error: Disk not found in current directory.[/color]")
 			newline()
 			return
 
@@ -1145,7 +1162,7 @@ func _built_in_command_init():
 		"diskinfo",
 		func():
 			if inserted_disk == "":
-				append_text("[color=RED]No disk inserted.[/color]")
+				append_text("[color=DARK_GREEN]No disk inserted.[/color]")
 				newline()
 				return
 			
@@ -1153,7 +1170,7 @@ func _built_in_command_init():
 			if path_instance.has(inserted_disk):
 				append_text("[color=CYAN]Disk: " + inserted_disk + "[/color]")
 				newline()
-				append_text("[color=YELLOW]Files:[/color]")
+				append_text("[color=GREEN]Files:[/color]")
 				newline()
 				var disk_data = path_instance[inserted_disk]
 				for file_name in disk_data.keys():
@@ -1395,9 +1412,16 @@ func _restore_terminal_ui() -> void:
 	pass
 
 func _show_startup_commands() -> void:
-	append_text("[color=CYAN]ALIEN CLASSIFICATION TERMINAL[/color]")
+	# Show exit instruction only once
+	if not _exit_instruction_shown:
+		append_text("[color=LIME_GREEN]Click or press ESC to exit the computer[/color]")
+		newline()
+		newline()
+		_exit_instruction_shown = true
+	
+	append_text("[color=LIME_GREEN]ALIEN CLASSIFICATION TERMINAL[/color]")
 	newline()
-	append_text("[color=YELLOW]Basic Commands:[/color]")
+	append_text("[color=GREEN]Basic Commands:[/color]")
 	newline()
 	append_text("  help     - Show all available commands")
 	newline()
@@ -1411,6 +1435,6 @@ func _show_startup_commands() -> void:
 	newline()
 	append_text("  eject    - Remove inserted disk")
 	newline()
-	append_text("[color=GRAY]Insert a data disk to begin analysis...[/color]")
+	append_text("[color=DARK_GREEN]Insert a data disk to begin analysis...[/color]")
 	newline()
 	newline()

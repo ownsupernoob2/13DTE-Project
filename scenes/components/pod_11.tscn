@@ -135,6 +135,8 @@ viewport_path = NodePath("PodHealthViewport")
 albedo_texture = SubResource("ViewportTexture_health")
 emission_enabled = true
 emission_texture = SubResource("ViewportTexture_health")
+clearcoat_enabled = true
+clearcoat_roughness = 0.61
 
 [node name="Pod11" instance=ExtResource("1_bqs3a")]
 transform = Transform3D(1.055, 0, 0, 0, 1.088, 0, 0, 0, 1.01486, 0, 0, 0)

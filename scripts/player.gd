@@ -135,6 +135,10 @@ func _update_interaction_raycast() -> void:
 		elif result.collider.is_in_group("start_button"):
 			can_interact = true
 			using_computer = result.collider
+		# Check for mailbox
+		elif result.collider.is_in_group("mailbox"):
+			can_interact = true
+			using_computer = result.collider
 
 func insert_disk() -> void:
 	if held_object == null or not can_grab or Global.is_using_computer or Global.is_using_monitor:
@@ -240,6 +244,19 @@ func _press_start_button() -> void:
 	else:
 		print("❌ Pod doesn't have _on_start_button_pressed method")
 
+func _use_mailbox() -> void:
+	if not using_computer or Global.is_using_computer or Global.is_using_monitor:
+		return
+	
+	print("📬 Player interacting with mailbox!")
+	
+	# Check if the mailbox has mail
+	if using_computer.has_method("take_mail"):
+		using_computer.take_mail()
+		print("✅ Taking mail from mailbox")
+	else:
+		print("❌ Mailbox doesn't have take_mail method")
+
 func enter_monitor_mode() -> void:
 	if using_computer and not Global.is_using_computer and not Global.is_using_monitor:
 		active_computer_camera = get_node_or_null("../Monitor/MonitorCamera")
@@ -338,6 +355,8 @@ func _unhandled_input(event: InputEvent) -> void:
 					_use_caulk()
 				elif using_computer.is_in_group("start_button"):
 					_press_start_button()
+				elif using_computer.is_in_group("mailbox"):
+					_use_mailbox()
 			elif held_object == null and can_grab:
 				grab_object()
 			elif held_object and can_grab:

@@ -57,6 +57,10 @@ func _ready() -> void:
 	modulate = Color(1, 1, 1, 1)
 	
 	# Show initial state
+	display_start_message()
+	
+	print("✅ New Monitor System ready")
+
 # ====================================
 # PUBLIC INTERFACE METHODS
 # ====================================
@@ -176,17 +180,17 @@ func _render_alien_info() -> void:
 # HELPER METHODS FOR DISPLAY
 # ====================================
 
-func _add_centered_text(text_content: String, color: Color) -> void:
+func _add_centered_text(text: String, color: Color) -> void:
 	push_paragraph(HORIZONTAL_ALIGNMENT_CENTER)
 	push_color(color)
-	add_text(text_content)
+	add_text(text)
 	pop() # color
 	pop() # alignment
 	newline()
 
-func _add_text(text_content: String, color: Color) -> void:
+func _add_text(text: String, color: Color) -> void:
 	push_color(color)
-	add_text(text_content)
+	add_text(text)
 	pop()
 	newline()
 

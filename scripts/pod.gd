@@ -8,6 +8,15 @@ var game_started: bool = false
 var pod_filling: bool = false
 var alien_sedated: bool = false
 
+# Pod damage system
+var pod_health: float = 100.0
+var damage_active: bool = false
+var damage_timer: Timer
+var banging_timer: Timer
+var bang_pitch_range: Vector2 = Vector2(0.8, 1.2)  # Random pitch variation
+var bang_frequency_range: Vector2 = Vector2(8.0, 1.0)  # Time between bangs (seconds) - decreases as damage increases
+var banging_audio: AudioStreamPlayer3D
+
 # Node references
 @onready var start_button_3d: StaticBody3D = $"StartButton3D"
 @onready var button_mesh: MeshInstance3D = $"StartButton3D/ButtonMesh"
@@ -44,6 +53,9 @@ func _ready() -> void:
 	
 	# Initialize health display
 	_initialize_health_display()
+	
+	# Initialize damage and banging sound system
+	_initialize_damage_system()
 	
 	# Connect to GameManager pod health signals
 	if GameManager:
@@ -119,7 +131,7 @@ func _initialize_shaders() -> void:
 	else:
 		print("⚠️ Inner shader material not found")
 
-func _on_start_button_clicked(camera: Node, event: InputEvent, click_position: Vector3, click_normal: Vector3, shape_idx: int) -> void:
+func _on_start_button_clicked(_camera: Node, event: InputEvent, _click_position: Vector3, _click_normal: Vector3, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		print("🚀 3D Start button clicked!")
 		_on_start_button_pressed()
@@ -151,8 +163,12 @@ func _on_start_button_pressed() -> void:
 	# Also start the pod filling sequence for visual effects and health display
 	_start_pod_filling_sequence()
 	
+	# Start pod damage system (which includes banging sounds)
+	start_pod_damage()
+	
 	print("✅ Game started immediately, monitor display will show in a few seconds...")
 	print("💡 Button remains visible but further presses will be ignored")
+	print("🔊 Listen for pod damage - banging sounds will increase in frequency as damage progresses")
 
 func _start_delayed_monitor_sequence() -> void:
 	print("🎬 Starting delayed monitor sequence...")
@@ -274,6 +290,14 @@ func _on_pod_health_changed(health: float) -> void:
 			health_bar.modulate = Color.YELLOW
 		else:
 			health_bar.modulate = Color.RED
+			
+	# Adjust banging sound parameters based on health
+	if damage_active:
+		# Increase sound volume as damage increases
+		if banging_audio:
+			var volume_base = -10.0
+			var volume_increase = 8.0 * (1.0 - health/100.0)  # More damage = louder
+			banging_audio.volume_db = volume_base + volume_increase
 
 func _on_pod_destroyed() -> void:
 	print("💀 Pod destroyed - updating display...")
@@ -284,6 +308,19 @@ func _on_pod_destroyed() -> void:
 	
 	if health_bar:
 		health_bar.modulate = Color.RED
+		
+	# Play one final loud bang
+	if banging_audio:
+		banging_audio.pitch_scale = 0.6  # Deep, final bang
+		banging_audio.volume_db = 4.0  # Very loud
+		banging_audio.play()
+		
+		# Stop damage system
+		damage_active = false
+		if damage_timer:
+			damage_timer.stop()
+		if banging_timer:
+			banging_timer.stop()
 
 func _update_fill_shader(transparency: float) -> void:
 	if fill_shader_material:
@@ -292,6 +329,114 @@ func _update_fill_shader(transparency: float) -> void:
 func _update_animation_speed(speed: float) -> void:
 	if fill_shader_material:
 		fill_shader_material.set_shader_parameter("animation_speed", speed)
+
+# Initialize the pod damage system with banging sounds
+func _initialize_damage_system() -> void:
+	print("🔧 Initializing pod damage system...")
+	
+	# Create audio player for banging sounds
+	banging_audio = AudioStreamPlayer3D.new()
+	banging_audio.name = "BangingAudio"
+	add_child(banging_audio)
+	
+	# Load temporary banging sound
+	var bang_sound = preload("res://assets/music/sfx/enter.mp3") # Temporary sound - replace later
+	if not bang_sound:
+		print("⚠️ Warning: Could not load banging sound. Using default.")
+		bang_sound = AudioStreamMP3.new()
+	banging_audio.stream = bang_sound
+	banging_audio.max_db = 2.0
+	banging_audio.volume_db = -6.0
+	banging_audio.pitch_scale = 1.0
+	
+	# Create damage timer
+	damage_timer = Timer.new()
+	damage_timer.name = "DamageTimer"
+	damage_timer.wait_time = 1.0
+	damage_timer.autostart = false
+	add_child(damage_timer)
+	damage_timer.timeout.connect(_apply_pod_damage)
+	
+	# Create banging timer
+	banging_timer = Timer.new()
+	banging_timer.name = "BangingTimer"
+	banging_timer.wait_time = 8.0 # Start with infrequent bangs
+	banging_timer.autostart = false
+	banging_timer.one_shot = true
+	add_child(banging_timer)
+	banging_timer.timeout.connect(_play_banging_sound)
+	
+	print("✅ Pod damage system initialized")
+
+func start_pod_damage() -> void:
+	print("⚠️ Starting pod damage system!")
+	
+	# Reset values
+	pod_health = 100.0
+	damage_active = true
+	
+	# Start damage timer
+	damage_timer.start()
+	
+	# Schedule first bang
+	banging_timer.wait_time = bang_frequency_range.x
+	banging_timer.start()
+	
+	# Update display
+	_on_pod_health_changed(pod_health)
+	
+	print("🔊 Pod damage system active - listen for banging sounds")
+
+func _apply_pod_damage() -> void:
+	if not damage_active:
+		return
+	
+	# Reduce pod health by small amount
+	pod_health -= randf_range(0.5, 1.5)
+	pod_health = max(0.0, pod_health)
+	
+	# Update display
+	_on_pod_health_changed(pod_health)
+	
+	# Check if pod is destroyed
+	if pod_health <= 0:
+		_on_pod_destroyed()
+		damage_active = false
+		damage_timer.stop()
+		banging_timer.stop()
+		print("💥 Pod destroyed due to damage!")
+		return
+	
+	# Calculate new banging frequency based on health
+	# As health decreases, banging becomes more frequent
+	var health_factor = pod_health / 100.0
+	var new_frequency = lerp(bang_frequency_range.y, bang_frequency_range.x, health_factor)
+	
+	# Update banging frequency (only if not already scheduled)
+	if not banging_timer.time_left > 0:
+		banging_timer.wait_time = new_frequency
+		banging_timer.start()
+
+func _play_banging_sound() -> void:
+	if not damage_active:
+		return
+	
+	# Calculate pitch based on damage level
+	var health_factor = pod_health / 100.0
+	var base_pitch = lerp(1.5, 0.8, health_factor) # Lower health = higher pitch
+	var random_pitch = base_pitch * randf_range(bang_pitch_range.x, bang_pitch_range.y)
+	
+	# Set pitch and play sound
+	banging_audio.pitch_scale = random_pitch
+	banging_audio.play()
+	
+	print("🔊 Pod banging sound played at pitch: ", random_pitch)
+	
+	# Schedule next bang
+	var health_factor_for_time = pod_health / 100.0
+	var new_time = lerp(bang_frequency_range.y, bang_frequency_range.x, health_factor_for_time)
+	banging_timer.wait_time = new_time
+	banging_timer.start()
 
 # Called by lever system when sedation is applied
 func apply_sedation_effect() -> void:

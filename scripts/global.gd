@@ -5,6 +5,12 @@ var is_using_monitor: bool = false
 var in_presentation: bool = false  # Simple global flag for presentation mode
 var mouse_sensitivity: float = 1.2
 
+# Elevator transition variables for camera persistence
+var coming_from_elevator: bool = false
+var saved_head_rotation: Vector3 = Vector3.ZERO
+var saved_camera_rotation: Vector3 = Vector3.ZERO
+var elevator_start_height: float = 0.0  # Height where elevator should start in level_0
+
 # Function to get current mouse sensitivity setting
 func get_mouse_sensitivity() -> float:
 	var config = ConfigFile.new()

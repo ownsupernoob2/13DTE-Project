@@ -31,10 +31,6 @@ func _ready() -> void:
 func take_mail() -> void:
 	if not has_mail or is_interacting or mail_was_taken:
 		print("Cannot take mail - has_mail: ", has_mail, " is_interacting: ", is_interacting, " already_taken: ", mail_was_taken)
-		
-		# Show "no mail" message if mail was already taken
-		if mail_was_taken and not is_interacting:
-			_show_no_mail_message()
 		return
 	
 	is_interacting = true
@@ -101,35 +97,3 @@ func refill_mail() -> void:
 		mail_paper.position = Vector3(0, -0.4, 0.1)
 		mail_paper.rotation = Vector3(0, 0, 0)
 	print("Mail refilled and mailbox reset!")
-
-func _show_no_mail_message() -> void:
-	# Create a temporary label to show "no mail" message
-	var no_mail_label = Label.new()
-	no_mail_label.text = "No recent mail"
-	no_mail_label.add_theme_font_size_override("font_size", 24)
-	no_mail_label.add_theme_color_override("font_color", Color.WHITE)
-	no_mail_label.add_theme_color_override("font_shadow_color", Color.BLACK)
-	no_mail_label.add_theme_constant_override("shadow_offset_x", 2)
-	no_mail_label.add_theme_constant_override("shadow_offset_y", 2)
-	
-	# Position the label in the center of the screen
-	no_mail_label.anchor_left = 0.5
-	no_mail_label.anchor_right = 0.5
-	no_mail_label.anchor_top = 0.5
-	no_mail_label.anchor_bottom = 0.5
-	no_mail_label.pivot_offset = Vector2(no_mail_label.size.x / 2, no_mail_label.size.y / 2)
-	
-	# Add to the scene tree (find the main scene root)
-	var main_scene = get_tree().current_scene
-	if main_scene:
-		main_scene.add_child(no_mail_label)
-	
-	# Animate the message: fade in, stay, fade out
-	no_mail_label.modulate.a = 0.0
-	var tween = create_tween()
-	tween.tween_property(no_mail_label, "modulate:a", 1.0, 0.5)  # Fade in
-	tween.tween_interval(2.0)  # Stay visible for 2 seconds
-	tween.tween_property(no_mail_label, "modulate:a", 0.0, 1.0)  # Fade out
-	
-	# Remove the label when animation is complete
-	tween.tween_callback(no_mail_label.queue_free)

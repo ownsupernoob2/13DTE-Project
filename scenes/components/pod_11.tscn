@@ -7,6 +7,7 @@
 [ext_resource type="FastNoiseLite" uid="uid://cnve4sjd8v7w3" path="res://assets/resources/new_fast_noise_lite1.tres" id="4_oi6qu"]
 [ext_resource type="Shader" uid="uid://ngccs62tl7ao" path="res://shaders/pod_12.gdshader" id="5_6mros"]
 [ext_resource type="AudioStream" uid="uid://d8y113mxbxv3" path="res://assets/music/sfx/underwaterambience-181406.mp3" id="6_kpuav"]
+[ext_resource type="PackedScene" uid="uid://c3k66yc2cce0o" path="res://assets/meshes/scifi_button.glb" id="8_u801d"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_gv60m"]
 
@@ -114,16 +115,11 @@ material = SubResource("ShaderMaterial_oi6qu")
 radial_segments = 256
 rings = 128
 
-[sub_resource type="BoxMesh" id="BoxMesh_startbutton"]
-size = Vector3(2, 0.5, 1.2)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_startbutton"]
-albedo_color = Color(0, 1, 0, 1)
-emission_enabled = true
-emission = Color(0.1, 0.4, 0.1, 1)
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_startbutton"]
-size = Vector3(2, 0.5, 1.2)
+size = Vector3(0.61438, 0.323242, 0.349561)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_nslut"]
+size = Vector3(1.60648, 1.39926, 0.844653)
 
 [sub_resource type="QuadMesh" id="QuadMesh_health"]
 size = Vector2(2, 0.5)
@@ -173,18 +169,21 @@ autoplay = true
 parameters/looping = true
 
 [node name="StartButton3D" type="StaticBody3D" parent="." index="66" groups=["start_button"]]
-transform = Transform3D(0.990993, 0, 0.133917, 0, 1, 0, -0.133917, 0, 0.990993, 7.68839, 2, -0.852042)
+transform = Transform3D(0.998824, 0, 0.0485011, 0, 1, 0, -0.0485011, 0, 0.998824, 5.60902, 1.52134, 2.81491)
 
-[node name="ButtonMesh" type="MeshInstance3D" parent="StartButton3D" index="0"]
-mesh = SubResource("BoxMesh_startbutton")
-surface_material_override/0 = SubResource("StandardMaterial3D_startbutton")
+[node name="Sketchfab_Scene" parent="StartButton3D" index="0" instance=ExtResource("8_u801d")]
+transform = Transform3D(2.98023e-08, 0, 1, 0, 1, 0, -1, 0, 1.49012e-08, 0.258228, -1.13227, -0.330772)
+
+[node name="Object_9" parent="StartButton3D/Sketchfab_Scene/Sketchfab_model/5c52d278dd394752ad0f43f6b0fcd2db_fbx/Object_2/RootNode/switch_armature/Object_6/Skeleton3D" index="0"]
+transform = Transform3D(0.877957, 0, 0, 0, 0.907227, 0, 0, 0, 0.757427, -0.403864, 3.70856e-24, 0.0350263)
 
 [node name="ButtonCollision" type="CollisionShape3D" parent="StartButton3D" index="1"]
+transform = Transform3D(0.67599, -0.736912, 0, 0.736913, 0.675989, 0, -2.83122e-07, 0, 1, 0.508296, 0.0780774, 0.0535704)
 shape = SubResource("BoxShape3D_startbutton")
 
-[node name="ButtonLabel" type="Label3D" parent="StartButton3D" index="2"]
-transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0.16, 0)
-text = "START GAME"
+[node name="ButtonCollision2" type="CollisionShape3D" parent="StartButton3D" index="2"]
+transform = Transform3D(-0.043079, -0.999072, 0, 0.999073, -0.0430788, 0, -2.6566e-07, 0, 1, 0.219198, -0.375842, 0.0750756)
+shape = SubResource("BoxShape3D_nslut")
 
 [node name="PodHealthViewport" type="SubViewport" parent="." index="67"]
 size = Vector2i(400, 100)
@@ -251,7 +250,9 @@ text = "100%"
 horizontal_alignment = 1
 
 [node name="PodHealthDisplay" type="MeshInstance3D" parent="." index="68"]
-transform = Transform3D(0.216633, 0.00322463, 0.976248, 0.0355611, 0.999304, -0.011192, -0.975605, 0.037141, 0.216368, 6.19861, 2.94028, -4.3625)
+transform = Transform3D(0.216633, 0.00322463, 0.976248, 0.0355611, 0.999304, -0.011192, -0.975605, 0.037141, 0.216368, 3.74532, 2.93016, -3.8771)
 cast_shadow = 0
 mesh = SubResource("QuadMesh_health")
 surface_material_override/0 = SubResource("StandardMaterial3D_health")
+
+[editable path="StartButton3D/Sketchfab_Scene"]

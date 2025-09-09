@@ -37,7 +37,7 @@ func _setup_scene() -> void:
 	# Set global flag for presentation mode
 	Global.in_presentation = true
 	
-	## Ensure mouse is captured for camera movement
+	# Hide mouse cursor and capture it for camera movement
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	
 	# Set up screen lighting effect
@@ -142,13 +142,13 @@ func _skip_current_message() -> void:
 			_show_next_message()
 
 func _end_presentation() -> void:
-	print("🎬 Presentation complete - enabling player exit...")
+	print("🎬 Presentation complete - enabling free exploration...")
 	presentation_active = false
 	can_exit = true
 	Global.in_presentation = false
 	presentation_ui.visible = false
-	instruction_label.visible = true
-	instruction_label.text = "Walk to exit"
+	instruction_label.visible = false  # Hide instructions completely
+	# Remove elevator instruction - let player discover it themselves
 	
 
 func _start_exit_sequence() -> void:
@@ -189,10 +189,10 @@ func _start_exit_sequence() -> void:
 	# Final cleanup before transition
 	_cleanup_overlays()
 	
-	# Transition to game
-	var result = get_tree().change_scene_to_file("res://scenes/stage_1_tutorial.tscn")
+	# Transition to level_0 via elevator
+	var result = get_tree().change_scene_to_file("res://scenes/level_0.tscn")
 	if result != OK:
-		print("❌ Failed to load tutorial - Error code: ", result)
+		print("❌ Failed to load level_0 - Error code: ", result)
 		print("🔄 Loading demo as fallback...")
 		result = get_tree().change_scene_to_file("res://scenes/demo.tscn")
 		if result != OK:
@@ -200,7 +200,7 @@ func _start_exit_sequence() -> void:
 			# If both fail, keep the overlay visible to show error state
 			print("❌ Scene transition failed completely")
 	else:
-		print("✅ Tutorial loaded successfully")
+		print("✅ Level_0 loaded successfully")
 
 # Cleanup function to ensure no overlay remains
 func _cleanup_overlays() -> void:
@@ -213,7 +213,7 @@ func _cleanup_overlays() -> void:
 func _on_trigger_area_entered(body: Node3D) -> void:
 	# Check if it's the player and if they can exit
 	if body == player and can_exit:
-		print("🎬 Player reached exit trigger - starting transition...")
+		print("🎬 Player reached elevator trigger - starting elevator transition...")
 		_start_exit_sequence()
 
 func _input(event: InputEvent) -> void:

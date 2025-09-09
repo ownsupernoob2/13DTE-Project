@@ -50,38 +50,42 @@ func _ready() -> void:
 	_show_epilepsy_warning()
 
 func _show_epilepsy_warning() -> void:
-	# Start with warning text invisible at normal scale
+	# Show warning text immediately (no fade-in)
 	warning_label.scale = Vector2(1.0, 1.0)  # Keep original scale
-	warning_label.modulate.a = 0.0  # Start invisible
+	warning_label.modulate.a = 1.0  # Show immediately
 	
-	# Fade in the text over 1.5 seconds
-	var fade_in_tween = create_tween()
-	fade_in_tween.tween_property(warning_label, "modulate:a", 1.0, 1.5)
+	# Start ambient music immediately but quietly
+	_start_ambient_effects()
 	
 	# Text stays visible until player presses a key (handled in _input function)
 
 func _hide_warning_text() -> void:
 	# Hide just the warning text, keep the black background
 	var text_fade_tween = create_tween()
-	text_fade_tween.tween_property(warning_label, "modulate:a", 0.0, 0.8)
+	text_fade_tween.tween_property(warning_label, "modulate:a", 0.0, 0.4)  # Faster fade
 	
-	# Wait 3 seconds with just black screen (longer black screen)
-	await get_tree().create_timer(3.0).timeout
+	# Wait 1.5 seconds with just black screen (shorter wait)
+	await get_tree().create_timer(1.5).timeout
 	_reveal_main_menu()
 
 func _reveal_main_menu() -> void:
-	# Hide the entire warning overlay (including black background) with longer fade
+	# Hide the entire warning overlay (including black background) with faster fade
 	var overlay_fade_tween = create_tween()
-	overlay_fade_tween.tween_property(epilepsy_warning_overlay, "modulate:a", 0.0, 2.5)  # Longer fade out
+	overlay_fade_tween.tween_property(epilepsy_warning_overlay, "modulate:a", 0.0, 1.0)  # Faster fade out
 	overlay_fade_tween.tween_callback(epilepsy_warning_overlay.hide)
-	overlay_fade_tween.tween_callback(_start_ambient_effects)  # Start music when revealed
+	# Music is already playing, so we just need to ensure flickering starts
+	_start_flickering_effect()
 
 func _skip_epilepsy_warning() -> void:
-	# When player presses key, proceed to hide text and continue sequence
+	# When player presses key, stop all tweens and proceed immediately
 	var all_tweens = get_tree().get_nodes_in_group("tween")
 	for tween in all_tweens:
 		if tween is Tween:
 			tween.kill()
+	
+	# Start music immediately if not already playing
+	if not ambient_sound.playing:
+		_start_ambient_effects()
 	
 	# Proceed to hide warning text and continue sequence
 	_hide_warning_text()
@@ -224,10 +228,17 @@ func _connect_buttons() -> void:
 		quit_button.pressed.connect(_on_quit_pressed)
 
 func _start_ambient_effects() -> void:
-	# Set up ambient sound pitch to stay at 0.6 for 4 seconds, then increase over 2 seconds
-	if ambient_sound:
+	# Start ambient sound quietly and gradually increase volume
+	if ambient_sound and not ambient_sound.playing:
+		ambient_sound.volume_db = -30.0  # Start very quiet
 		ambient_sound.pitch_scale = 0.8
-		ambient_sound.play()  # Start playing the music
+		ambient_sound.play()
+		
+		# Gradually increase volume over 3 seconds
+		var volume_tween = create_tween()
+		volume_tween.tween_property(ambient_sound, "volume_db", -10.0, 3.0)
+	
+	# Start flickering effect immediately
 	_start_flickering_effect()
 		
 func _start_flickering_effect() -> void:
@@ -430,8 +441,8 @@ func _start_new_game() -> void:
 	print("🎮 _start_new_game called - starting scene transition...")
 	SaveSystem.reset_progress()
 	print("🎮 Save system reset complete")
-	
-	# First try the fixed scene, then fallback to original
+		   
+	# Load our new combined scene that includes both presentation and tutorial areas
 	var scene_paths = [
 		"res://scenes/environments/presentation_scene.tscn"
 	]

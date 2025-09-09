@@ -25,6 +25,7 @@ var gravity: float = 9.8
 @onready var cursor1: TextureRect = $CanvasLayer/Cursor1
 @onready var cursor2: TextureRect = $CanvasLayer/Cursor2
 
+var debug_timer: float = 0.0
 var can_grab: bool = false
 var current_grab_area: Node = null
 var held_object: StaticBody3D = null
@@ -52,14 +53,23 @@ var lever_validation_timer: float = 0.0  # Timer for periodic raycast validation
 var initial_lever_values: Array = [0, 0, 0]  # Store initial values when first checking levers
 var have_lever_values_changed: bool = false  # Track if any lever has been modified
 
+# Movement control variables
+var can_move: bool = true
+
+func set_can_move(value: bool) -> void:
+	can_move = value
+	if not can_move:
+		velocity = Vector3.ZERO
+
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	add_to_group("player")  # Add to player group for elevator detection
 	if cursor1 and cursor2:
 		cursor1.visible = true
 		cursor2.visible = false
 
 func _process(_delta: float) -> void:
-	if Global.is_using_computer or Global.is_using_monitor:
+	if Global.is_using_computer or Global.is_using_monitor or Global.in_presentation:
 		if cursor1:
 			cursor1.visible = false
 		if cursor2:
@@ -402,7 +412,13 @@ func exit_computer_mode() -> void:
 			cursor2.visible = can_interact
 
 func _physics_process(delta: float) -> void:
-	if Global.is_using_computer or Global.is_using_monitor or is_manual_open():
+	# Debug: Print player position every second
+	debug_timer += delta
+	if debug_timer >= 1.0:
+		print("Player Position: ", global_position)
+		debug_timer = 0.0
+	
+	if not can_move or Global.is_using_computer or Global.is_using_monitor or is_manual_open():
 		velocity = Vector3.ZERO
 		return
 	
